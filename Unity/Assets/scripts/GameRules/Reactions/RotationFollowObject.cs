@@ -5,7 +5,7 @@ using ModularRules;
 
 public class RotationFollowObject : Reaction
 {
-	protected override void React(EventData data)
+	protected override void React(EventData data = null)
 	{
 
 	}

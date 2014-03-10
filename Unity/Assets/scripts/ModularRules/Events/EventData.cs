@@ -16,17 +16,26 @@ namespace ModularRules
 		/// Adds new data to the dataList - if it doesn't exist yet.
 		/// </summary>
 		/// <returns>false if data piece already exists</returns>
-		public bool Add(DataPiece newData)
+		public EventData Add(DataPiece newData)
 		{
 			try
 			{
 				dataList.Add(newData.id, newData);
-				return true;
+				return this;
 			}
 			catch(System.ArgumentException)
 			{
-				return false;
+				Debug.LogWarning("Key " + newData.id + " already exists in EventData.");
+				return this;
 			}
+		}
+
+		public DataPiece Get(string id)
+		{
+			if (dataList.ContainsKey(id))
+				return dataList[id];
+			else
+				return null;
 		}
 
 		/// <summary>

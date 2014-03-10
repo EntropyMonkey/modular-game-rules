@@ -7,10 +7,12 @@ namespace ModularRules
 	// extends MonoBehaviour because children can then have fields in unity editor
 	public abstract class Reaction : MonoBehaviour
 	{
+		public GameEvent ListenedEvent;
+
 		protected List<Reaction> reactionComponents = new List<Reaction>();
 
 		/// <summary>
-		/// execute all reactions in depth first order
+		/// execute all sub reactions in depth first order
 		/// </summary>
 		/// <param name="eventData">the event's data. possibly null</param>
 		public void Execute(EventData eventData = null)
@@ -22,7 +24,7 @@ namespace ModularRules
 		}
 
 		/// <summary>
-		/// The actual reaction.
+		/// The actual reaction to the registered event.
 		/// </summary>
 		/// <param name="eventData">the event's data</param>
 		protected abstract void React(EventData eventData = null);

@@ -44,6 +44,8 @@ namespace ModularRules
 		}
 		#endregion
 
+		public abstract void Update();
+
 		/// <summary>
 		/// Trigger the event
 		/// </summary>
