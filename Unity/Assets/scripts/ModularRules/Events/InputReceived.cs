@@ -19,7 +19,7 @@ namespace ModularRules
 			{
 				Trigger(new EventData()
 					.Add(new DataPiece(EventDataKeys.InputKey) { data = InputKey }) // add which key has been pressed
-					.Add(new DataPiece(EventDataKeys.InputValue) { data = 1 })
+					.Add(new DataPiece(EventDataKeys.InputValue) { data = 1.0f })
 					.Add(new DataPiece(EventDataKeys.InputType)
 					{
 						data =  // add the type of keypress

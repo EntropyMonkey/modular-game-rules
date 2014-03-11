@@ -28,9 +28,13 @@ namespace ModularRules
 
 		protected override void React(EventData eventData)
 		{
-			float value = (float)eventData.Get(EventDataKeys.InputValue).data;
+			if (eventData == null) return;
 
-			if (reactor is IMovable)
+			DataPiece input = eventData.Get(EventDataKeys.InputValue);
+
+			float value = (float)input.data;
+
+			if (reactor as IMovable != null)
 				((IMovable)reactor).Move(eventData, MoveDirection);
 		}
 	}

@@ -4,12 +4,26 @@ using System.Collections;
 using ModularRules;
 using System.Collections.Generic;
 
+[RequireComponent(typeof(Rigidbody))]
 public class Player : Actor, IMovable
 {
+	[SerializeField]
+	private float runSpeed = 10;
+
+	[SerializeField]
+	private float jumpSpeed = 20;
+
+	private float moveSpeed;
+
+	void Awake()
+	{
+		InitializeActor();
+	}
+
 	// Use this for initialization
 	void Start()
 	{
-
+		
 	}
 
 	// Update is called once per frame
@@ -21,6 +35,36 @@ public class Player : Actor, IMovable
 	// implementing the IMovable interface
 	public void Move(EventData eventData, MoveObject.Direction direction)
 	{
+		float v = (float)eventData.Get(EventDataKeys.InputValue).data;
 
+		moveSpeed = runSpeed;
+
+		Vector3 dir = Vector3.zero;
+		switch (direction)
+		{
+			case MoveObject.Direction.FORWARD:
+				dir = transform.forward;
+				break;
+			case MoveObject.Direction.BACKWARD:
+				dir = -transform.forward;
+				break;
+			case MoveObject.Direction.LEFT:
+				dir = -transform.right;
+				break;
+			case MoveObject.Direction.RIGHT:
+				dir = transform.right;
+				break;
+			case MoveObject.Direction.UP:
+				moveSpeed = jumpSpeed;
+				dir = Vector3.up;
+				break;
+			case MoveObject.Direction.DOWN:
+				dir = Vector3.down;
+				break;
+		}
+
+		rigidbody.AddForce(dir * v * moveSpeed);
+		
+		moveSpeed = 0;
 	}
 }

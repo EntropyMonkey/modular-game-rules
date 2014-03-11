@@ -15,19 +15,19 @@ namespace ModularRules
 		/// execute all sub reactions in depth first order
 		/// </summary>
 		/// <param name="eventData">the event's data. possibly null</param>
-		public void Execute(EventData eventData = null)
+		public void Execute(EventData eventData)
 		{
 			foreach (Reaction r in reactionComponents)
 				r.Execute(eventData);
 
-			React();
+			React(eventData);
 		}
 
 		/// <summary>
 		/// The actual reaction to the registered event.
 		/// </summary>
 		/// <param name="eventData">the event's data</param>
-		protected abstract void React(EventData eventData = null);
+		protected abstract void React(EventData eventData);
 
 		#region Event Registering/Unregistering
 		/// <summary>

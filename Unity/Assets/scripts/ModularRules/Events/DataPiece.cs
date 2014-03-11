@@ -6,7 +6,8 @@ using System.Collections.Generic;
 namespace ModularRules
 {
 	/// <summary>
-	/// A generic data piece of an eventData class
+	/// A datapiece.
+	/// TODO: Rework into generic class for type safety.
 	/// </summary>
 	public class DataPiece : IEqualityComparer<DataPiece>
 	{
