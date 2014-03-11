@@ -5,7 +5,7 @@ using ModularRules;
 
 public class ObjectMovedEvent : GameEvent
 {
-	const float minDistance = 0.01f;
+	const float minDistance = 0.1f;
 	Vector3 position;
 
 	void Start()
@@ -19,6 +19,8 @@ public class ObjectMovedEvent : GameEvent
 		{
 			Trigger(new EventData()
 				.Add(new DataPiece(EventDataKeys.TargetObject) { data = gameObject }));
+
+			position = transform.position;
 		}
 	}
 }
