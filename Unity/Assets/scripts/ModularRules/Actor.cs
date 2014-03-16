@@ -29,7 +29,7 @@ namespace ModularRules
 		public void UpdateEvents()
 		{
 			foreach (GameEvent e in events)
-				e.Update();
+				e.UpdateEvent();
 		}
 	}
 }

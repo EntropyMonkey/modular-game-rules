@@ -2,7 +2,7 @@
 using System.Collections;
 using ModularRules;
 
-public class Camera : Actor
+public class PlayerCamera : Actor
 {
 
 }

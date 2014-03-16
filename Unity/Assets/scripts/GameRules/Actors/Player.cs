@@ -35,7 +35,8 @@ public class Player : Actor, IMovable
 	// implementing the IMovable interface
 	public void Move(EventData eventData, MoveObject.Direction direction)
 	{
-		float v = (float)eventData.Get(EventDataKeys.InputValue).data;
+
+		float v = ((InputReceived.InputData)eventData.Get(EventDataKeys.InputData).data).inputValue;
 
 		moveSpeed = runSpeed;
 

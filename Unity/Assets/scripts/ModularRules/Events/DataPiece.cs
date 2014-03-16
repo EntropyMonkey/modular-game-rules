@@ -62,5 +62,10 @@ namespace ModularRules
 			return base.GetHashCode() ^ id.GetHashCode() ^ data.GetHashCode();
 		}
 		#endregion
+
+		public override string ToString()
+		{
+			return data.ToString();
+		}
 	}
 }

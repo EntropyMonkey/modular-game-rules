@@ -13,7 +13,7 @@ public class ObjectMovedEvent : GameEvent
 		position = transform.position;
 	}
 
-	public override void Update() 
+	public override GameEvent UpdateEvent() 
 	{
 		if (Vector3.Distance(position, transform.position) > minDistance)
 		{
@@ -22,5 +22,7 @@ public class ObjectMovedEvent : GameEvent
 
 			position = transform.position;
 		}
+
+		return this;
 	}
 }

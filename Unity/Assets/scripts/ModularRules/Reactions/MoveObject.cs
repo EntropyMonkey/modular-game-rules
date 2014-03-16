@@ -30,10 +30,6 @@ namespace ModularRules
 		{
 			if (eventData == null) return;
 
-			DataPiece input = eventData.Get(EventDataKeys.InputValue);
-
-			float value = (float)input.data;
-
 			if (reactor as IMovable != null)
 				((IMovable)reactor).Move(eventData, MoveDirection);
 		}

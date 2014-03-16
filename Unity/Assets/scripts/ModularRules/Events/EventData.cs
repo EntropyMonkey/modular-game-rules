@@ -12,6 +12,14 @@ namespace ModularRules
 		/// </summary>
 		private Dictionary<string, DataPiece> dataList = new Dictionary<string, DataPiece>();
 
+		public static EventData Empty
+		{
+			get
+			{
+				return new EventData();
+			}
+		}
+
 		/// <summary>
 		/// Adds new data to the dataList - if it doesn't exist yet.
 		/// </summary>
@@ -52,6 +60,18 @@ namespace ModularRules
 		public void Clear()
 		{
 			dataList.Clear();
+		}
+
+		public override string ToString()
+		{
+			string s = "ED--";
+
+			foreach (KeyValuePair<string, DataPiece> kvp in dataList)
+			{
+				s += kvp.Value.ToString() + "\n";
+			}
+
+			return s;
 		}
 	}
 }

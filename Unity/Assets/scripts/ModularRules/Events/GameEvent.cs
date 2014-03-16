@@ -44,14 +44,14 @@ namespace ModularRules
 		}
 		#endregion
 
-		public abstract void Update();
+		public abstract GameEvent UpdateEvent();
 
 		/// <summary>
 		/// Trigger the event
 		/// </summary>
 		/// <param name="data">fill in event data</param>
 		/// <returns>true once all reactions were executed, false if conditions aren't met</returns>
-		protected bool Trigger(EventData data = null)
+		protected bool Trigger(EventData data)
 		{
 			if (!ConditionsMet()) return false;
 
