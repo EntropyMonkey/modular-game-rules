@@ -5,6 +5,11 @@ using ModularRules;
 
 public class FollowObject : Reaction
 {
+	public float FollowSpeed = 10;
+
+
+	private Vector3 targetPos = Vector3.zero;
+
 	void OnEnable()
 	{
 		ListenedEvent.Register(this);
@@ -17,12 +22,16 @@ public class FollowObject : Reaction
 
 	protected override void React(EventData eventData)
 	{
-
 		GameObject target = eventData.Get(EventDataKeys.TargetObject).data as GameObject;
 
 		if (target != null)
 		{
-			transform.position = target.transform.position;
+			targetPos = target.transform.position;
 		}
+	}
+
+	void Update()
+	{
+		transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * FollowSpeed);
 	}
 }

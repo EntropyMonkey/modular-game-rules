@@ -12,7 +12,8 @@ namespace ModularRules
 		{
 			public MouseButton button = MouseButton.NONE;
 			public GameObject clickedObject = null;
-			public Vector3 screenPosition;
+			public Vector3 screenPosition; // pixels
+			public Vector3 deltaMovement; // pixels
 
 			public static MouseData Empty
 			{
@@ -24,7 +25,8 @@ namespace ModularRules
 						button = MouseButton.NONE,
 						clickedObject = null,
 						inputValue = 0.0f,
-						screenPosition = Vector3.zero
+						screenPosition = Vector3.zero,
+						deltaMovement = Vector3.zero
 					};
 				}
 			}
@@ -48,8 +50,10 @@ namespace ModularRules
 
 			if (lastScreenPosition != Input.mousePosition)
 			{
-				lastScreenPosition = Input.mousePosition;
-				data.screenPosition = lastScreenPosition;
+				data.screenPosition = Input.mousePosition;
+				data.deltaMovement = Input.mousePosition - lastScreenPosition;
+				lastScreenPosition = data.screenPosition;
+				Debug.Log(data.deltaMovement);
 			}
 
 			if (Input.GetMouseButtonDown((int)TrackedButton))
