@@ -5,7 +5,7 @@ using ModularRules;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Player : Actor, IMovable
+public class Player : Actor, IMove
 {
 	[SerializeField]
 	private float runSpeed = 10;
@@ -14,6 +14,12 @@ public class Player : Actor, IMovable
 	private float jumpSpeed = 20;
 
 	private float moveSpeed;
+
+	public PlayerCamera PlayerCamera
+	{
+		get;
+		set;
+	}
 
 	void Awake()
 	{
@@ -44,16 +50,20 @@ public class Player : Actor, IMovable
 		switch (direction)
 		{
 			case MoveObject.Direction.FORWARD:
-				dir = transform.forward;
+				dir = PlayerCamera.transform.forward;
+				dir.y = 0;
 				break;
 			case MoveObject.Direction.BACKWARD:
-				dir = -transform.forward;
+				dir = -PlayerCamera.transform.forward;
+				dir.y = 0;
 				break;
 			case MoveObject.Direction.LEFT:
-				dir = -transform.right;
+				dir = -PlayerCamera.transform.right;
+				dir.y = 0;
 				break;
 			case MoveObject.Direction.RIGHT:
-				dir = transform.right;
+				dir = PlayerCamera.transform.right;
+				dir.y = 0;
 				break;
 			case MoveObject.Direction.UP:
 				moveSpeed = jumpSpeed;

@@ -9,6 +9,9 @@ namespace ModularRules
 	{
 		public GameEvent ListenedEvent;
 
+		[HideInInspector]
+		public Actor Reactor;
+
 		protected List<Reaction> reactionComponents = new List<Reaction>();
 
 		/// <summary>

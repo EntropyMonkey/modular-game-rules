@@ -8,22 +8,35 @@ namespace ModularRules
 	{
 		protected List<GameEvent> events;
 
+		protected List<Reaction> reactions;
+
 		/// <summary>
 		/// Collects all events, so that they can be updated when appropriate
 		/// </summary>
 		protected void InitializeActor()
 		{
+			// get all events
 			events = new List<GameEvent>();
-
-			GameEvent newEvent;
-			for (int i = 0; i < transform.childCount; i++)
+			Component[] c = GetComponentsInChildren(typeof(GameEvent));
+			foreach (Component co in c)
 			{
-				if ((newEvent = transform.GetChild(i).GetComponent(typeof(GameEvent)) as GameEvent) != null)
-				{
-					Debug.Log("Adding event " + newEvent.name + " to " + name);
-					events.Add(newEvent);
-				}
+				GameEvent e = co as GameEvent;
+				e.Actor = this;
+				events.Add(e);
 			}
+			Debug.Log(name + " registered " + events.Count + " GameEvents.");
+
+			// get all reactions
+			reactions = new List<Reaction>();
+			c = GetComponentsInChildren(typeof(Reaction));
+			foreach (Component co in c)
+			{
+				Reaction r = co as Reaction;
+				r.Reactor = this;
+				reactions.Add(r);
+			}
+			Debug.Log(name + " registered " + reactions.Count + " Reactions.");
+
 		}
 
 		public void UpdateEvents()

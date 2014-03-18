@@ -38,7 +38,7 @@ namespace ModularRules
 				}
 				else if (Input.GetKeyUp(InputKey))
 				{
-					k.inputValue = 0.0f;
+					k.inputValue = -1.0f;
 					k.inputType = InputType.RELEASED;
 
 					Trigger(EventData.Empty.Add(new DataPiece(EventDataKeys.InputData) { data = k }));

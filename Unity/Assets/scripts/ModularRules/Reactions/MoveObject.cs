@@ -8,16 +8,10 @@ namespace ModularRules
 	{
 		public enum Direction { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN }
 
-		[SerializeField]
-		private Direction MoveDirection;
-
-		[SerializeField]
-		private Actor reactor;
+		public Direction MoveDirection;
 
 		void OnEnable()
 		{
-			if (reactor == null) reactor = transform.parent.gameObject.GetComponent<Actor>();
-
 			ListenedEvent.Register(this);
 		}
 
@@ -30,8 +24,8 @@ namespace ModularRules
 		{
 			if (eventData == null) return;
 
-			if (reactor as IMovable != null)
-				((IMovable)reactor).Move(eventData, MoveDirection);
+			if (Reactor as IMove != null)
+				((IMove)Reactor).Move(eventData, MoveDirection);
 		}
 	}
 }

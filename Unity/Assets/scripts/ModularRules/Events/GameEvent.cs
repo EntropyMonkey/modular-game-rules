@@ -6,8 +6,12 @@ namespace ModularRules
 {
 	public abstract class GameEvent : MonoBehaviour
 	{
+		[HideInInspector]
+		public Actor Actor;
+
 		#region Reaction Handling
 		private List<Reaction> triggeredReactions = new List<Reaction>();
+
 		public void Register(Reaction newReaction)
 		{
 			if (!triggeredReactions.Contains(newReaction))
@@ -51,7 +55,7 @@ namespace ModularRules
 		/// </summary>
 		/// <param name="data">fill in event data</param>
 		/// <returns>true once all reactions were executed, false if conditions aren't met</returns>
-		protected bool Trigger(EventData data)
+		public bool Trigger(EventData data)
 		{
 			if (!ConditionsMet()) return false;
 
