@@ -1,0 +1,75 @@
+<rules>
+	<actors>
+		<actor>
+			<id>0</id>
+			<type>Player</type>
+		</actor>
+		<actor>
+			<id>1</id>
+			<type>PlayerCamera</type>
+		</actor>
+	</actors>
+	
+	<events>
+		<event>
+			<id>0</id>
+			<actorId>0</actorId>
+			<type>KeyboardInput</type>
+			<param name="InputKey">
+				<type>KeyCode</type>
+				<value>32</value>
+			</param>
+		</event>
+
+		<event>
+			<id>1</id>
+			<actorId>0</actorId>
+			<type>MouseInput</type>
+			<param name="TrackedButton">
+				<type>MouseButton</type>
+				<value>0</value>
+			</param>
+			<param name="TrackedCamera">
+				<type>Camera</type>
+				<actorId>1</actorId>
+			</param>
+		</event>
+
+		<event>
+			<id>2</id>
+			<actorId>0</actorId>
+			<type>ObjectMovedEvent</type>
+		</event>
+	</events>
+	
+	<reactions>
+		<reaction>
+			<id>0</id>
+			<listenedEventId>0</listenedEventId>
+			<actorId>0</actorId>
+			<type>MoveObject</type>
+			<param name="MoveDirection">
+				<type>MoveDirection</type>
+				<value>0</value>
+			</param>		
+		</reaction>
+		<reaction>
+			<id>1</id>
+			<listenedEventId>2</listenedEventId>
+			<actorId>1</actorId>
+			<type>FollowObject</type>
+			<param name="FollowSpeed">
+				<type>float</type>
+				<value>10</value>
+			</param>
+			<param name="Offset">
+				<type>Vector3</type>
+				<value>0 5 -5</value>
+			</param>
+			<param name="FixedToObject">
+				<type>GameObject</type>
+				<actorId></actorId>
+			</param>
+		</reaction>
+	</reactions>
+</rules>

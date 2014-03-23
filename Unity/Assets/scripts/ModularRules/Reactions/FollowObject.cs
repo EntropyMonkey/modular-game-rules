@@ -14,7 +14,8 @@ namespace ModularRules
 
 		void OnEnable()
 		{
-			ListenedEvent.Register(this);
+			if (ListenedEvent)
+				ListenedEvent.Register(this);
 
 			if (FixedToObject)
 			{
@@ -25,7 +26,8 @@ namespace ModularRules
 
 		void OnDisable()
 		{
-			ListenedEvent.Unregister(this);
+			if (ListenedEvent)
+				ListenedEvent.Unregister(this);
 		}
 
 		protected override void React(EventData eventData)
@@ -38,11 +40,12 @@ namespace ModularRules
 			}
 		}
 
-		void Update()
+		void FixedUpdate()
 		{
 			if (!FixedToObject)
 			{
-				transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * FollowSpeed);
+				transform.position = Vector3.Lerp(transform.position, targetPos + Offset, Time.deltaTime * FollowSpeed);
+				transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetPos - transform.position), Time.deltaTime * FollowSpeed);
 			}
 		}
 	}

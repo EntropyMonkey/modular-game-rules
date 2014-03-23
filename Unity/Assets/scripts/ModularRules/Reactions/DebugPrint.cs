@@ -7,12 +7,14 @@ namespace ModularRules
 	{
 		void OnEnable()
 		{
-			ListenedEvent.Register(this);
+			if (ListenedEvent)
+				ListenedEvent.Register(this);
 		}
 
 		void OnDisable()
 		{
-			ListenedEvent.Unregister(this);
+			if (ListenedEvent)
+				ListenedEvent.Unregister(this);
 		}
 
 		protected override void React(EventData eventData)
