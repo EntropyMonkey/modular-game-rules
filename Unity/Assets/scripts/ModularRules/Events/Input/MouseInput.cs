@@ -34,17 +34,19 @@ namespace ModularRules
 		// fields
 		public MouseButton TrackedButton;
 
+		public Camera TrackedCamera;
+
 		protected Vector3 lastScreenPosition = Vector3.zero;
 
 		// methods
 		public override GameEvent UpdateEvent()
 		{
-			if (!base.UpdateEvent()) return null;
+			if (!base.UpdateEvent() || TrackedCamera == null) return null;
 
 			MouseData data = MouseData.Empty;
 			data.button = TrackedButton;
 			data.screenPosition = Input.mousePosition;
-			data.rayFromPosition = Camera.main.ScreenPointToRay(data.screenPosition);
+			data.rayFromPosition = TrackedCamera.ScreenPointToRay(data.screenPosition);
 
 			// has the mouse been moved?
 			if (lastScreenPosition != Input.mousePosition)

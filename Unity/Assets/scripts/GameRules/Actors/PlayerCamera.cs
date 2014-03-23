@@ -4,6 +4,12 @@ using ModularRules;
 
 public class PlayerCamera : Actor, IRotate
 {
+	public enum CameraType { EGO, TOP_DOWN }
+
+	public static string Tag = "PlayerCamera";
+
+	public CameraType CamType = CameraType.EGO;
+
 	public float Sensitivity = 10;
 	public float MaxYRotation = 60;
 
@@ -11,7 +17,8 @@ public class PlayerCamera : Actor, IRotate
 
 	void Start()
 	{
-		GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().PlayerCamera = this;
+		tag = Tag;
+
 		InitializeActor();
 	}
 

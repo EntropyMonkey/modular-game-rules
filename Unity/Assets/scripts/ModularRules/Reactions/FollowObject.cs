@@ -8,6 +8,7 @@ namespace ModularRules
 		public float FollowSpeed = 10;
 
 		public GameObject FixedToObject = null;
+		public Vector3 Offset = Vector3.zero;
 
 		private Vector3 targetPos = Vector3.zero;
 
@@ -18,7 +19,7 @@ namespace ModularRules
 			if (FixedToObject)
 			{
 				transform.parent = FixedToObject.transform;
-				transform.localPosition = Vector3.zero;
+				transform.localPosition = Offset;
 			}
 		}
 

@@ -24,8 +24,10 @@ namespace ModularRules
 		{
 			if (eventData == null) return;
 
-			if (Reactor as IMove != null)
-				((IMove)Reactor).Move(eventData, MoveDirection);
+			IMove movingObject = Reactor.gameObject.GetComponent(typeof(IMove)) as IMove;
+			Debug.Log(movingObject);
+			if (movingObject != null)
+				movingObject.Move(eventData, MoveDirection);
 		}
 	}
 }
