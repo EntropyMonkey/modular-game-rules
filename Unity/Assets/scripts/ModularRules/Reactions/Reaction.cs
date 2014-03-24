@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace ModularRules
 {
 	// extends MonoBehaviour because children can then have fields in unity editor
-	public abstract class Reaction : MonoBehaviour
+	public abstract class Reaction : BaseRuleElement
 	{
 		public GameEvent ListenedEvent;
 

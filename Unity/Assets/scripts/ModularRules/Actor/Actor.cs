@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ModularRules
 {
-	public abstract class Actor : MonoBehaviour
+	public abstract class Actor : BaseRuleElement
 	{
 		protected List<GameEvent> events;
 

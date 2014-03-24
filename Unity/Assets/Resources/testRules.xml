@@ -1,11 +1,11 @@
 <rules>
 	<actors>
 		<actor>
-			<id>0</id>
+			<id>1</id>
 			<type>Player</type>
 		</actor>
 		<actor>
-			<id>1</id>
+			<id>0</id>
 			<type>PlayerCamera</type>
 		</actor>
 	</actors>

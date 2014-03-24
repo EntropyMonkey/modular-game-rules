@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ModularRules
 {
-	public abstract class GameEvent : MonoBehaviour
+	public abstract class GameEvent : BaseRuleElement
 	{
 		[HideInInspector]
 		public Actor Actor;
