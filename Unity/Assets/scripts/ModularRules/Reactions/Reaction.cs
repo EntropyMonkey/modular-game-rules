@@ -14,6 +14,13 @@ namespace ModularRules
 
 		protected List<Reaction> reactionComponents = new List<Reaction>();
 
+		public override void Initialize()
+		{
+			base.Initialize();
+
+			Register();
+		}
+
 		/// <summary>
 		/// execute all sub reactions in depth first order
 		/// </summary>
@@ -32,21 +39,18 @@ namespace ModularRules
 		/// <param name="eventData">the event's data</param>
 		protected abstract void React(EventData eventData);
 
-		#region Event Registering/Unregistering
-		/// <summary>
-		/// Add this reaction to an event.
-		/// </summary>
-		public void AddToEvent(GameEvent e)
+
+		#region Register/Unregister with events
+		protected virtual void Register()
 		{
-			e.Register(this);
+			if (ListenedEvent != null)
+				ListenedEvent.Register(this);
 		}
 
-		/// <summary>
-		/// Removes this reaction from an event.
-		/// </summary>
-		public void RemoveFromEvent(GameEvent e)
+		protected virtual void Unregister()
 		{
-			e.Unregister(this);
+			if (ListenedEvent != null)
+				ListenedEvent.Unregister(this);
 		}
 		#endregion
 	}

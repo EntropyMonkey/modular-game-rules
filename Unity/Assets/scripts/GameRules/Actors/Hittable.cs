@@ -7,7 +7,7 @@ public class Hittable : Actor, ICount
 {
 	void Start()
 	{
-		InitializeActor();
+		Initialize();
 	}
 
 	public void ChangeCount(EventData data, float changeBy)

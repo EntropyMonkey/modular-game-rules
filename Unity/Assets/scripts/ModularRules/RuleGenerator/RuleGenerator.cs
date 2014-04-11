@@ -19,7 +19,7 @@ namespace ModularRules
 
 		// keeping track of generated elements
 		List<Actor> genActors = new List<Actor>();
-		List<Event> genEvents = new List<Event>();
+		List<GameEvent> genEvents = new List<GameEvent>();
 		List<Reaction> genReactions = new List<Reaction>();
 
 		void Awake()
@@ -103,26 +103,16 @@ namespace ModularRules
 
 				GameEvent newEvent = newEventGO.AddComponent(data.type) as GameEvent;
 
-				// setting actor
+				// references
+				newEvent.Id = data.id;
 				newEvent.Actor = genActors[data.actorId];
 
 				// setting parameters
-				foreach (RuleParserLinq.Param parameter in data.parameters)
-				{
-					Debug.Log("Adding param " + parameter.type + " to " + data.type + ", value: " + parameter.value);
+				SetParameters(newEvent, data);
 
-					FieldInfo pFieldInfo = data.type.GetField(parameter.name);
-					// different handling for object references
-					if (parameter.type.IsSubclassOf(typeof(Actor)))
-					{
-						pFieldInfo.SetValue(newEvent, genActors[(int)parameter.value]);
-					}
-					// set all other values
-					else
-					{
-						pFieldInfo.SetValue(newEvent, parameter.value);
-					}
-				}
+				// keep track of generated events
+				genEvents.Add(newEvent);
+				genEvents.Sort((x, y) => x.Id.CompareTo(y.Id)); // sort list
 			}
 		}
 
@@ -131,12 +121,59 @@ namespace ModularRules
 #if DEBUG
 			Debug.Log("Adding reaction " + data.id + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
 #endif
+			if (data.actorId < genActors.Count && genActors[data.actorId] != null)
+			{
+				GameObject newReactionGO = new GameObject("R => " + data.type);
+				newReactionGO.transform.parent = genActors[data.actorId].Reactions.transform;
 
+				Reaction newReaction = newReactionGO.AddComponent(data.type) as Reaction;
+
+				// references
+				newReaction.Id = data.id;
+				newReaction.Reactor = genActors[data.actorId];
+				newReaction.ListenedEvent = genEvents[data.eventId];
+
+				// parameters
+				SetParameters(newReaction, data);
+
+				// keeping track
+				genReactions.Add(newReaction);
+				genReactions.Sort((x, y) => x.Id.CompareTo(y.Id));
+			}
+		}
+
+		private void SetParameters<T, U>(T gObject, U data) 
+			where T : BaseRuleElement 
+			where U : RuleParserLinq.EventData
+		{
+			foreach (RuleParserLinq.Param parameter in data.parameters)
+			{
+#if DEBUG
+				Debug.Log("Adding param " + parameter.type + " to " + data.type + ", value: " + parameter.value);
+#endif
+
+				FieldInfo pFieldInfo = data.type.GetField(parameter.name);
+				// different handling for object references
+				if (parameter.type.IsSubclassOf(typeof(Actor)) || parameter.type.IsAssignableFrom(typeof(Actor)))
+				{
+					if ((int)parameter.value < genActors.Count && (int)parameter.value >= 0)
+						pFieldInfo.SetValue(gObject, genActors[(int)parameter.value]);
+				}
+				// set all other values
+				else
+				{
+					pFieldInfo.SetValue(gObject, parameter.value);
+				}
+			}
 		}
 		#endregion
 
 		void InitializeRuleElements()
 		{
+			foreach (Actor a in genActors)
+			{
+				a.Initialize();
+			}
 		}
 
 		void Regenerate(string filename)

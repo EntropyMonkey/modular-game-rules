@@ -57,7 +57,7 @@
 			<actorId>0</actorId>
 			<type>MoveObject</type>
 			<param name="MoveDirection">
-				<type>MoveDirection</type>
+				<type>Direction</type>
 				<value>0</value>
 			</param>		
 		</reaction>
@@ -68,7 +68,7 @@
 			<actorId>1</actorId>
 			<type>FollowObject</type>
 			<param name="FollowSpeed">
-				<type>float</type>
+				<type>System.Single</type>
 				<value>10</value>
 			</param>
 			<param name="Offset">
@@ -76,8 +76,8 @@
 				<value>0 5 -5</value>
 			</param>
 			<param name="FixedToObject">
-				<type>GameObject</type>
-				<actorId></actorId>
+				<type>Actor</type>
+				<value>-1</value>
 			</param>
 		</reaction>
 	</reactions>

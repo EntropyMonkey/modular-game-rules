@@ -12,10 +12,9 @@ namespace ModularRules
 
 		private Vector3 targetPos = Vector3.zero;
 
-		void OnEnable()
+		public override void Initialize()
 		{
-			if (ListenedEvent)
-				ListenedEvent.Register(this);
+			base.Initialize();
 
 			if (FixedToObject)
 			{
@@ -24,10 +23,14 @@ namespace ModularRules
 			}
 		}
 
+		void OnEnable()
+		{
+			Register();
+		}
+
 		void OnDisable()
 		{
-			if (ListenedEvent)
-				ListenedEvent.Unregister(this);
+			Unregister();
 		}
 
 		protected override void React(EventData eventData)

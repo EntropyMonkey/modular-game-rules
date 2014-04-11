@@ -4,20 +4,20 @@ using ModularRules;
 
 namespace ModularRules
 {
+	public enum Direction { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN }
+
 	public class MoveObject : Reaction
 	{
-		public enum Direction { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN }
-
 		public Direction MoveDirection;
 
 		void OnEnable()
 		{
-			ListenedEvent.Register(this);
+			Register();
 		}
 
 		void OnDisable()
 		{
-			ListenedEvent.Unregister(this);
+			Unregister();
 		}
 
 		protected override void React(EventData eventData)

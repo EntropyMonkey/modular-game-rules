@@ -9,7 +9,7 @@ namespace ModularRules
 {
 	public class RuleParserLinq : MonoBehaviour
 	{
-		public struct ActorData
+		public class ActorData
 		{
 			public int id;
 			public System.Type type;
@@ -23,29 +23,21 @@ namespace ModularRules
 			public object value;
 		};
 
-		public struct EventData
+		public class EventData : ActorData
 		{
-			public int id;
 			public int actorId;
-			public System.Type type;
 			public string label;
 
 			public List<Param> parameters;
 		};
 
-		public struct ReactionData
+		public class ReactionData : EventData
 		{
-			public int id;
 			public int eventId;
-			public int actorId;
-			public System.Type type;
-			public string label;
-
-			public List<Param> parameters;
 		};
 
 		[HideInInspector]
-		public string[] ExtraNamespaces = { "UnityEngine", "ModularRules" };
+		public string[] ExtraNamespaces = { "System", "UnityEngine", "ModularRules" };
 
 		public void Parse(RuleGenerator generator, string fileName)
 		{
@@ -71,7 +63,7 @@ namespace ModularRules
 
 		private void ParseActors(RuleGenerator generator, XElement xActors)
 		{
-			ActorData currentActor;
+			ActorData currentActor = new ActorData();
 			foreach (XElement xActor in xActors.Elements("actor"))
 			{
 				currentActor.id = int.Parse(xActor.Element("id").Value);
@@ -84,7 +76,7 @@ namespace ModularRules
 
 		private void ParseEvents(RuleGenerator generator, XElement xEvents)
 		{
-			EventData currentEvent;
+			EventData currentEvent = new EventData();
 			foreach(XElement xEvent in xEvents.Elements("event"))
 			{
 				currentEvent.id = int.Parse(xEvent.Element("id").Value);
@@ -108,7 +100,7 @@ namespace ModularRules
 
 		private void ParseReactions(RuleGenerator generator, XElement xReactions)
 		{
-			ReactionData currentReaction;
+			ReactionData currentReaction = new ReactionData();
 			foreach (XElement xReaction in xReactions.Elements("reaction"))
 			{
 				currentReaction.id = int.Parse(xReaction.Element("id").Value);
@@ -127,6 +119,7 @@ namespace ModularRules
 
 				generator.AddReactionToScene(currentReaction);
 			}
+
 		}
 
 		// parses all parameters of this element and sets up their values with the right types
@@ -146,14 +139,24 @@ namespace ModularRules
 				// get value as string
 				string v = xParam.Element("value").Value;
 
+				float tryparsef; int tryparsei;
+
 				// handle parameter value according to type
-				if (newP.type.IsSubclassOf(typeof(Actor)))
+				if (newP.type.IsSubclassOf(typeof(Actor)) || newP.type.IsAssignableFrom(typeof(Actor)))
 				{
 					newP.value = int.Parse(v);
 				}
 				else if (newP.type.IsEnum)
 				{
 					newP.value = Enum.Parse(newP.type, v);
+				}
+				else if (float.TryParse(v, out tryparsef))
+				{
+					newP.value = float.Parse(v);
+				}
+				else if (int.TryParse(v, out tryparsei))
+				{
+					newP.value = int.Parse(v);
 				}
 				else if (newP.type == typeof(Vector3))
 				{
@@ -166,7 +169,7 @@ namespace ModularRules
 				}
 				else
 				{
-					Debug.LogError("Element " + xElement.Element("id").Value + ", parameter " + newP.name + ": the used type (" + t + ") couldn't be reflected.");
+					Debug.LogError("Element " + xElement.Element("id").Value + ", parameter " + newP.name + ": the used type (" + t + ") couldn't be interpreted.");
 				}
 
 #if DEBUG
@@ -201,7 +204,7 @@ namespace ModularRules
 				// type couldn't be found
 				if (type == null)
 				{
-					Debug.LogError("The used type (" + typeName + ") couldn't be found.");
+					Debug.LogError("The used type (" + typeName + ") couldn't be found via reflection.");
 				}
 			}
 

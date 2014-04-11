@@ -15,7 +15,7 @@ public class Player : Actor
 
 	void Awake()
 	{
-		InitializeActor();
+		Initialize();
 
 		movementController = AddComponent<MovementController>();
 		shooterMovement = AddComponent<ShooterMovement>();

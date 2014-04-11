@@ -20,7 +20,7 @@ namespace ModularRules
 			playerCamera = GameObject.FindGameObjectWithTag("PlayerCamera").GetComponent<PlayerCamera>();
 		}
 
-		public override void Move(EventData eventData, MoveObject.Direction direction)
+		public override void Move(EventData eventData, Direction direction)
 		{
 
 			float v = ((InputReceived.InputData)eventData.Get(EventDataKeys.InputData).data).inputValue;
@@ -30,27 +30,27 @@ namespace ModularRules
 			Vector3 dir = Vector3.zero;
 			switch (direction)
 			{
-				case MoveObject.Direction.FORWARD:
+				case Direction.FORWARD:
 					dir = playerCamera.transform.forward;
 					dir.y = 0;
 					break;
-				case MoveObject.Direction.BACKWARD:
+				case Direction.BACKWARD:
 					dir = -playerCamera.transform.forward;
 					dir.y = 0;
 					break;
-				case MoveObject.Direction.LEFT:
+				case Direction.LEFT:
 					dir = -playerCamera.transform.right;
 					dir.y = 0;
 					break;
-				case MoveObject.Direction.RIGHT:
+				case Direction.RIGHT:
 					dir = playerCamera.transform.right;
 					dir.y = 0;
 					break;
-				case MoveObject.Direction.UP:
+				case Direction.UP:
 					moveSpeed = jumpSpeed;
 					dir = Vector3.up;
 					break;
-				case MoveObject.Direction.DOWN:
+				case Direction.DOWN:
 					dir = Vector3.down;
 					break;
 			}

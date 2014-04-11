@@ -17,23 +17,33 @@ namespace ModularRules
 			{
 				if (eventsGO == null)
 				{
-					Transform events = transform.FindChild("Events");
-					if (events == null)
-					{
-						GameObject EventsGO = new GameObject("Events");
-						EventsGO.transform.parent = transform;
-						eventsGO = EventsGO;
-					}
+					eventsGO = new GameObject("Events");
+					eventsGO.transform.parent = transform;
 				}
 
 				return eventsGO;
 			}
 		}
 
+		private GameObject reactionsGO;
+		public GameObject Reactions
+		{
+			get
+			{
+				if (reactionsGO == null)
+				{
+					reactionsGO = new GameObject("Reactions");
+					reactionsGO.transform.parent = transform;
+				}
+
+				return reactionsGO;
+			}
+		}
+
 		/// <summary>
 		/// Collects all events, so that they can be updated when appropriate
 		/// </summary>
-		protected void InitializeActor()
+		public override void Initialize()
 		{
 			// get all events
 			events = new List<GameEvent>();
@@ -43,6 +53,7 @@ namespace ModularRules
 				GameEvent e = co as GameEvent;
 				e.Actor = this;
 				events.Add(e);
+				e.Initialize();
 			}
 			Debug.Log(name + " registered " + events.Count + " GameEvents.");
 
@@ -54,6 +65,7 @@ namespace ModularRules
 				Reaction r = co as Reaction;
 				r.Reactor = this;
 				reactions.Add(r);
+				r.Initialize();
 			}
 			Debug.Log(name + " registered " + reactions.Count + " Reactions.");
 		}
