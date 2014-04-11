@@ -16,7 +16,7 @@ namespace ModularRules
 		};
 
 		[SerializeField]
-		private KeyCode InputKey = KeyCode.None;
+		public KeyCode InputKey = KeyCode.None;
 
 		public override GameEvent UpdateEvent()
 		{

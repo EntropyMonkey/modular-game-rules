@@ -6,7 +6,7 @@ namespace ModularRules
 {
 	public class MouseInput : InputReceived
 	{
-		public enum MouseButton { LEFT = 0, RIGHT = 1, MIDDLE = 2, NONE = 3}
+		public enum MouseButton { LEFT = 0, RIGHT = 1, MIDDLE = 2, NONE = 3 }
 
 		public class MouseData : InputData
 		{
@@ -34,7 +34,7 @@ namespace ModularRules
 		// fields
 		public MouseButton TrackedButton;
 
-		public Camera TrackedCamera;
+		public Actor TrackedCamera;
 
 		protected Vector3 lastScreenPosition = Vector3.zero;
 
@@ -46,7 +46,7 @@ namespace ModularRules
 			MouseData data = MouseData.Empty;
 			data.button = TrackedButton;
 			data.screenPosition = Input.mousePosition;
-			data.rayFromPosition = TrackedCamera.ScreenPointToRay(data.screenPosition);
+			data.rayFromPosition = TrackedCamera.camera.ScreenPointToRay(data.screenPosition);
 
 			// has the mouse been moved?
 			if (lastScreenPosition != Input.mousePosition)

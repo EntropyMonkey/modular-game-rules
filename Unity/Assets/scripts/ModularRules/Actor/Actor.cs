@@ -10,6 +10,26 @@ namespace ModularRules
 
 		protected List<Reaction> reactions;
 
+		private GameObject eventsGO;
+		public GameObject Events
+		{
+			get
+			{
+				if (eventsGO == null)
+				{
+					Transform events = transform.FindChild("Events");
+					if (events == null)
+					{
+						GameObject EventsGO = new GameObject("Events");
+						EventsGO.transform.parent = transform;
+						eventsGO = EventsGO;
+					}
+				}
+
+				return eventsGO;
+			}
+		}
+
 		/// <summary>
 		/// Collects all events, so that they can be updated when appropriate
 		/// </summary>
@@ -36,7 +56,6 @@ namespace ModularRules
 				reactions.Add(r);
 			}
 			Debug.Log(name + " registered " + reactions.Count + " Reactions.");
-
 		}
 
 		public void UpdateEvents()

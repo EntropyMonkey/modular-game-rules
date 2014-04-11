@@ -1,18 +1,23 @@
 <rules>
 	<actors>
 		<actor>
-			<id>1</id>
+			<id>0</id>
+			<label>Player</label>
+			<!--The labels are intended as a placeholder for automatic name generation -->
 			<type>Player</type>
 		</actor>
 		<actor>
-			<id>0</id>
+			<id>1</id>
+			<label>PlayerCamera</label>
 			<type>PlayerCamera</type>
 		</actor>
+		
 	</actors>
 	
 	<events>
 		<event>
 			<id>0</id>
+			<label>KeyboardInput Space</label>
 			<actorId>0</actorId>
 			<type>KeyboardInput</type>
 			<param name="InputKey">
@@ -23,20 +28,22 @@
 
 		<event>
 			<id>1</id>
+			<label>MouseInput LeftClick</label>
 			<actorId>0</actorId>
 			<type>MouseInput</type>
 			<param name="TrackedButton">
-				<type>MouseButton</type>
+				<type>MouseInput+MouseButton</type>
 				<value>0</value>
 			</param>
 			<param name="TrackedCamera">
-				<type>Camera</type>
-				<actorId>1</actorId>
+				<type>PlayerCamera</type>
+				<value>1</value>
 			</param>
 		</event>
 
 		<event>
 			<id>2</id>
+			<label>MovedObject Player</label>
 			<actorId>0</actorId>
 			<type>ObjectMovedEvent</type>
 		</event>
@@ -45,6 +52,7 @@
 	<reactions>
 		<reaction>
 			<id>0</id>
+			<label>On MouseInput MoveObject Player</label>
 			<listenedEventId>0</listenedEventId>
 			<actorId>0</actorId>
 			<type>MoveObject</type>
@@ -55,6 +63,7 @@
 		</reaction>
 		<reaction>
 			<id>1</id>
+			<label>On MoveObject Player FollowObject</label>
 			<listenedEventId>2</listenedEventId>
 			<actorId>1</actorId>
 			<type>FollowObject</type>

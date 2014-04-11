@@ -3,6 +3,8 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using System;
 
 namespace ModularRules
 {
@@ -10,7 +12,7 @@ namespace ModularRules
 	{
 		public bool ShowButton = true;
 
-		RuleParser ruleParser;
+		RuleParserLinq ruleParser;
 
 		// contains all placeholders for actors in the scene, in order of their Id
 		List<GenerateElement> placeholders;
@@ -22,7 +24,7 @@ namespace ModularRules
 
 		void Awake()
 		{
-			ruleParser = gameObject.AddComponent<RuleParser>();
+			ruleParser = gameObject.AddComponent<RuleParserLinq>();
 		}
 
 		#region Finding generation placeholders in scene
@@ -65,12 +67,12 @@ namespace ModularRules
 
 		#region Adding Elements to the scene
 
-		public void AddActorToScene(RuleParser.ActorData data)
+		public void AddActorToScene(RuleParserLinq.ActorData data)
 		{
 #if DEBUG
 			Debug.Log("Adding actor " + data.id + ", " + data.type);
 #endif
-			if (placeholders[data.id] != null)
+			if (placeholders.Count > data.id && placeholders[data.id] != null)
 			{
 				GameObject pGo = placeholders[data.id].gameObject;
 
@@ -80,18 +82,62 @@ namespace ModularRules
 				genActors.Add(newActor);
 				genActors.Sort((x, y) => x.Id.CompareTo(y.Id)); // sort list
 
-				// destroy placeholder
-				Destroy(placeholders[data.id]);
+				// deactivate placeholder
+				placeholders[data.id].enabled = false;
+			}
+			else
+			{
+				Debug.LogError("There is no placeholder for actor " + data.id + " in the scene.");
 			}
 		}
 
-		public void AddEventToScene(RuleParser.EventData data)
+		public void AddEventToScene(RuleParserLinq.EventData data)
 		{
 #if DEBUG
 			Debug.Log("Adding event " + data.id + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
 #endif
+			if (data.actorId < genActors.Count && genActors[data.actorId] != null)
+			{
+				GameObject newEventGO = new GameObject("E => " + data.type);
+				newEventGO.transform.parent = genActors[data.actorId].Events.transform;
+
+				GameEvent newEvent = newEventGO.AddComponent(data.type) as GameEvent;
+
+				// setting actor
+				newEvent.Actor = genActors[data.actorId];
+
+				// setting parameters
+				foreach (RuleParserLinq.Param parameter in data.parameters)
+				{
+					Debug.Log("Adding param " + parameter.type + " to " + data.type + ", value: " + parameter.value);
+
+					FieldInfo pFieldInfo = data.type.GetField(parameter.name);
+					// different handling for object references
+					if (parameter.type.IsSubclassOf(typeof(Actor)))
+					{
+						pFieldInfo.SetValue(newEvent, genActors[(int)parameter.value]);
+					}
+					// set all other values
+					else
+					{
+						pFieldInfo.SetValue(newEvent, parameter.value);
+					}
+				}
+			}
+		}
+
+		public void AddReactionToScene(RuleParserLinq.ReactionData data)
+		{
+#if DEBUG
+			Debug.Log("Adding reaction " + data.id + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
+#endif
+
 		}
 		#endregion
+
+		void InitializeRuleElements()
+		{
+		}
 
 		void Regenerate(string filename)
 		{
@@ -99,6 +145,9 @@ namespace ModularRules
 
 			FindGenerationPlaceholdersInScene();
 			ruleParser.Parse(this, filename);
+
+			// initialize elements. order of initializing is important
+			InitializeRuleElements();
 
 			Debug.LogWarning("Completed generating rules.");
 		}
