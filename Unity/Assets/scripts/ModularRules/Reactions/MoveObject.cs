@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using ModularRules;
+using System.Collections.Generic;
 
 namespace ModularRules
 {
@@ -20,12 +21,27 @@ namespace ModularRules
 			Unregister();
 		}
 
-		protected override void React(EventData eventData)
+		public override RuleData GetRuleInformation()
+		{
+			ReactionData rule = base.GetRuleInformation() as ReactionData;
+
+			rule.parameters = new List<Param>();
+			rule.parameters.Add(new Param()
+			{
+				name = "MoveDirection",
+				type = MoveDirection.GetType(),
+				value = MoveDirection
+			});
+
+			return rule;
+		}
+
+		protected override void React(GameEventData eventData)
 		{
 			if (eventData == null) return;
 
 			IMove movingObject = Reactor.gameObject.GetComponent(typeof(IMove)) as IMove;
-			Debug.Log(movingObject);
+
 			if (movingObject != null)
 				movingObject.Move(eventData, MoveDirection);
 		}

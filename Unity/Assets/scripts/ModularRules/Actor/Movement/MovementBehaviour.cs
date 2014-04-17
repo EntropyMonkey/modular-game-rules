@@ -10,6 +10,6 @@ namespace ModularRules
 		/// </summary>
 		/// <param name="data">The data of the event which has triggered the move</param>
 		/// <param name="direction">The subjective direction in which to move</param>
-		public abstract void Move(EventData data, Direction direction);
+		public abstract void Move(GameEventData data, Direction direction);
 	}
 }

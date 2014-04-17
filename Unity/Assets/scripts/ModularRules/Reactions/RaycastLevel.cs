@@ -20,7 +20,7 @@ namespace ModularRules
 			Unregister();
 		}
 
-		protected override void React(EventData eventData)
+		protected override void React(GameEventData eventData)
 		{
 			RaycastHit hitInfo;
 			Ray ray = new Ray();
@@ -42,7 +42,7 @@ namespace ModularRules
 				if (hitInfo.collider != null)
 				{
 					GetComponent<RaycastHitEvent>().Trigger(
-						EventData.Empty.Add(new DataPiece(EventDataKeys.RaycastData) { data = hitInfo })
+						GameEventData.Empty.Add(new DataPiece(EventDataKeys.RaycastData) { data = hitInfo })
 						.Add(new DataPiece(EventDataKeys.TargetObject) { data = hitInfo.collider.gameObject }));
 				}
 			}

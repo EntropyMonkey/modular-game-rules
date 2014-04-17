@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System;
+using System.IO;
 
 namespace ModularRules
 {
@@ -61,13 +62,13 @@ namespace ModularRules
 					Debug.Log(i + " - " + placeholders[i].name + " - " + placeholders[i].Id);
 				}
 			}
-		}
 #endif
+		}
 		#endregion
 
 		#region Adding Elements to the scene
 
-		public void AddActorToScene(RuleParserLinq.ActorData data)
+		public void AddActorToScene(BaseRuleElement.ActorData data)
 		{
 #if DEBUG
 			Debug.Log("Adding actor " + data.id + ", " + data.type);
@@ -91,7 +92,7 @@ namespace ModularRules
 			}
 		}
 
-		public void AddEventToScene(RuleParserLinq.EventData data)
+		public void AddEventToScene(BaseRuleElement.EventData data)
 		{
 #if DEBUG
 			Debug.Log("Adding event " + data.id + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
@@ -116,7 +117,7 @@ namespace ModularRules
 			}
 		}
 
-		public void AddReactionToScene(RuleParserLinq.ReactionData data)
+		public void AddReactionToScene(BaseRuleElement.ReactionData data)
 		{
 #if DEBUG
 			Debug.Log("Adding reaction " + data.id + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
@@ -144,9 +145,9 @@ namespace ModularRules
 
 		private void SetParameters<T, U>(T gObject, U data) 
 			where T : BaseRuleElement 
-			where U : RuleParserLinq.EventData
+			where U : BaseRuleElement.EventData
 		{
-			foreach (RuleParserLinq.Param parameter in data.parameters)
+			foreach (BaseRuleElement.Param parameter in data.parameters)
 			{
 #if DEBUG
 				Debug.Log("Adding param " + parameter.type + " to " + data.type + ", value: " + parameter.value);
@@ -168,6 +169,43 @@ namespace ModularRules
 		}
 		#endregion
 
+		#region Update Elements
+		void UpdateActor(BaseRuleElement.ActorData actorData)
+		{
+			// check if matching id actor has same type
+
+			// if different type, change it. Self-destroy old one, create new actor.
+
+			// ==> have to tell events and reactions that there's a new kind of actor, after new events and reactions have beens set
+		}
+
+		void UpdateEvent(BaseRuleElement.EventData eventData)
+		{
+			// find event with matching id
+
+			// check if it's of the right type
+
+			// if so, set the parameters
+
+			// if it's not the same type, tell old event to self-destroy
+
+			// query the actor id, reset actor ref
+		}
+
+		void UpdateReaction(BaseRuleElement.ReactionData reactionData)
+		{
+			// find reaction with matching id
+
+			// check type
+
+			// if it's ok, set parameters
+
+			// if it's not the same, tell the old reaction to self-destroy (including all added requiredcomponents)
+
+			// query the actor id, reset actor ref
+		}
+		#endregion
+
 		void InitializeRuleElements()
 		{
 			foreach (Actor a in genActors)
@@ -176,9 +214,9 @@ namespace ModularRules
 			}
 		}
 
-		void Regenerate(string filename)
+		void LoadRules(string filename)
 		{
-			Debug.LogWarning("Generating rules from testRules.xml ...");
+			Debug.LogWarning("Generating level rules from " + filename + ".xml ...");
 
 			FindGenerationPlaceholdersInScene();
 			ruleParser.Parse(this, filename);
@@ -186,14 +224,48 @@ namespace ModularRules
 			// initialize elements. order of initializing is important
 			InitializeRuleElements();
 
-			Debug.LogWarning("Completed generating rules.");
+			Debug.LogWarning("Completed generating level.");
+		}
+
+		void SaveRules(string filename)
+		{
+			Debug.LogWarning("Saving rules into " + filename + ".xml ...");
+			
+			// broadcast save request, let elements handle storing info about themselves
+			BaseRuleElement[] brelements = GameObject.FindObjectsOfType(typeof(BaseRuleElement)) as BaseRuleElement[];
+
+			List<BaseRuleElement.RuleData> rules = new List<BaseRuleElement.RuleData>();
+			foreach (BaseRuleElement br in brelements)
+			{
+				rules.Add(br.GetRuleInformation());
+			}
+
+			ruleParser.SaveRules(rules, filename);
+
+			Debug.LogWarning("Completed saving rules.");
 		}
 
 		void OnGUI()
 		{
-			if (ShowButton && GUI.Button(new Rect(0, 0, 100, 50), "Generate Rules"))
+			string[] files = Directory.GetFiles(Directory.GetCurrentDirectory() + @"/Assets/Resources/", "rules_*.xml");
+
+			if (ShowButton)
 			{
-				Regenerate("testRules");
+				int x = 0; int width = 150;
+				for (int i = 0; i < files.Length; i++)
+				{
+					string file = Path.GetFileNameWithoutExtension(files[i]);
+					if (GUI.Button(new Rect(x, 0, width, 50), "Load " + file))
+					{
+						LoadRules(file);
+					}
+					x += width;
+				}
+			}
+
+			if (ShowButton && GUI.Button(new Rect(0, 50, 100, 50), "Save Rules"))
+			{
+				SaveRules("rules_0");
 			}
 		}
 	}

@@ -9,47 +9,21 @@ namespace ModularRules
 {
 	public class RuleParserLinq : MonoBehaviour
 	{
-		public class ActorData
-		{
-			public int id;
-			public System.Type type;
-		};
-
-		// parameter for events or reactions
-		public struct Param
-		{
-			public string name;
-			public System.Type type;
-			public object value;
-		};
-
-		public class EventData : ActorData
-		{
-			public int actorId;
-			public string label;
-
-			public List<Param> parameters;
-		};
-
-		public class ReactionData : EventData
-		{
-			public int eventId;
-		};
-
+		#region XML Parsing
 		[HideInInspector]
 		public string[] ExtraNamespaces = { "System", "UnityEngine", "ModularRules" };
 
-		public void Parse(RuleGenerator generator, string fileName)
+		public void Parse(RuleGenerator generator, string filename)
 		{
 
-			TextAsset file = Resources.Load(fileName) as TextAsset;
-			if (file == null)
+			string filepath = Directory.GetCurrentDirectory() + @"/Assets/Resources/" + filename + ".xml";
+			XDocument xmlDoc = XDocument.Load(filepath);
+
+			if (xmlDoc == null)
 			{
-				Debug.LogError("Couldn't find rule file " + fileName + " in any of the Resources folders. Aborting generation.");
+				Debug.LogError("Couldn't find rule file " + filename + " in the Resources folders. Aborting generation.");
 				return;
 			}
-
-			XDocument xmlDoc = XDocument.Parse(file.text);
 
 			// parse actors
 			ParseActors(generator, xmlDoc.Element("rules").Element("actors"));
@@ -63,7 +37,7 @@ namespace ModularRules
 
 		private void ParseActors(RuleGenerator generator, XElement xActors)
 		{
-			ActorData currentActor = new ActorData();
+			BaseRuleElement.ActorData currentActor = new BaseRuleElement.ActorData();
 			foreach (XElement xActor in xActors.Elements("actor"))
 			{
 				currentActor.id = int.Parse(xActor.Element("id").Value);
@@ -76,7 +50,7 @@ namespace ModularRules
 
 		private void ParseEvents(RuleGenerator generator, XElement xEvents)
 		{
-			EventData currentEvent = new EventData();
+			BaseRuleElement.EventData currentEvent = new BaseRuleElement.EventData();
 			foreach(XElement xEvent in xEvents.Elements("event"))
 			{
 				currentEvent.id = int.Parse(xEvent.Element("id").Value);
@@ -100,7 +74,7 @@ namespace ModularRules
 
 		private void ParseReactions(RuleGenerator generator, XElement xReactions)
 		{
-			ReactionData currentReaction = new ReactionData();
+			BaseRuleElement.ReactionData currentReaction = new BaseRuleElement.ReactionData();
 			foreach (XElement xReaction in xReactions.Elements("reaction"))
 			{
 				currentReaction.id = int.Parse(xReaction.Element("id").Value);
@@ -123,13 +97,13 @@ namespace ModularRules
 		}
 
 		// parses all parameters of this element and sets up their values with the right types
-		private List<Param> ParseParameters(XElement xElement)
+		private List<BaseRuleElement.Param> ParseParameters(XElement xElement)
 		{
-			List<Param> parameters = new List<Param>();
+			List<BaseRuleElement.Param> parameters = new List<BaseRuleElement.Param>();
 
 			foreach (XElement xParam in xElement.Elements("param"))
 			{
-				Param newP = new Param { name = xParam.Attribute("name").Value };
+				BaseRuleElement.Param newP = new BaseRuleElement.Param { name = xParam.Attribute("name").Value };
 
 				// get the parameter's type
 				string t = xParam.Element("type").Value;
@@ -181,6 +155,135 @@ namespace ModularRules
 
 			return parameters;
 		}
+		#endregion
+
+		#region Saving Rules
+		public void SaveRules(List<BaseRuleElement.RuleData> data, string filename)
+		{
+			string filepath = Directory.GetCurrentDirectory() + @"/Assets/Resources/" + filename + ".xml";
+
+			XDocument xmlDoc = new XDocument();
+			if (File.Exists(filepath))
+			{
+				string newName = filename.Split('_')[0] + "_" + (int.Parse(filename.Split('_')[1]) + 1);
+				Debug.Log("File exists. Trying again: " + newName);
+
+				SaveRules(data, newName);
+				return;
+			}
+			else
+			{
+				Debug.Log("Couldn't find rule file " + filename + " in the Resources folder. Creating..");
+			}
+
+			Directory.CreateDirectory(Directory.GetCurrentDirectory() + @"/Assets/Resources");
+
+			XDeclaration declaration = new XDeclaration("1.0", null, null);
+			xmlDoc.Declaration = declaration;
+			xmlDoc.Add(new XElement("rules"));
+			xmlDoc.Save(filepath);
+
+			xmlDoc.Element("rules").Add(new XElement("actors"));
+			XElement xActors = xmlDoc.Element("rules").Element("actors");
+
+			xmlDoc.Element("rules").Add(new XElement("events"));
+			XElement xEvents = xmlDoc.Element("rules").Element("events");
+
+			xmlDoc.Element("rules").Add(new XElement("reactions"));
+			XElement xReactions = xmlDoc.Element("rules").Element("reactions");
+
+			foreach (BaseRuleElement.RuleData ruleData in data)
+			{
+				if (ruleData != null)
+				{
+					if (ruleData.GetType() == typeof(BaseRuleElement.ActorData))
+					{
+						BaseRuleElement.ActorData actorData = ruleData as BaseRuleElement.ActorData;
+						XElement xActor = new XElement("actor");
+						xActor.Add(new XElement("id") { Value = "" + ruleData.id });
+						xActor.Add(new XElement("type") { Value = GetTypeStringWithoutNamespaces(actorData.type) });
+						xActor.Add(new XElement("label") { Value = actorData.label });
+						xActors.Add(xActor);
+					}
+					else if (ruleData.GetType() == typeof(BaseRuleElement.EventData))
+					{
+						BaseRuleElement.EventData eventData = ruleData as BaseRuleElement.EventData;
+						XElement xEvent = new XElement("event");
+						xEvent.Add(new XElement("id") { Value = "" + ruleData.id });
+
+						xEvent.Add(new XElement("type") { Value = GetTypeStringWithoutNamespaces(eventData.type) });
+						xEvent.Add(new XElement("label") { Value = eventData.label });
+
+						xEvent.Add(new XElement("actorId") { Value = "" + eventData.actorId });
+
+						AddParameters(xEvent, eventData.parameters);
+
+						xEvents.Add(xEvent);
+					}
+					else if (ruleData.GetType() == typeof(BaseRuleElement.ReactionData))
+					{
+						XElement xReaction = new XElement("reaction");
+						xReaction.Add(new XElement("id") { Value = "" + ruleData.id });
+
+						BaseRuleElement.ReactionData reactionData = ruleData as BaseRuleElement.ReactionData;
+
+						xReaction.Add(new XElement("type") { Value = GetTypeStringWithoutNamespaces(reactionData.type) });
+						xReaction.Add(new XElement("label") { Value = reactionData.label });
+
+						xReaction.Add(new XElement("actorId") { Value = "" + reactionData.actorId });
+						xReaction.Add(new XElement("listenedEventId") { Value = "" + reactionData.eventId });
+
+						AddParameters(xReaction, reactionData.parameters);
+
+						xReactions.Add(xReaction);
+					}
+
+				}
+			}
+
+			xmlDoc.Save(filepath);
+		}
+
+		string GetTypeStringWithoutNamespaces(Type type)
+		{
+			string result = "" + type;
+
+			if (result.Contains("."))
+			{
+				Debug.Log(result);
+				int index = result.LastIndexOf('.');
+				Debug.Log(index + 1);
+				Debug.Log(result.Length);
+				Debug.Log(result.Length - (index + 1));
+
+				result = result.Substring(result.LastIndexOf('.') + 1, result.Length - (index + 1));
+
+			}
+
+			Debug.Log(result);
+
+			return result;
+		}
+
+		void AddParameters(XElement element, List<BaseRuleElement.Param> parameters)
+		{
+			if (parameters == null) return;
+
+			foreach (BaseRuleElement.Param param in parameters)
+			{
+				XElement xParam = new XElement("param");
+				xParam.Add(new XAttribute("name", param.name));
+
+				xParam.Add(new XElement("type") { Value = GetTypeStringWithoutNamespaces(param.type) });
+				if (param.type.IsEnum)
+					xParam.Add(new XElement("value") { Value = "" + (int)param.value });
+				else
+					xParam.Add(new XElement("value") { Value = "" + param.value });
+
+				element.Add(xParam);
+			}
+		}
+		#endregion
 
 		#region Reflection Helpers
 		private System.Type ReflectOverSeveralNamespaces(string typeName, string[] namespaces)
@@ -197,7 +300,11 @@ namespace ModularRules
 					type = System.Type.GetType(namespc + "." + typeName + "," + namespc); // for dynamic assemblies
 
 					if (type == null)
+					{
 						type = System.Type.GetType(namespc + "." + typeName); // for nondynamic assemblies
+						
+						if (type != null) break;
+					}
 					else break;
 				}
 

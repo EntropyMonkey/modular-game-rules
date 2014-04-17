@@ -5,6 +5,6 @@ namespace ModularRules
 {
 	public interface IRotate
 	{
-		void Rotate(EventData data, Vector3 deltaMovement);
+		void Rotate(GameEventData data, Vector3 deltaMovement);
 	}
 }

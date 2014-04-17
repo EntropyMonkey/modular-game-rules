@@ -5,7 +5,7 @@ namespace ModularRules
 {
 	public class MovementController : BehaviourController<MovementBehaviour>, IMove
 	{
-		public void Move(EventData data, Direction dir)
+		public void Move(GameEventData data, Direction dir)
 		{
 			currentBehaviour.Move(data, dir);
 		}

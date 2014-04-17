@@ -17,10 +17,12 @@ namespace ModularRules
 		{
 			base.Load();
 
+			rigidbody.freezeRotation = true;
+
 			playerCamera = GameObject.FindGameObjectWithTag("PlayerCamera").GetComponent<PlayerCamera>();
 		}
 
-		public override void Move(EventData eventData, Direction direction)
+		public override void Move(GameEventData eventData, Direction direction)
 		{
 
 			float v = ((InputReceived.InputData)eventData.Get(EventDataKeys.InputData).data).inputValue;

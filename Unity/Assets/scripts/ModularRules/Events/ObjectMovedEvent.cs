@@ -17,7 +17,7 @@ namespace ModularRules
 		{
 			if (Vector3.Distance(position, transform.position) > minDistance)
 			{
-				Trigger(new EventData()
+				Trigger(new GameEventData()
 					.Add(new DataPiece(EventDataKeys.TargetObject) { data = gameObject }));
 
 				position = transform.position;

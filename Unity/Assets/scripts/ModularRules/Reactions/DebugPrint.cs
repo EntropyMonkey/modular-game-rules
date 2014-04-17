@@ -15,7 +15,7 @@ namespace ModularRules
 			Unregister();
 		}
 
-		protected override void React(EventData eventData)
+		protected override void React(GameEventData eventData)
 		{
 			Debug.Log("Received event " + eventData.ToString());
 		}

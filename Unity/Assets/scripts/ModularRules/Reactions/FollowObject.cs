@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace ModularRules
 {
@@ -18,9 +19,30 @@ namespace ModularRules
 
 			if (FixedToObject)
 			{
-				transform.parent = FixedToObject.transform;
-				transform.localPosition = Offset;
+				Reactor.transform.parent = FixedToObject.transform;
+				Reactor.transform.localPosition = Offset;
 			}
+		}
+
+		public override RuleData GetRuleInformation()
+		{
+			ReactionData rule = base.GetRuleInformation() as ReactionData;
+
+			rule.parameters = new List<Param>();
+			rule.parameters.Add(new Param()
+			{
+				name = "FollowSpeed",
+				type = FollowSpeed.GetType(),
+				value = FollowSpeed
+			});
+			rule.parameters.Add(new Param() 
+			{ 
+				name = "Offset",
+				type = Offset.GetType(),
+				value = Offset.x + " " + Offset.y + " " + Offset.z
+			});
+
+			return rule;
 		}
 
 		void OnEnable()
@@ -33,7 +55,7 @@ namespace ModularRules
 			Unregister();
 		}
 
-		protected override void React(EventData eventData)
+		protected override void React(GameEventData eventData)
 		{
 			GameObject target = eventData.Get(EventDataKeys.TargetObject).data as GameObject;
 
@@ -47,8 +69,8 @@ namespace ModularRules
 		{
 			if (!FixedToObject)
 			{
-				transform.position = Vector3.Lerp(transform.position, targetPos + Offset, Time.deltaTime * FollowSpeed);
-				transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(targetPos - transform.position), Time.deltaTime * FollowSpeed);
+				Reactor.transform.position = Vector3.Lerp(Reactor.transform.position, targetPos + Offset, Time.deltaTime * FollowSpeed);
+				Reactor.transform.rotation = Quaternion.Lerp(Reactor.transform.rotation, Quaternion.LookRotation(targetPos - Reactor.transform.position), Time.deltaTime * FollowSpeed);
 			}
 		}
 	}

@@ -27,27 +27,38 @@ namespace ModularRules
 		}
 		#endregion
 
-		#region Condition Handling
-		private List<GameEventCondition> conditions = new List<GameEventCondition>();
-		public void AddCondition(GameEventCondition condition)
+		//#region Condition Handling
+		//private List<GameEventCondition> conditions = new List<GameEventCondition>();
+		//public void AddCondition(GameEventCondition condition)
+		//{
+		//	if (!conditions.Contains(condition))
+		//		conditions.Add(condition);
+		//}
+		//public void RemoveCondition(GameEventCondition condition)
+		//{
+		//	conditions.Remove(condition);
+		//}
+		//public bool ConditionsMet()
+		//{
+		//	foreach (GameEventCondition c in conditions)
+		//	{
+		//		if (!c.IsTrue)
+		//			return false;
+		//	}
+		//	return true;
+		//}
+		//#endregion
+
+		public override RuleData GetRuleInformation()
 		{
-			if (!conditions.Contains(condition))
-				conditions.Add(condition);
-		}
-		public void RemoveCondition(GameEventCondition condition)
-		{
-			conditions.Remove(condition);
-		}
-		public bool ConditionsMet()
-		{
-			foreach (GameEventCondition c in conditions)
+			return new EventData()
 			{
-				if (!c.IsTrue)
-					return false;
-			}
-			return true;
+				id = Id,
+				actorId = Actor.Id,
+				type = this.GetType(),
+				label = Actor.name + " " + gameObject.name
+			};
 		}
-		#endregion
 
 		public abstract GameEvent UpdateEvent();
 
@@ -56,9 +67,9 @@ namespace ModularRules
 		/// </summary>
 		/// <param name="data">fill in event data</param>
 		/// <returns>true once all reactions were executed, false if conditions aren't met</returns>
-		public bool Trigger(EventData data)
+		public bool Trigger(GameEventData data)
 		{
-			if (!ConditionsMet()) return false;
+			//if (!ConditionsMet()) return false;
 
 			foreach(Reaction r in triggeredReactions)
 			{

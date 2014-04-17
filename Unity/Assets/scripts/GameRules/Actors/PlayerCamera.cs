@@ -22,12 +22,12 @@ public class PlayerCamera : Actor, IRotate
 		Initialize();
 	}
 
-	public void Rotate(EventData data, Vector3 deltaMovement)
+	public void Rotate(GameEventData data, Vector3 deltaMovement)
 	{
 		EgoCamBehaviour(data, deltaMovement);
 	}
 
-	void EgoCamBehaviour(EventData data, Vector3 deltaMovement)
+	void EgoCamBehaviour(GameEventData data, Vector3 deltaMovement)
 	{
 		float xRotation = transform.localEulerAngles.y + deltaMovement.x * Sensitivity;
 		yRotation += deltaMovement.y * Sensitivity;

@@ -5,6 +5,6 @@ namespace ModularRules
 {
 	public interface ICount
 	{
-		void ChangeCount(EventData data, float changeBy);
+		void ChangeCount(GameEventData data, float changeBy);
 	}
 }

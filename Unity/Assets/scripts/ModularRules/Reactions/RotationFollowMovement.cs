@@ -18,7 +18,7 @@ namespace ModularRules
 			Unregister();
 		}
 
-		protected override void React(EventData data)
+		protected override void React(GameEventData data)
 		{
 			DataPiece inputData;
 			if ((inputData = data.Get(EventDataKeys.InputData)) != null &&

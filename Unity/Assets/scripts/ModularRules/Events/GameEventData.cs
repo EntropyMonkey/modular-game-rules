@@ -5,18 +5,18 @@ using System;
 
 namespace ModularRules
 {
-	public class EventData
+	public class GameEventData
 	{
 		/// <summary>
 		/// A list with differently typed data pieces
 		/// </summary>
 		private Dictionary<string, DataPiece> dataList = new Dictionary<string, DataPiece>();
 
-		public static EventData Empty
+		public static GameEventData Empty
 		{
 			get
 			{
-				return new EventData();
+				return new GameEventData();
 			}
 		}
 
@@ -24,7 +24,7 @@ namespace ModularRules
 		/// Adds new data to the dataList - if it doesn't exist yet.
 		/// </summary>
 		/// <returns>false if data piece already exists</returns>
-		public EventData Add(DataPiece newData)
+		public GameEventData Add(DataPiece newData)
 		{
 			try
 			{

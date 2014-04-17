@@ -5,6 +5,6 @@ namespace ModularRules
 {
 	public interface IMove
 	{
-		void Move(EventData eventData, Direction direction);
+		void Move(GameEventData eventData, Direction direction);
 	}
 }

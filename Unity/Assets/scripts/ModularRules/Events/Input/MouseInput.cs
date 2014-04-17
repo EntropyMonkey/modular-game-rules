@@ -38,11 +38,32 @@ namespace ModularRules
 
 		protected Vector3 lastScreenPosition = Vector3.zero;
 
+		public override RuleData GetRuleInformation()
+		{
+			EventData rule = base.GetRuleInformation() as EventData;
+
+			rule.parameters = new List<Param>();
+			rule.parameters.Add(new Param()
+			{
+				name = "TrackedButton",
+				type = TrackedButton.GetType(),
+				value = TrackedButton
+			});
+			rule.parameters.Add(new Param() 
+			{
+ 				name = "TrackedCamera",
+				type = TrackedCamera.GetType(),
+				value = TrackedCamera.Id
+			});
+
+			return rule;
+		}
+
 		// methods
 		public override GameEvent UpdateEvent()
 		{
 			if (!base.UpdateEvent() || TrackedCamera == null) return null;
-
+			
 			MouseData data = MouseData.Empty;
 			data.button = TrackedButton;
 			data.screenPosition = Input.mousePosition;
@@ -79,7 +100,7 @@ namespace ModularRules
 			// trigger only if something happened
 			if ((int)data.inputType > 0)
 			{
-				Trigger(EventData.Empty.Add(new DataPiece(EventDataKeys.InputData) { data = data }));
+				Trigger(GameEventData.Empty.Add(new DataPiece(EventDataKeys.InputData) { data = data }));
 			}
 
 			return this;

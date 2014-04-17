@@ -70,6 +70,11 @@ namespace ModularRules
 			Debug.Log(name + " registered " + reactions.Count + " Reactions.");
 		}
 
+		public override RuleData GetRuleInformation()
+		{
+			return new ActorData() { id = Id, type = this.GetType(), label = gameObject.name };
+		}
+
 		public void UpdateEvents()
 		{
 			foreach (GameEvent e in events)
