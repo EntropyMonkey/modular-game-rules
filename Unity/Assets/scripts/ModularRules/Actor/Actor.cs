@@ -40,11 +40,17 @@ namespace ModularRules
 			}
 		}
 
+		private GenerateElement generateElement;
+
 		/// <summary>
 		/// Collects all events, so that they can be updated when appropriate
 		/// </summary>
 		public override void Initialize()
 		{
+			base.Initialize();
+
+			generateElement = gameObject.GetComponent<GenerateElement>();
+
 			// get all events
 			events = new List<GameEvent>();
 			Component[] c = GetComponentsInChildren(typeof(GameEvent));
@@ -70,6 +76,42 @@ namespace ModularRules
 			Debug.Log(name + " registered " + reactions.Count + " Reactions.");
 		}
 
+		public override void Reset()
+		{
+			// reset components to original set
+			List<Component> newComps = new List<Component>();
+			newComps.AddRange(GetComponents(typeof(Component)));
+
+			foreach (Component c in newComps)
+			{
+				if (!generateElement.OriginalComponents.Contains(c))
+				{
+					Destroy(c);
+				}
+			}
+			newComps.Clear();
+
+			// destroy all events and reactions belonging to this actor
+			foreach(GameEvent gameEvent in events)
+			{
+				Destroy(gameEvent);
+			}
+			events.Clear();
+			Destroy(Events);
+			foreach (Reaction reaction in reactions)
+			{
+				reaction.Unregister();
+				Destroy(reaction);
+			}
+			reactions.Clear();
+			Destroy(Reactions);
+
+			// enable placeholder
+			GetComponent<GenerateElement>().enabled = true;
+
+			base.Reset();
+		}
+
 		public override RuleData GetRuleInformation()
 		{
 			return new ActorData() { id = Id, type = this.GetType(), label = gameObject.name };
@@ -78,7 +120,9 @@ namespace ModularRules
 		public void UpdateEvents()
 		{
 			foreach (GameEvent e in events)
+			{
 				e.UpdateEvent();
+			}
 		}
 	}
 }

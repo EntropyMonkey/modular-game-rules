@@ -18,8 +18,6 @@ public class PlayerCamera : Actor, IRotate
 	void Start()
 	{
 		tag = Tag;
-
-		Initialize();
 	}
 
 	public void Rotate(GameEventData data, Vector3 deltaMovement)

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace ModularRules
 {
@@ -9,5 +10,19 @@ namespace ModularRules
 	public class GenerateElement : MonoBehaviour
 	{
 		public int Id;
+
+		[HideInInspector]
+		public List<Component> OriginalComponents;
+
+		void Awake()
+		{
+			OriginalComponents = new List<Component>();
+			OriginalComponents.AddRange(GetComponents(typeof(Component)));
+		}
+
+		void Update()
+		{
+
+		}
 	}
 }

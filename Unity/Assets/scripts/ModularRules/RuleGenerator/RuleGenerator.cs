@@ -70,25 +70,35 @@ namespace ModularRules
 
 		public void AddActorToScene(BaseRuleElement.ActorData data)
 		{
+			if (placeholders[data.id].enabled == true)
+			{
 #if DEBUG
-			Debug.Log("Adding actor " + data.id + ", " + data.type);
+				Debug.Log("Adding actor " + data.id + ", " + data.type);
 #endif
-			if (placeholders.Count > data.id && placeholders[data.id] != null)
-			{
-				GameObject pGo = placeholders[data.id].gameObject;
+				if (placeholders.Count > data.id && placeholders[data.id] != null)
+				{
+					GameObject pGo = placeholders[data.id].gameObject;
 
-				// create new actor
-				Actor newActor = pGo.AddComponent(data.type) as Actor;
-				newActor.Id = data.id;
-				genActors.Add(newActor);
-				genActors.Sort((x, y) => x.Id.CompareTo(y.Id)); // sort list
+					// create new actor
+					Actor actor = pGo.AddComponent(data.type) as Actor;
+					actor.Id = data.id;
 
-				// deactivate placeholder
-				placeholders[data.id].enabled = false;
+					SetParameters(actor, data);
+
+					genActors.Add(actor);
+					//genActors.Sort((x, y) => x.Id.CompareTo(y.Id)); // sort list
+
+					// deactivate placeholder
+					placeholders[data.id].enabled = false;
+				}
+				else
+				{
+					Debug.LogError("There is no placeholder for actor " + data.id + " in the scene.");
+				}
 			}
-			else
+			else // has already been created
 			{
-				Debug.LogError("There is no placeholder for actor " + data.id + " in the scene.");
+				UpdateActor(data);
 			}
 		}
 
@@ -97,23 +107,36 @@ namespace ModularRules
 #if DEBUG
 			Debug.Log("Adding event " + data.id + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
 #endif
-			if (data.actorId < genActors.Count && genActors[data.actorId] != null)
+			// actor should exist by now - if it doesn't, don't create any related actions or events
+			Actor actor = genActors[data.actorId];
+
+			if (actor != null)
 			{
-				GameObject newEventGO = new GameObject("E => " + data.type);
-				newEventGO.transform.parent = genActors[data.actorId].Events.transform;
+				GameEvent gameEvent = genEvents.Find(item => item.Id == data.id);
 
-				GameEvent newEvent = newEventGO.AddComponent(data.type) as GameEvent;
+				if (gameEvent == null)
+				{
+					GameObject newEventGO = new GameObject("E => " + data.type);
+					newEventGO.transform.parent = actor.Events.transform;
 
-				// references
-				newEvent.Id = data.id;
-				newEvent.Actor = genActors[data.actorId];
+					gameEvent = newEventGO.AddComponent(data.type) as GameEvent;
+					gameEvent.Id = data.id;
 
-				// setting parameters
-				SetParameters(newEvent, data);
+					// references
+					gameEvent.Actor = actor;
 
-				// keep track of generated events
-				genEvents.Add(newEvent);
-				genEvents.Sort((x, y) => x.Id.CompareTo(y.Id)); // sort list
+					// setting parameters
+					SetParameters(gameEvent, data);
+
+					// keep track of generated events
+					genEvents.Add(gameEvent);
+					//genEvents.Sort((x, y) => x.Id.CompareTo(y.Id)); // sort list
+					return;
+				}
+				else
+				{
+					UpdateEvent(gameEvent, data);
+				}
 			}
 		}
 
@@ -122,30 +145,44 @@ namespace ModularRules
 #if DEBUG
 			Debug.Log("Adding reaction " + data.id + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
 #endif
-			if (data.actorId < genActors.Count && genActors[data.actorId] != null)
+			// actor should exist by now - if it doesn't, don't create any related actions or events
+			Actor actor = genActors.Find(item => item.Id == data.actorId);
+
+			if (actor)
 			{
-				GameObject newReactionGO = new GameObject("R => " + data.type);
-				newReactionGO.transform.parent = genActors[data.actorId].Reactions.transform;
+				Reaction reaction = genReactions.Find(item => item.Id == data.id);
 
-				Reaction newReaction = newReactionGO.AddComponent(data.type) as Reaction;
+				Debug.Log(data.id + " add reaction");
 
-				// references
-				newReaction.Id = data.id;
-				newReaction.Reactor = genActors[data.actorId];
-				newReaction.ListenedEvent = genEvents[data.eventId];
+				if (!reaction)
+				{
+					GameObject newReactionGO = new GameObject("R => " + data.type);
+					newReactionGO.transform.parent = actor.Reactions.transform;
 
-				// parameters
-				SetParameters(newReaction, data);
+					reaction = newReactionGO.AddComponent(data.type) as Reaction;
 
-				// keeping track
-				genReactions.Add(newReaction);
-				genReactions.Sort((x, y) => x.Id.CompareTo(y.Id));
+					// references
+					reaction.Id = data.id;
+					reaction.Reactor = actor;
+					reaction.ListenedEvent = genEvents.Find(item => item.Id == data.eventId);
+
+					// parameters
+					SetParameters(reaction, data);
+
+					// keeping track
+					genReactions.Add(reaction);
+					//genReactions.Sort((x, y) => x.Id.CompareTo(y.Id));
+				}
+				else
+				{
+					UpdateReaction(reaction, data);
+				}
 			}
 		}
 
 		private void SetParameters<T, U>(T gObject, U data) 
 			where T : BaseRuleElement 
-			where U : BaseRuleElement.EventData
+			where U : BaseRuleElement.ActorData
 		{
 			foreach (BaseRuleElement.Param parameter in data.parameters)
 			{
@@ -173,13 +210,24 @@ namespace ModularRules
 		void UpdateActor(BaseRuleElement.ActorData actorData)
 		{
 			// check if matching id actor has same type
-
 			// if different type, change it. Self-destroy old one, create new actor.
+			Actor oldActor = genActors.Find(item => item.Id == actorData.id);
+			if (oldActor.GetType() != actorData.type)
+			{
+				oldActor.Reset();
+				genActors.Remove(oldActor);
+
+				// clean up old events and reactions from genReactions and genEvents lists
+
+				Destroy(oldActor);
+
+				AddActorToScene(actorData);
+			}
 
 			// ==> have to tell events and reactions that there's a new kind of actor, after new events and reactions have beens set
 		}
 
-		void UpdateEvent(BaseRuleElement.EventData eventData)
+		void UpdateEvent(GameEvent gameEvent, BaseRuleElement.EventData eventData)
 		{
 			// find event with matching id
 
@@ -192,17 +240,29 @@ namespace ModularRules
 			// query the actor id, reset actor ref
 		}
 
-		void UpdateReaction(BaseRuleElement.ReactionData reactionData)
+		void UpdateReaction(Reaction reaction, BaseRuleElement.ReactionData reactionData)
 		{
+			Debug.Log(reactionData.id + " update: " + reaction.Id);
 			// find reaction with matching id
 
+			if (reaction.Id != reactionData.id)
+				Debug.LogError("Trying to initialize reaction (" + reaction.Id + ") with data for reaction (" + reactionData.id + ")");
+
 			// check type
+			if (reaction.GetType() != reactionData.type)
+			{
+				// if it's not the same, tell the old reaction to reset
+				reaction.Reset();
+			}
 
-			// if it's ok, set parameters
+			// set parameters
+			SetParameters(reaction, reactionData);
 
-			// if it's not the same, tell the old reaction to self-destroy (including all added requiredcomponents)
+			// set actor reference
+			reaction.Reactor = genActors.Find(item => item.Id == reactionData.actorId);
 
-			// query the actor id, reset actor ref
+			// set event reference
+			reaction.ListenedEvent = genEvents.Find(item => item.Id == reactionData.eventId);
 		}
 		#endregion
 
@@ -218,7 +278,11 @@ namespace ModularRules
 		{
 			Debug.LogWarning("Generating level rules from " + filename + ".xml ...");
 
-			FindGenerationPlaceholdersInScene();
+			if (genActors.Count == 0)
+			{
+				FindGenerationPlaceholdersInScene();
+			}
+
 			ruleParser.Parse(this, filename);
 
 			// initialize elements. order of initializing is important
@@ -266,6 +330,16 @@ namespace ModularRules
 			if (ShowButton && GUI.Button(new Rect(0, 50, 100, 50), "Save Rules"))
 			{
 				SaveRules("rules_0");
+			}
+
+			if (ShowButton && GUI.Button(new Rect(0, 100, 100, 50), "Reset Scene"))
+			{
+				foreach(Actor a in genActors)
+				{
+					a.Reset();
+					Destroy(a);
+				}
+				genActors.Clear();
 			}
 		}
 	}

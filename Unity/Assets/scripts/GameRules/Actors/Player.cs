@@ -4,21 +4,34 @@ using System.Collections;
 using ModularRules;
 using System.Collections.Generic;
 
+public enum MovementBehaviour { SIMPLE, FLOCK }
+
 public class Player : Actor
 {
-	public enum MovementBehaviour { SHOOTER }
-
 	public MovementBehaviour StartMovementBehaviour;
 
 	private MovementController movementController;
-	private ModularRules.MovementBehaviour shooterMovement;
+	private ModularRules.MovementBehaviour simpleMovement;
+
+	public override BaseRuleElement.RuleData GetRuleInformation()
+	{
+		BaseRuleElement.ActorData data = base.GetRuleInformation() as BaseRuleElement.ActorData;
+
+		data.parameters = new List<Param>();
+		data.parameters.Add(new Param
+		{
+			name = "StartMovementBehaviour",
+			type = StartMovementBehaviour.GetType(),
+			value = StartMovementBehaviour
+		});
+
+		return data;
+	}
 
 	void Awake()
 	{
-		Initialize();
-
-		movementController = AddComponent<MovementController>();
-		shooterMovement = AddComponent<ShooterMovement>();
+		movementController = gameObject.AddComponent<MovementController>();
+		simpleMovement = gameObject.AddComponent<ShooterMovement>();
 	}
 
 	// Use this for initialization
@@ -26,15 +39,13 @@ public class Player : Actor
 	{
 		switch (StartMovementBehaviour)
 		{
-			case MovementBehaviour.SHOOTER:
-				movementController.ChangeBehaviour(shooterMovement);
+			case MovementBehaviour.SIMPLE:
+				movementController.ChangeBehaviour(simpleMovement);
+				break;
+			case MovementBehaviour.FLOCK:
+				movementController.ChangeBehaviour(simpleMovement);
 				break;
 		}
-	}
-
-	public T AddComponent<T>() where T : Component
-	{
-		return gameObject.AddComponent<T>();
 	}
 
 	// Update is called once per frame

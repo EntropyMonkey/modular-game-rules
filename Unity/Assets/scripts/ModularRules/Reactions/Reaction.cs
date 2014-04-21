@@ -65,7 +65,7 @@ namespace ModularRules
 				ListenedEvent.Register(this);
 		}
 
-		protected virtual void Unregister()
+		public virtual void Unregister()
 		{
 			if (ListenedEvent != null)
 				ListenedEvent.Unregister(this);

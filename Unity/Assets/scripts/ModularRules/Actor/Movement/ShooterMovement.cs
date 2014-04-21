@@ -3,7 +3,6 @@ using System.Collections;
 
 namespace ModularRules
 {
-	[RequireComponent(typeof(Rigidbody))]
 	public class ShooterMovement : MovementBehaviour
 	{
 		public float runSpeed = 10;
@@ -17,6 +16,8 @@ namespace ModularRules
 		{
 			base.Load();
 
+			if (rigidbody == null)
+				gameObject.AddComponent(typeof(Rigidbody));
 			rigidbody.freezeRotation = true;
 
 			playerCamera = GameObject.FindGameObjectWithTag("PlayerCamera").GetComponent<PlayerCamera>();

@@ -15,6 +15,8 @@ namespace ModularRules
 		public class ActorData : RuleData
 		{
 			public System.Type type;
+
+			public List<Param> parameters;
 		};
 
 		// parameter for events or reactions
@@ -28,8 +30,6 @@ namespace ModularRules
 		public class EventData : ActorData
 		{
 			public int actorId;
-
-			public List<Param> parameters;
 		};
 
 		public class ReactionData : EventData
@@ -43,15 +43,13 @@ namespace ModularRules
 		// called upon generation
 		public virtual void Initialize()
 		{
-
 		}
 
 		/// <summary>
-		/// Called when the component needs to be destroyed. Also destroys all requiredcomponent comps
+		/// Called when the component needs to be reset
 		/// </summary>
-		public virtual void SelfDestroy()
+		public virtual void Reset()
 		{
-
 		}
 
 		public abstract RuleData GetRuleInformation();

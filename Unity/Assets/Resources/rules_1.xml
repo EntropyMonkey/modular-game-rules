@@ -2,12 +2,12 @@
 <rules>
   <actors>
     <actor>
-      <id>1</id>
+      <id>0</id>
       <type>PlayerCamera</type>
       <label>PlayerCamera</label>
     </actor>
     <actor>
-      <id>0</id>
+      <id>1</id>
       <type>Player</type>
       <label>Player</label>
     </actor>

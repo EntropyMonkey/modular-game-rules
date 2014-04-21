@@ -44,6 +44,8 @@ namespace ModularRules
 
 				currentActor.type = ReflectOverSeveralNamespaces(xActor.Element("type").Value, ExtraNamespaces);
 
+				currentActor.parameters = ParseParameters(xActor);
+
 				generator.AddActorToScene(currentActor);
 			}
 		}
