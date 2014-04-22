@@ -5,8 +5,8 @@ namespace ModularRules
 {
 	public class ShooterMovement : MovementBehaviour
 	{
-		public float runSpeed = 10;
-		public float jumpSpeed = 20;
+		public float RunSpeed = 10;
+		public float JumpSpeed = 20;
 
 		private float moveSpeed;
 
@@ -28,7 +28,7 @@ namespace ModularRules
 
 			float v = ((InputReceived.InputData)eventData.Get(EventDataKeys.InputData).data).inputValue;
 
-			moveSpeed = runSpeed;
+			moveSpeed = RunSpeed;
 
 			Vector3 dir = Vector3.zero;
 			switch (direction)
@@ -50,7 +50,7 @@ namespace ModularRules
 					dir.y = 0;
 					break;
 				case Direction.UP:
-					moveSpeed = jumpSpeed;
+					moveSpeed = JumpSpeed;
 					dir = Vector3.up;
 					break;
 				case Direction.DOWN:

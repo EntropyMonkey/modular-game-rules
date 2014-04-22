@@ -85,8 +85,11 @@ namespace ModularRules
 
 					SetParameters(actor, data);
 
+					SetComponentParameters(actor, data);
+
 					genActors.Add(actor);
-					//genActors.Sort((x, y) => x.Id.CompareTo(y.Id)); // sort list
+					// commented because ids might not be a series without missing ids
+					//genActors.Sort((x, y) => x.Id.CompareTo(y.Id)); // sort list for quick access via id
 
 					// deactivate placeholder
 					placeholders[data.id].enabled = false;
@@ -108,7 +111,7 @@ namespace ModularRules
 			Debug.Log("Adding event " + data.id + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
 #endif
 			// actor should exist by now - if it doesn't, don't create any related actions or events
-			Actor actor = genActors[data.actorId];
+			Actor actor = genActors.Find(item => item.Id == data.actorId);
 
 			if (actor != null)
 			{
@@ -181,26 +184,54 @@ namespace ModularRules
 		}
 
 		private void SetParameters<T, U>(T gObject, U data) 
-			where T : BaseRuleElement 
-			where U : BaseRuleElement.ActorData
+			where T : Component 
+			where U : BaseRuleElement.RuleData
 		{
 			foreach (BaseRuleElement.Param parameter in data.parameters)
 			{
 #if DEBUG
-				Debug.Log("Adding param " + parameter.type + " to " + data.type + ", value: " + parameter.value);
+				Debug.Log("Adding param " + parameter.name + " ("+ parameter.type + ") to " + data.type + ", value: " + parameter.value);
 #endif
 
 				FieldInfo pFieldInfo = data.type.GetField(parameter.name);
+
+				if (pFieldInfo == null)
+				{
+					Debug.LogError("Couldn't find parameter.");
+					continue;
+				}
+
 				// different handling for object references
 				if (parameter.type.IsSubclassOf(typeof(Actor)) || parameter.type.IsAssignableFrom(typeof(Actor)))
 				{
 					if ((int)parameter.value < genActors.Count && (int)parameter.value >= 0)
-						pFieldInfo.SetValue(gObject, genActors[(int)parameter.value]);
+						pFieldInfo.SetValue(gObject, genActors.Find(item => item.Id == (int)parameter.value));
 				}
 				// set all other values
 				else
 				{
 					pFieldInfo.SetValue(gObject, parameter.value);
+				}
+			}
+		}
+
+		private void SetComponentParameters<T, U>(T gObject, U data)
+			where T : Actor
+			where U : BaseRuleElement.ActorData
+		{
+			foreach (BaseRuleElement.ComponentData componentData in data.components)
+			{
+				// check if component was added
+				Component component = gObject.GetComponent(componentData.type);
+				if (component != null)
+				{
+					// if so, set parameters
+					SetParameters(component, componentData);
+				}
+				else
+				{
+					// if not, log warning about trying to set parameters for ghost component
+					Debug.LogWarning("Actor (" + data.id + "): trying to set parameter for component (" + componentData.type + ") which doesn't exist.");
 				}
 			}
 		}

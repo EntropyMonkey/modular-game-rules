@@ -63,6 +63,12 @@ namespace ModularRules
 		public override GameEvent UpdateEvent()
 		{
 			if (!base.UpdateEvent() || TrackedCamera == null) return null;
+
+			if (TrackedCamera.camera == null) 
+			{
+				Debug.LogError("There is no camera component on the TrackedCamera actor.");
+				return null;
+			}
 			
 			MouseData data = MouseData.Empty;
 			data.button = TrackedButton;

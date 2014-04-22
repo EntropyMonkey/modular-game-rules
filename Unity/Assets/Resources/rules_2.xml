@@ -10,21 +10,6 @@
       <id>0</id>
       <type>Player</type>
       <label>Player</label>
-		<param name="StartMovementBehaviour">
-			<type>MovementBehaviour</type>
-			<value>1</value>
-		</param>
-		<component>
-			<type>ShooterMovement</type>
-			<param name="RunSpeed">
-				<type>Single</type>
-				<value>30</value>
-			</param>
-			<param name="JumpSpeed">
-				<type>Single</type>
-				<value>20</value>
-			</param>
-		</component>
     </actor>
   </actors>
   <events>

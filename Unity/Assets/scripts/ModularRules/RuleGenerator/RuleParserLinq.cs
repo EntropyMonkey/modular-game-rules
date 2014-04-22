@@ -46,6 +46,19 @@ namespace ModularRules
 
 				currentActor.parameters = ParseParameters(xActor);
 
+				// parse component parameters
+				currentActor.components = new List<BaseRuleElement.ComponentData>();
+				foreach (XElement xComponent in xActor.Elements("component"))
+				{
+					BaseRuleElement.ComponentData currentComponent = new BaseRuleElement.ComponentData()
+					{
+						type = ReflectOverSeveralNamespaces(xComponent.Element("type").Value, ExtraNamespaces)
+					};
+
+					currentComponent.parameters = ParseParameters(xComponent);
+					currentActor.components.Add(currentComponent);
+				}
+
 				generator.AddActorToScene(currentActor);
 			}
 		}

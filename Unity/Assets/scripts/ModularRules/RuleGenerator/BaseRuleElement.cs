@@ -10,14 +10,19 @@ namespace ModularRules
 		{
 			public int id;
 			public string label;
+			public System.Type type;
+			public List<Param> parameters;
 		};
 
 		public class ActorData : RuleData
 		{
-			public System.Type type;
-
-			public List<Param> parameters;
+			public List<ComponentData> components;
 		};
+
+		public class ComponentData : RuleData
+		{
+
+		}
 
 		// parameter for events or reactions
 		public struct Param
@@ -27,7 +32,7 @@ namespace ModularRules
 			public object value;
 		};
 
-		public class EventData : ActorData
+		public class EventData : RuleData
 		{
 			public int actorId;
 		};
