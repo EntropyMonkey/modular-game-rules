@@ -11,7 +11,7 @@ public class Player : Actor
 	public MovementBehaviour StartMovementBehaviour;
 
 	private MovementController movementController;
-	private ModularRules.MovementBehaviour simpleMovement;
+	private ShooterMovement simpleMovement;
 
 	public override BaseRuleElement.RuleData GetRuleInformation()
 	{
@@ -24,6 +24,25 @@ public class Player : Actor
 			type = StartMovementBehaviour.GetType(),
 			value = StartMovementBehaviour
 		});
+		data.components = new List<ComponentData>();
+		ComponentData c = new ComponentData()
+		{
+			type = typeof(ShooterMovement),
+			parameters = new List<Param>()
+		};
+		c.parameters.Add(new Param()
+			{
+				name = "RunSpeed",
+				type = simpleMovement.RunSpeed.GetType(),
+				value = simpleMovement.RunSpeed
+			});
+		c.parameters.Add(new Param()
+			{
+				name = "JumpSpeed",
+				type = simpleMovement.JumpSpeed.GetType(),
+				value = simpleMovement.JumpSpeed
+			});
+		data.components.Add(c);
 
 		return data;
 	}

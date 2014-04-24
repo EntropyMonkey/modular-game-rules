@@ -153,9 +153,8 @@ namespace ModularRules
 
 			if (actor)
 			{
+				// find reaction if already in scene
 				Reaction reaction = genReactions.Find(item => item.Id == data.id);
-
-				Debug.Log(data.id + " add reaction");
 
 				if (!reaction)
 				{
@@ -254,46 +253,60 @@ namespace ModularRules
 
 				AddActorToScene(actorData);
 			}
+			else // Update components and parameters
+			{
+				SetParameters(oldActor, actorData);
 
-			// ==> have to tell events and reactions that there's a new kind of actor, after new events and reactions have beens set
+				SetComponentParameters(oldActor, actorData);
+			}
 		}
 
 		void UpdateEvent(GameEvent gameEvent, BaseRuleElement.EventData eventData)
 		{
-			// find event with matching id
-
 			// check if it's of the right type
+			if (gameEvent.GetType() != eventData.type)
+			{
+				// if it's not the same type, tell old event to self-destroy
 
-			// if so, set the parameters
+				gameEvent.Reset();
+				genEvents.Remove(gameEvent);
 
-			// if it's not the same type, tell old event to self-destroy
+				Destroy(gameEvent);
 
-			// query the actor id, reset actor ref
+				AddEventToScene(eventData);
+			}
+			else
+			{
+				// if so, set the parameters
+				SetParameters(gameEvent, eventData);
+
+				// query the actor id, reset actor ref
+				gameEvent.Actor = genActors.Find(item => item.Id == eventData.actorId);
+			}
 		}
 
 		void UpdateReaction(Reaction reaction, BaseRuleElement.ReactionData reactionData)
 		{
-			Debug.Log(reactionData.id + " update: " + reaction.Id);
-			// find reaction with matching id
-
-			if (reaction.Id != reactionData.id)
-				Debug.LogError("Trying to initialize reaction (" + reaction.Id + ") with data for reaction (" + reactionData.id + ")");
-
 			// check type
 			if (reaction.GetType() != reactionData.type)
 			{
-				// if it's not the same, tell the old reaction to reset
+				// if it's not the same, tell the old reaction to reset and clean up
 				reaction.Reset();
+
+				genReactions.Remove(reaction);
+				Destroy(reaction);
 			}
+			else
+			{
+				// set parameters
+				SetParameters(reaction, reactionData);
 
-			// set parameters
-			SetParameters(reaction, reactionData);
+				// set actor reference
+				reaction.Reactor = genActors.Find(item => item.Id == reactionData.actorId);
 
-			// set actor reference
-			reaction.Reactor = genActors.Find(item => item.Id == reactionData.actorId);
-
-			// set event reference
-			reaction.ListenedEvent = genEvents.Find(item => item.Id == reactionData.eventId);
+				// set event reference
+				reaction.ListenedEvent = genEvents.Find(item => item.Id == reactionData.eventId);
+			}
 		}
 		#endregion
 

@@ -10,6 +10,21 @@
       <id>0</id>
       <type>Player</type>
       <label>Player</label>
+      <param name="StartMovementBehaviour">
+        <type>MovementBehaviour</type>
+        <value>0</value>
+      </param>
+      <component>
+        <type>ShooterMovement</type>
+        <param name="RunSpeed">
+          <type>Single</type>
+          <value>50</value>
+        </param>
+        <param name="JumpSpeed">
+          <type>Single</type>
+          <value>10</value>
+        </param>
+      </component>
     </actor>
   </actors>
   <events>
@@ -83,11 +98,11 @@
       <listenedEventId>5</listenedEventId>
       <param name="FollowSpeed">
         <type>Single</type>
-        <value>5</value>
+        <value>20</value>
       </param>
       <param name="Offset">
         <type>Vector3</type>
-        <value>0 7 -10</value>
+        <value>0 7 -5</value>
       </param>
     </reaction>
     <reaction>
@@ -98,7 +113,7 @@
       <listenedEventId>3</listenedEventId>
       <param name="MoveDirection">
         <type>Direction</type>
-        <value>3</value>
+        <value>2</value>
       </param>
     </reaction>
     <reaction>
@@ -131,7 +146,7 @@
       <listenedEventId>0</listenedEventId>
       <param name="MoveDirection">
         <type>Direction</type>
-        <value>2</value>
+        <value>3</value>
       </param>
     </reaction>
   </reactions>

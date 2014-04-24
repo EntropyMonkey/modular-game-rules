@@ -218,6 +218,11 @@ namespace ModularRules
 						xActor.Add(new XElement("id") { Value = "" + ruleData.id });
 						xActor.Add(new XElement("type") { Value = GetTypeStringWithoutNamespaces(actorData.type) });
 						xActor.Add(new XElement("label") { Value = actorData.label });
+
+						AddParameters(xActor, actorData.parameters);
+
+						AddComponents(xActor, actorData.components);
+
 						xActors.Add(xActor);
 					}
 					else if (ruleData.GetType() == typeof(BaseRuleElement.EventData))
@@ -278,6 +283,21 @@ namespace ModularRules
 			Debug.Log(result);
 
 			return result;
+		}
+
+		void AddComponents(XElement element, List<BaseRuleElement.ComponentData> components)
+		{
+			if (components == null) return;
+
+			foreach (BaseRuleElement.ComponentData component in components)
+			{
+				XElement xComp = new XElement("component");
+				xComp.Add(new XElement("type") { Value = GetTypeStringWithoutNamespaces(component.type) });
+
+				AddParameters(xComp, component.parameters);
+
+				element.Add(xComp);
+			}
 		}
 
 		void AddParameters(XElement element, List<BaseRuleElement.Param> parameters)
