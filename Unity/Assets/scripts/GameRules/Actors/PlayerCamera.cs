@@ -4,6 +4,12 @@ using ModularRules;
 
 public class PlayerCamera : Actor, IRotate
 {
+	//public enum CameraType { EGO, TOP_DOWN }
+	//public CameraType CamType = CameraType.EGO;
+
+	public static string Tag = "PlayerCamera";
+
+
 	public float Sensitivity = 10;
 	public float MaxYRotation = 60;
 
@@ -11,16 +17,15 @@ public class PlayerCamera : Actor, IRotate
 
 	void Start()
 	{
-		GameObject.FindGameObjectWithTag("Player").GetComponent<Player>().PlayerCamera = this;
-		InitializeActor();
+		tag = Tag;
 	}
 
-	public void Rotate(EventData data, Vector3 deltaMovement)
+	public void Rotate(GameEventData data, Vector3 deltaMovement)
 	{
 		EgoCamBehaviour(data, deltaMovement);
 	}
 
-	void EgoCamBehaviour(EventData data, Vector3 deltaMovement)
+	void EgoCamBehaviour(GameEventData data, Vector3 deltaMovement)
 	{
 		float xRotation = transform.localEulerAngles.y + deltaMovement.x * Sensitivity;
 		yRotation += deltaMovement.y * Sensitivity;

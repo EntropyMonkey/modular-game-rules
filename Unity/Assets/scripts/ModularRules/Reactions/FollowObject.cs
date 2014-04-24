@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace ModularRules
 {
@@ -8,26 +9,53 @@ namespace ModularRules
 		public float FollowSpeed = 10;
 
 		public GameObject FixedToObject = null;
+		public Vector3 Offset = Vector3.zero;
 
 		private Vector3 targetPos = Vector3.zero;
 
-		void OnEnable()
+		public override void Initialize()
 		{
-			ListenedEvent.Register(this);
+			base.Initialize();
 
 			if (FixedToObject)
 			{
-				transform.parent = FixedToObject.transform;
-				transform.localPosition = Vector3.zero;
+				Reactor.transform.parent = FixedToObject.transform;
+				Reactor.transform.localPosition = Offset;
 			}
+		}
+
+		public override RuleData GetRuleInformation()
+		{
+			ReactionData rule = base.GetRuleInformation() as ReactionData;
+
+			rule.parameters = new List<Param>();
+			rule.parameters.Add(new Param()
+			{
+				name = "FollowSpeed",
+				type = FollowSpeed.GetType(),
+				value = FollowSpeed
+			});
+			rule.parameters.Add(new Param() 
+			{ 
+				name = "Offset",
+				type = Offset.GetType(),
+				value = Offset.x + " " + Offset.y + " " + Offset.z
+			});
+
+			return rule;
+		}
+
+		void OnEnable()
+		{
+			Register();
 		}
 
 		void OnDisable()
 		{
-			ListenedEvent.Unregister(this);
+			Unregister();
 		}
 
-		protected override void React(EventData eventData)
+		protected override void React(GameEventData eventData)
 		{
 			GameObject target = eventData.Get(EventDataKeys.TargetObject).data as GameObject;
 
@@ -37,11 +65,12 @@ namespace ModularRules
 			}
 		}
 
-		void Update()
+		void FixedUpdate()
 		{
 			if (!FixedToObject)
 			{
-				transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * FollowSpeed);
+				Reactor.transform.position = Vector3.Lerp(Reactor.transform.position, targetPos + Offset, Time.deltaTime * FollowSpeed);
+				Reactor.transform.rotation = Quaternion.Lerp(Reactor.transform.rotation, Quaternion.LookRotation(targetPos - Reactor.transform.position), Time.deltaTime * FollowSpeed);
 			}
 		}
 	}

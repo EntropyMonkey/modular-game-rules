@@ -15,9 +15,11 @@ namespace ModularRules
 
 		public override GameEvent UpdateEvent()
 		{
+			if (transform == null) return this;
+
 			if (Vector3.Distance(position, transform.position) > minDistance)
 			{
-				Trigger(new EventData()
+				Trigger(new GameEventData()
 					.Add(new DataPiece(EventDataKeys.TargetObject) { data = gameObject }));
 
 				position = transform.position;

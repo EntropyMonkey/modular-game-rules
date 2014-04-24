@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace ModularRules
 {
@@ -15,8 +16,22 @@ namespace ModularRules
 			}
 		};
 
-		[SerializeField]
-		private KeyCode InputKey = KeyCode.None;
+		public KeyCode InputKey = KeyCode.None;
+
+		public override RuleData GetRuleInformation()
+		{
+			EventData rule = base.GetRuleInformation() as EventData;
+
+			rule.parameters = new List<Param>();
+			rule.parameters.Add(new Param()
+			{
+				name = "InputKey",
+				type = InputKey.GetType(),
+				value = InputKey
+			});
+
+			return rule;
+		}
 
 		public override GameEvent UpdateEvent()
 		{
@@ -34,14 +49,14 @@ namespace ModularRules
 					k.inputValue = 1.0f;
 					k.inputType = Input.GetKeyDown(InputKey) ? InputType.PRESSED : InputType.HELD;
 
-					Trigger(EventData.Empty.Add(new DataPiece(EventDataKeys.InputData) { data = k }));
+					Trigger(GameEventData.Empty.Add(new DataPiece(EventDataKeys.InputData) { data = k }));
 				}
 				else if (Input.GetKeyUp(InputKey))
 				{
 					k.inputValue = -1.0f;
 					k.inputType = InputType.RELEASED;
 
-					Trigger(EventData.Empty.Add(new DataPiece(EventDataKeys.InputData) { data = k }));
+					Trigger(GameEventData.Empty.Add(new DataPiece(EventDataKeys.InputData) { data = k }));
 				}
 			}
 

@@ -9,15 +9,15 @@ namespace ModularRules
 
 		void OnEnable()
 		{
-			ListenedEvent.Register(this);
+			Register();
 		}
 
 		void OnDisable()
 		{
-			ListenedEvent.Unregister(this);
+			Unregister();
 		}
 
-		protected override void React(EventData eventData)
+		protected override void React(GameEventData eventData)
 		{
 			GameObject target = (GameObject)eventData.Get(EventDataKeys.TargetObject).data;
 			if (target == null || (target == Reactor.gameObject && Reactor is ICount))

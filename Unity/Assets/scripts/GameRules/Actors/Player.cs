@@ -4,78 +4,72 @@ using System.Collections;
 using ModularRules;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(Rigidbody))]
-public class Player : Actor, IMove
+public enum MovementBehaviour { SIMPLE, FLOCK }
+
+public class Player : Actor
 {
-	[SerializeField]
-	private float runSpeed = 10;
+	public MovementBehaviour StartMovementBehaviour;
 
-	[SerializeField]
-	private float jumpSpeed = 20;
+	private MovementController movementController;
+	private ShooterMovement simpleMovement;
 
-	private float moveSpeed;
-
-	public PlayerCamera PlayerCamera
+	public override BaseRuleElement.RuleData GetRuleInformation()
 	{
-		get;
-		set;
+		BaseRuleElement.ActorData data = base.GetRuleInformation() as BaseRuleElement.ActorData;
+
+		data.parameters = new List<Param>();
+		data.parameters.Add(new Param
+		{
+			name = "StartMovementBehaviour",
+			type = StartMovementBehaviour.GetType(),
+			value = StartMovementBehaviour
+		});
+		data.components = new List<ComponentData>();
+		ComponentData c = new ComponentData()
+		{
+			type = typeof(ShooterMovement),
+			parameters = new List<Param>()
+		};
+		c.parameters.Add(new Param()
+			{
+				name = "RunSpeed",
+				type = simpleMovement.RunSpeed.GetType(),
+				value = simpleMovement.RunSpeed
+			});
+		c.parameters.Add(new Param()
+			{
+				name = "JumpSpeed",
+				type = simpleMovement.JumpSpeed.GetType(),
+				value = simpleMovement.JumpSpeed
+			});
+		data.components.Add(c);
+
+		return data;
 	}
 
 	void Awake()
 	{
-		InitializeActor();
+		movementController = gameObject.AddComponent<MovementController>();
+		simpleMovement = gameObject.AddComponent<ShooterMovement>();
 	}
 
 	// Use this for initialization
 	void Start()
 	{
-		
+		switch (StartMovementBehaviour)
+		{
+			case MovementBehaviour.SIMPLE:
+				movementController.ChangeBehaviour(simpleMovement);
+				break;
+			case MovementBehaviour.FLOCK:
+				movementController.ChangeBehaviour(simpleMovement);
+				break;
+		}
 	}
 
 	// Update is called once per frame
 	void Update()
 	{
 		UpdateEvents();
-	}
-
-	// implementing the IMovable interface
-	public void Move(EventData eventData, MoveObject.Direction direction)
-	{
-
-		float v = ((InputReceived.InputData)eventData.Get(EventDataKeys.InputData).data).inputValue;
-
-		moveSpeed = runSpeed;
-
-		Vector3 dir = Vector3.zero;
-		switch (direction)
-		{
-			case MoveObject.Direction.FORWARD:
-				dir = PlayerCamera.transform.forward;
-				dir.y = 0;
-				break;
-			case MoveObject.Direction.BACKWARD:
-				dir = -PlayerCamera.transform.forward;
-				dir.y = 0;
-				break;
-			case MoveObject.Direction.LEFT:
-				dir = -PlayerCamera.transform.right;
-				dir.y = 0;
-				break;
-			case MoveObject.Direction.RIGHT:
-				dir = PlayerCamera.transform.right;
-				dir.y = 0;
-				break;
-			case MoveObject.Direction.UP:
-				moveSpeed = jumpSpeed;
-				dir = Vector3.up;
-				break;
-			case MoveObject.Direction.DOWN:
-				dir = Vector3.down;
-				break;
-		}
-
-		rigidbody.AddForce(dir * v * moveSpeed);
-		
-		moveSpeed = 0;
 	}
 }

@@ -10,15 +10,15 @@ namespace ModularRules
 	{
 		void OnEnable()
 		{
-			ListenedEvent.Register(this);
+			Register();
 		}
 
 		void OnDisable()
 		{
-			ListenedEvent.Unregister(this);
+			Unregister();
 		}
 
-		protected override void React(EventData data)
+		protected override void React(GameEventData data)
 		{
 			DataPiece inputData;
 			if ((inputData = data.Get(EventDataKeys.InputData)) != null &&

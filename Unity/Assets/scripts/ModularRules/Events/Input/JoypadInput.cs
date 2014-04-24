@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace ModularRules
 {
@@ -10,10 +11,24 @@ namespace ModularRules
 			public string axisName;
 		};
 
-		[SerializeField]
-		private string AxisName = "";
+		public string AxisName = "";
 
 		private float lastAxisValue = 0;
+
+		public override RuleData GetRuleInformation()
+		{
+			EventData rule = base.GetRuleInformation() as EventData;
+
+			rule.parameters = new List<Param>();
+			rule.parameters.Add(new Param() 
+			{ 
+				name = "AxisName",
+				type = AxisName.GetType(),
+				value = AxisName
+			});
+
+			return rule;
+		}
 
 		public override GameEvent UpdateEvent()
 		{
@@ -35,7 +50,7 @@ namespace ModularRules
 				if (lastAxisValue != value)
 				{
 					lastAxisValue = value;
-					Trigger(EventData.Empty.Add(new DataPiece(EventDataKeys.InputData)
+					Trigger(GameEventData.Empty.Add(new DataPiece(EventDataKeys.InputData)
 					{
 						data = new JoypadData
 						{

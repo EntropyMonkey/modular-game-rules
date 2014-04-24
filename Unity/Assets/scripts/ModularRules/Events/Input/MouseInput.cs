@@ -6,7 +6,7 @@ namespace ModularRules
 {
 	public class MouseInput : InputReceived
 	{
-		public enum MouseButton { LEFT = 0, RIGHT = 1, MIDDLE = 2, NONE = 3}
+		public enum MouseButton { LEFT = 0, RIGHT = 1, MIDDLE = 2, NONE = 3 }
 
 		public class MouseData : InputData
 		{
@@ -34,17 +34,46 @@ namespace ModularRules
 		// fields
 		public MouseButton TrackedButton;
 
+		public Actor TrackedCamera;
+
 		protected Vector3 lastScreenPosition = Vector3.zero;
+
+		public override RuleData GetRuleInformation()
+		{
+			EventData rule = base.GetRuleInformation() as EventData;
+
+			rule.parameters = new List<Param>();
+			rule.parameters.Add(new Param()
+			{
+				name = "TrackedButton",
+				type = TrackedButton.GetType(),
+				value = TrackedButton
+			});
+			rule.parameters.Add(new Param() 
+			{
+ 				name = "TrackedCamera",
+				type = TrackedCamera.GetType(),
+				value = TrackedCamera.Id
+			});
+
+			return rule;
+		}
 
 		// methods
 		public override GameEvent UpdateEvent()
 		{
-			if (!base.UpdateEvent()) return null;
+			if (!base.UpdateEvent() || TrackedCamera == null) return null;
 
+			if (TrackedCamera.camera == null) 
+			{
+				Debug.LogError("There is no camera component on the TrackedCamera actor.");
+				return null;
+			}
+			
 			MouseData data = MouseData.Empty;
 			data.button = TrackedButton;
 			data.screenPosition = Input.mousePosition;
-			data.rayFromPosition = Camera.main.ScreenPointToRay(data.screenPosition);
+			data.rayFromPosition = TrackedCamera.camera.ScreenPointToRay(data.screenPosition);
 
 			// has the mouse been moved?
 			if (lastScreenPosition != Input.mousePosition)
@@ -77,7 +106,7 @@ namespace ModularRules
 			// trigger only if something happened
 			if ((int)data.inputType > 0)
 			{
-				Trigger(EventData.Empty.Add(new DataPiece(EventDataKeys.InputData) { data = data }));
+				Trigger(GameEventData.Empty.Add(new DataPiece(EventDataKeys.InputData) { data = data }));
 			}
 
 			return this;

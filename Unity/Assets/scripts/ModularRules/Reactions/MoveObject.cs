@@ -1,31 +1,49 @@
 ﻿using UnityEngine;
 using System.Collections;
 using ModularRules;
+using System.Collections.Generic;
 
 namespace ModularRules
 {
+	public enum Direction { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN }
+
 	public class MoveObject : Reaction
 	{
-		public enum Direction { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN }
-
 		public Direction MoveDirection;
 
 		void OnEnable()
 		{
-			ListenedEvent.Register(this);
+			Register();
 		}
 
 		void OnDisable()
 		{
-			ListenedEvent.Unregister(this);
+			Unregister();
 		}
 
-		protected override void React(EventData eventData)
+		public override RuleData GetRuleInformation()
+		{
+			ReactionData rule = base.GetRuleInformation() as ReactionData;
+
+			rule.parameters = new List<Param>();
+			rule.parameters.Add(new Param()
+			{
+				name = "MoveDirection",
+				type = MoveDirection.GetType(),
+				value = MoveDirection
+			});
+
+			return rule;
+		}
+
+		protected override void React(GameEventData eventData)
 		{
 			if (eventData == null) return;
 
-			if (Reactor as IMove != null)
-				((IMove)Reactor).Move(eventData, MoveDirection);
+			IMove movingObject = Reactor.gameObject.GetComponent(typeof(IMove)) as IMove;
+
+			if (movingObject != null)
+				movingObject.Move(eventData, MoveDirection);
 		}
 	}
 }

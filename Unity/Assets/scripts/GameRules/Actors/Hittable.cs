@@ -7,12 +7,11 @@ public class Hittable : Actor, ICount
 {
 	void Start()
 	{
-		InitializeActor();
+		Initialize();
 	}
 
-	public void ChangeCount(EventData data, float changeBy)
+	public void ChangeCount(GameEventData data, float changeBy)
 	{
-		Debug.Log(1);
 		if (!rigidbody.useGravity)
 			rigidbody.useGravity = true;
 		else
