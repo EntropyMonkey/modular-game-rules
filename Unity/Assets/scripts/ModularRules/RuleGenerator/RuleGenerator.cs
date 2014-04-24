@@ -295,6 +295,8 @@ namespace ModularRules
 
 				genReactions.Remove(reaction);
 				Destroy(reaction);
+
+				AddReactionToScene(reactionData);
 			}
 			else
 			{
