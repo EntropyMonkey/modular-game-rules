@@ -2,11 +2,6 @@
 <rules>
   <actors>
     <actor>
-      <id>1</id>
-      <type>PlayerCamera</type>
-      <label>PlayerCamera</label>
-    </actor>
-    <actor>
       <id>0</id>
       <type>Player</type>
       <label>Player</label>
@@ -26,33 +21,52 @@
         </param>
       </component>
     </actor>
+    <actor>
+      <id>1</id>
+      <type>PlayerCamera</type>
+      <label>PlayerCamera</label>
+    </actor>
   </actors>
   <events>
     <event>
-      <id>6</id>
+      <id>3</id>
       <type>KeyboardInput</type>
       <label>Player E =&gt; ModularRules.KeyboardInput</label>
       <actorId>0</actorId>
       <param name="InputKey">
         <type>KeyCode</type>
-        <value>306</value>
+        <value>100</value>
       </param>
     </event>
     <event>
-      <id>7</id>
+      <id>0</id>
       <type>KeyboardInput</type>
       <label>Player E =&gt; ModularRules.KeyboardInput</label>
       <actorId>0</actorId>
       <param name="InputKey">
         <type>KeyCode</type>
-        <value>304</value>
+        <value>97</value>
       </param>
     </event>
     <event>
-      <id>5</id>
-      <type>ObjectMovedEvent</type>
-      <label>Player E =&gt; ModularRules.ObjectMovedEvent</label>
+      <id>1</id>
+      <type>KeyboardInput</type>
+      <label>Player E =&gt; ModularRules.KeyboardInput</label>
       <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>119</value>
+      </param>
+    </event>
+    <event>
+      <id>2</id>
+      <type>KeyboardInput</type>
+      <label>Player E =&gt; ModularRules.KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>115</value>
+      </param>
     </event>
     <event>
       <id>4</id>
@@ -69,56 +83,86 @@
       </param>
     </event>
     <event>
-      <id>2</id>
+      <id>5</id>
+      <type>ObjectMovedEvent</type>
+      <label>Player E =&gt; ModularRules.ObjectMovedEvent</label>
+      <actorId>0</actorId>
+    </event>
+    <event>
+      <id>7</id>
       <type>KeyboardInput</type>
       <label>Player E =&gt; ModularRules.KeyboardInput</label>
       <actorId>0</actorId>
       <param name="InputKey">
         <type>KeyCode</type>
-        <value>115</value>
+        <value>304</value>
       </param>
     </event>
     <event>
-      <id>1</id>
+      <id>6</id>
       <type>KeyboardInput</type>
       <label>Player E =&gt; ModularRules.KeyboardInput</label>
       <actorId>0</actorId>
       <param name="InputKey">
         <type>KeyCode</type>
-        <value>119</value>
-      </param>
-    </event>
-    <event>
-      <id>0</id>
-      <type>KeyboardInput</type>
-      <label>Player E =&gt; ModularRules.KeyboardInput</label>
-      <actorId>0</actorId>
-      <param name="InputKey">
-        <type>KeyCode</type>
-        <value>97</value>
-      </param>
-    </event>
-    <event>
-      <id>3</id>
-      <type>KeyboardInput</type>
-      <label>Player E =&gt; ModularRules.KeyboardInput</label>
-      <actorId>0</actorId>
-      <param name="InputKey">
-        <type>KeyCode</type>
-        <value>100</value>
+        <value>306</value>
       </param>
     </event>
   </events>
   <reactions>
     <reaction>
-      <id>3</id>
+      <id>6</id>
       <type>MoveObject</type>
       <label>Player R =&gt; ModularRules.MoveObject</label>
       <actorId>0</actorId>
-      <listenedEventId>3</listenedEventId>
+      <listenedEventId>2</listenedEventId>
       <param name="MoveDirection">
         <type>Direction</type>
-        <value>3</value>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>5</id>
+      <type>MoveObject</type>
+      <label>Player R =&gt; ModularRules.MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>1</listenedEventId>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>0</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>0</id>
+      <type>MoveObject</type>
+      <label>Player R =&gt; ModularRules.MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>0</listenedEventId>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>2</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>1</id>
+      <type>MoveObject</type>
+      <label>Player R =&gt; ModularRules.MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>7</listenedEventId>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>4</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>2</id>
+      <type>MoveObject</type>
+      <label>Player R =&gt; ModularRules.MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>6</listenedEventId>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>5</value>
       </param>
     </reaction>
     <reaction>
@@ -137,58 +181,14 @@
       </param>
     </reaction>
     <reaction>
-      <id>2</id>
+      <id>3</id>
       <type>MoveObject</type>
       <label>Player R =&gt; ModularRules.MoveObject</label>
       <actorId>0</actorId>
-      <listenedEventId>6</listenedEventId>
+      <listenedEventId>3</listenedEventId>
       <param name="MoveDirection">
         <type>Direction</type>
-        <value>5</value>
-      </param>
-    </reaction>
-    <reaction>
-      <id>1</id>
-      <type>MoveObject</type>
-      <label>Player R =&gt; ModularRules.MoveObject</label>
-      <actorId>0</actorId>
-      <listenedEventId>7</listenedEventId>
-      <param name="MoveDirection">
-        <type>Direction</type>
-        <value>4</value>
-      </param>
-    </reaction>
-    <reaction>
-      <id>0</id>
-      <type>MoveObject</type>
-      <label>Player R =&gt; ModularRules.MoveObject</label>
-      <actorId>0</actorId>
-      <listenedEventId>0</listenedEventId>
-      <param name="MoveDirection">
-        <type>Direction</type>
-        <value>2</value>
-      </param>
-    </reaction>
-    <reaction>
-      <id>5</id>
-      <type>MoveObject</type>
-      <label>Player R =&gt; ModularRules.MoveObject</label>
-      <actorId>0</actorId>
-      <listenedEventId>1</listenedEventId>
-      <param name="MoveDirection">
-        <type>Direction</type>
-        <value>0</value>
-      </param>
-    </reaction>
-    <reaction>
-      <id>6</id>
-      <type>MoveObject</type>
-      <label>Player R =&gt; ModularRules.MoveObject</label>
-      <actorId>0</actorId>
-      <listenedEventId>2</listenedEventId>
-      <param name="MoveDirection">
-        <type>Direction</type>
-        <value>1</value>
+        <value>3</value>
       </param>
     </reaction>
   </reactions>

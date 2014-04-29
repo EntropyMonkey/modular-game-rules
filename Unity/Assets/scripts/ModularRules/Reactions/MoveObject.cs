@@ -44,6 +44,8 @@ namespace ModularRules
 
 			if (movingObject != null)
 				movingObject.Move(eventData, MoveDirection);
+			else
+				Debug.LogWarning(name + " couldn't find a component of type IMove on " + Reactor.name + ".");
 		}
 	}
 }

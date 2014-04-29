@@ -53,25 +53,41 @@ namespace ModularRules
 
 			// get all events
 			events = new List<GameEvent>();
+			ScanEvents();
+
+			// get all reactions
+			reactions = new List<Reaction>();
+			ScanReactions();
+		}
+
+		public void ScanEvents()
+		{
 			Component[] c = GetComponentsInChildren(typeof(GameEvent));
 			foreach (Component co in c)
 			{
 				GameEvent e = co as GameEvent;
-				e.Actor = this;
-				events.Add(e);
-				e.Initialize();
+				if (!events.Contains(e))
+				{
+					e.Actor = this;
+					events.Add(e);
+					e.Initialize();
+				}
 			}
 			Debug.Log(name + " registered " + events.Count + " GameEvents.");
+		}
 
-			// get all reactions
-			reactions = new List<Reaction>();
-			c = GetComponentsInChildren(typeof(Reaction));
+		public void ScanReactions()
+		{
+			Component[] c = GetComponentsInChildren(typeof(Reaction));
 			foreach (Component co in c)
 			{
 				Reaction r = co as Reaction;
-				r.Reactor = this;
-				reactions.Add(r);
-				r.Initialize();
+				if (!reactions.Contains(r))
+				{
+					r.Reactor = this;
+					reactions.Add(r);
+					r.Initialize();
+				}
 			}
 			Debug.Log(name + " registered " + reactions.Count + " Reactions.");
 		}

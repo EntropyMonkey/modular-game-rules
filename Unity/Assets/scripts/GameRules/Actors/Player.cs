@@ -11,8 +11,10 @@ public class Player : Actor
 	public MovementBehaviour StartMovementBehaviour;
 
 	private MovementController movementController;
-	private ShooterMovement simpleMovement;
+	private SimpleMovement simpleMovement;
+	private FlockMovement flockMovement;
 
+	#region RuleInfo
 	public override BaseRuleElement.RuleData GetRuleInformation()
 	{
 		BaseRuleElement.ActorData data = base.GetRuleInformation() as BaseRuleElement.ActorData;
@@ -27,30 +29,49 @@ public class Player : Actor
 		data.components = new List<ComponentData>();
 		ComponentData c = new ComponentData()
 		{
-			type = typeof(ShooterMovement),
+			type = typeof(SimpleMovement),
 			parameters = new List<Param>()
 		};
-		c.parameters.Add(new Param()
+		if (simpleMovement)
+		{
+			c.parameters.Add(new Param()
 			{
 				name = "RunSpeed",
 				type = simpleMovement.RunSpeed.GetType(),
 				value = simpleMovement.RunSpeed
 			});
-		c.parameters.Add(new Param()
+			c.parameters.Add(new Param()
 			{
 				name = "JumpSpeed",
 				type = simpleMovement.JumpSpeed.GetType(),
 				value = simpleMovement.JumpSpeed
 			});
+		}
+
+		if (flockMovement)
+		{
+			c.parameters.Add(new Param()
+			{
+				name = "StandardFlySpeed",
+				type = flockMovement.StandardFlySpeed.GetType(),
+				value = flockMovement.StandardFlySpeed
+			});
+			c.parameters.Add(new Param()
+			{
+				name = "Gravity",
+				type = flockMovement.Gravity.GetType(),
+				value = flockMovement.Gravity
+			});
+		}
 		data.components.Add(c);
 
 		return data;
 	}
+	#endregion
 
 	void Awake()
 	{
 		movementController = gameObject.AddComponent<MovementController>();
-		simpleMovement = gameObject.AddComponent<ShooterMovement>();
 	}
 
 	// Use this for initialization
@@ -59,10 +80,12 @@ public class Player : Actor
 		switch (StartMovementBehaviour)
 		{
 			case MovementBehaviour.SIMPLE:
+				simpleMovement = gameObject.AddComponent<SimpleMovement>();
 				movementController.ChangeBehaviour(simpleMovement);
 				break;
 			case MovementBehaviour.FLOCK:
-				movementController.ChangeBehaviour(simpleMovement);
+				flockMovement = gameObject.AddComponent<FlockMovement>();
+				movementController.ChangeBehaviour(flockMovement);
 				break;
 		}
 	}

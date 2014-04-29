@@ -3,10 +3,14 @@ using System.Collections;
 
 namespace ModularRules
 {
-	public class ShooterMovement : MovementBehaviour
+	public class FlockMovement : MovementBehaviour
 	{
-		public float RunSpeed = 10;
-		public float JumpSpeed = 20;
+		public float StandardFlySpeed = 10;
+		public float TurnDriftSpeed = 2;
+		public float Gravity = 1;
+
+		public float MaxPitchAngle = 50;
+		public float MaxRollAngle = 50;
 
 		private float moveSpeed;
 
@@ -19,8 +23,10 @@ namespace ModularRules
 			if (rigidbody == null)
 				gameObject.AddComponent(typeof(Rigidbody));
 			rigidbody.freezeRotation = true;
+			rigidbody.useGravity = false;
+			rigidbody.mass = 0.5f;
 
-			playerCamera = GameObject.FindGameObjectWithTag("PlayerCamera").GetComponent<PlayerCamera>();
+			playerCamera = GameObject.FindGameObjectWithTag(PlayerCamera.Tag).GetComponent<PlayerCamera>();
 		}
 
 		public override void Move(GameEventData eventData, Direction direction)
@@ -28,7 +34,7 @@ namespace ModularRules
 
 			float v = ((InputReceived.InputData)eventData.Get(EventDataKeys.InputData).data).inputValue;
 
-			moveSpeed = RunSpeed;
+			moveSpeed = StandardFlySpeed;
 
 			Vector3 dir = Vector3.zero;
 			switch (direction)
@@ -42,25 +48,32 @@ namespace ModularRules
 					dir.y = 0;
 					break;
 				case Direction.LEFT:
+					moveSpeed = TurnDriftSpeed;
 					dir = -playerCamera.transform.right;
 					dir.y = 0;
 					break;
 				case Direction.RIGHT:
+					moveSpeed = TurnDriftSpeed;
 					dir = playerCamera.transform.right;
 					dir.y = 0;
 					break;
 				case Direction.UP:
-					moveSpeed = JumpSpeed;
 					dir = Vector3.up;
 					break;
 				case Direction.DOWN:
 					dir = Vector3.down;
 					break;
 			}
-
+						
 			rigidbody.AddForce(dir * v * moveSpeed);
+			transform.Rotate(Vector3.up, 1 * (direction == Direction.LEFT ? -1 : direction == Direction.RIGHT ? 1 : 0));
 
 			moveSpeed = 0;
+		}
+
+		void Update()
+		{
+			rigidbody.AddForce(Gravity * Vector3.down);
 		}
 	}
 }

@@ -341,6 +341,12 @@ namespace ModularRules
 		{
 			Debug.LogWarning("Saving rules into " + filename + ".xml ...");
 			
+			foreach (Actor a in GameObject.FindObjectsOfType(typeof(Actor)))
+			{
+				a.ScanEvents();
+				a.ScanReactions();
+			}
+
 			// broadcast save request, let elements handle storing info about themselves
 			BaseRuleElement[] brelements = GameObject.FindObjectsOfType(typeof(BaseRuleElement)) as BaseRuleElement[];
 

@@ -11,7 +11,9 @@ namespace ModularRules
 		public GameObject FixedToObject = null;
 		public Vector3 Offset = Vector3.zero;
 
-		private Vector3 targetPos = Vector3.zero;
+		public bool StayBehindObject = true;
+
+		private Transform targetTransform;
 
 		public override void Initialize()
 		{
@@ -41,6 +43,18 @@ namespace ModularRules
 				type = Offset.GetType(),
 				value = Offset.x + " " + Offset.y + " " + Offset.z
 			});
+			rule.parameters.Add(new Param()
+			{
+				name = "FixedToObject",
+				type = FixedToObject.GetComponent(typeof(Actor)).GetType(),
+				value = (FixedToObject.GetComponent(typeof(Actor)) as Actor).Id
+			});
+			rule.parameters.Add(new Param()
+			{
+				name = "StayBehindObject",
+				type = StayBehindObject.GetType(),
+				value = StayBehindObject
+			});
 
 			return rule;
 		}
@@ -61,7 +75,7 @@ namespace ModularRules
 
 			if (target != null)
 			{
-				targetPos = target.transform.position;
+				targetTransform = target.transform;
 			}
 		}
 
@@ -69,8 +83,22 @@ namespace ModularRules
 		{
 			if (!FixedToObject)
 			{
-				Reactor.transform.position = Vector3.Lerp(Reactor.transform.position, targetPos + Offset, Time.deltaTime * FollowSpeed);
-				Reactor.transform.rotation = Quaternion.Lerp(Reactor.transform.rotation, Quaternion.LookRotation(targetPos - Reactor.transform.position), Time.deltaTime * FollowSpeed);
+				if (!StayBehindObject)
+				{
+					Reactor.transform.position = Vector3.Lerp(Reactor.transform.position, targetTransform.position + Offset, Time.deltaTime * FollowSpeed);
+				}
+				else
+				{
+					Reactor.transform.position = Vector3.Lerp(
+						Reactor.transform.position, 
+						targetTransform.position + targetTransform.forward * Offset.z + targetTransform.right * Offset.x + targetTransform.up * Offset.y, 
+						Time.deltaTime * FollowSpeed);
+				}
+
+				Reactor.transform.rotation = Quaternion.Lerp(
+					Reactor.transform.rotation, 
+					Quaternion.LookRotation(targetTransform.position - Reactor.transform.position), 
+					Time.deltaTime * FollowSpeed);
 			}
 		}
 	}

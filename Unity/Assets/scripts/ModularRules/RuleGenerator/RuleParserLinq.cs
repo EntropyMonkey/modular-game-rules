@@ -270,11 +270,7 @@ namespace ModularRules
 
 			if (result.Contains("."))
 			{
-				Debug.Log(result);
 				int index = result.LastIndexOf('.');
-				Debug.Log(index + 1);
-				Debug.Log(result.Length);
-				Debug.Log(result.Length - (index + 1));
 
 				result = result.Substring(result.LastIndexOf('.') + 1, result.Length - (index + 1));
 

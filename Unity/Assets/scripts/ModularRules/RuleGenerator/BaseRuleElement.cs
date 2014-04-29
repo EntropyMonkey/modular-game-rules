@@ -42,7 +42,7 @@ namespace ModularRules
 			public int eventId;
 		};
 
-		[HideInInspector]
+//		[HideInInspector]
 		public int Id;
 
 		// called upon generation
