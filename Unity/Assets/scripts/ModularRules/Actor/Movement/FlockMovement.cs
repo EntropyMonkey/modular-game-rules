@@ -14,6 +14,8 @@ namespace ModularRules
 
 		private float moveSpeed;
 
+		public float maxAnisotropicAngle = 20;
+
 		private PlayerCamera playerCamera;
 
 		public override void Load()
@@ -66,6 +68,13 @@ namespace ModularRules
 			}
 						
 			rigidbody.AddForce(dir * v * moveSpeed);
+			
+			// anisotropic air friction:
+			// the bigger the angle between orientation and velocity, the bigger the friction. max friction is velocity
+			float angle = Vector3.Angle(rigidbody.velocity, transform.forward);
+
+			//rigidbody.AddForce();
+
 			transform.Rotate(Vector3.up, 1 * (direction == Direction.LEFT ? -1 : direction == Direction.RIGHT ? 1 : 0));
 
 			moveSpeed = 0;

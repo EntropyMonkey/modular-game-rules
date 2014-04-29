@@ -81,7 +81,7 @@ namespace ModularRules
 
 		void FixedUpdate()
 		{
-			if (!FixedToObject)
+			if (!FixedToObject && targetTransform != null)
 			{
 				if (!StayBehindObject)
 				{
