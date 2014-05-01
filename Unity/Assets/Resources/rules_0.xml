@@ -5,10 +5,6 @@
 			<label>Player</label>
 			<!--The labels are intended as a placeholder for automatic name generation -->
 			<type>Player</type>
-			<param name="StartMovementBehaviour">
-				<type>MovementBehaviour</type>
-				<value>1</value>
-			</param>
 		</actor>
 		<actor>
 			<id>1</id>

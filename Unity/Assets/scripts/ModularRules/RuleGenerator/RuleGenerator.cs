@@ -236,7 +236,7 @@ namespace ModularRules
 		}
 		#endregion
 
-		#region Update Elements
+		#region Updating Elements
 		void UpdateActor(BaseRuleElement.ActorData actorData)
 		{
 			// check if matching id actor has same type
@@ -312,6 +312,7 @@ namespace ModularRules
 		}
 		#endregion
 
+		#region Initialize Rule Elements
 		void InitializeRuleElements()
 		{
 			foreach (Actor a in genActors)
@@ -319,6 +320,7 @@ namespace ModularRules
 				a.Initialize();
 			}
 		}
+		#endregion
 
 		void LoadRules(string filename)
 		{
@@ -361,6 +363,7 @@ namespace ModularRules
 			Debug.LogWarning("Completed saving rules.");
 		}
 
+		#region OnGUI
 		void OnGUI()
 		{
 			string[] files = Directory.GetFiles(Directory.GetCurrentDirectory() + @"/Assets/Resources/", "rules_*.xml");
@@ -394,5 +397,6 @@ namespace ModularRules
 				genActors.Clear();
 			}
 		}
+		#endregion
 	}
 }

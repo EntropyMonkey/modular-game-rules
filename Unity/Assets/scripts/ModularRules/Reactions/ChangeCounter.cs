@@ -19,11 +19,11 @@ namespace ModularRules
 
 		protected override void React(GameEventData eventData)
 		{
-			GameObject target = (GameObject)eventData.Get(EventDataKeys.TargetObject).data;
-			if (target == null || (target == Reactor.gameObject && Reactor is ICount))
-			{
-				((ICount)Reactor).ChangeCount(eventData, ChangeBy);
-			}
+			//GameObject target = (GameObject)eventData.Get(EventDataKeys.TargetObject).data;
+			//if (target == null || (target == Reactor.gameObject && Reactor is ICount))
+			//{
+			//	((ICount)Reactor).ChangeCount(eventData, ChangeBy);
+			//}
 		}
 	}
 }

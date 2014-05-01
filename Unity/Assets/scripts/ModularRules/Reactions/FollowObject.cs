@@ -43,12 +43,15 @@ namespace ModularRules
 				type = Offset.GetType(),
 				value = Offset.x + " " + Offset.y + " " + Offset.z
 			});
-			rule.parameters.Add(new Param()
+			if (FixedToObject != null)
 			{
-				name = "FixedToObject",
-				type = FixedToObject.GetComponent(typeof(Actor)).GetType(),
-				value = (FixedToObject.GetComponent(typeof(Actor)) as Actor).Id
-			});
+				rule.parameters.Add(new Param()
+				{
+					name = "FixedToObject",
+					type = FixedToObject.GetComponent(typeof(Actor)).GetType(),
+					value = (FixedToObject.GetComponent(typeof(Actor)) as Actor).Id
+				});
+			}
 			rule.parameters.Add(new Param()
 			{
 				name = "StayBehindObject",

@@ -52,75 +52,113 @@ namespace ModularRules
 			generateElement = gameObject.GetComponent<GenerateElement>();
 
 			// get all events
-			events = new List<GameEvent>();
 			ScanEvents();
+			InitializeEvents();
 
 			// get all reactions
-			reactions = new List<Reaction>();
 			ScanReactions();
+			InitializeReactions();
 		}
 
 		public void ScanEvents()
 		{
 			Component[] c = GetComponentsInChildren(typeof(GameEvent));
+
+			if (c.Length > 0 && events == null)
+				events = new List<GameEvent>();
+
 			foreach (Component co in c)
 			{
 				GameEvent e = co as GameEvent;
 				if (!events.Contains(e))
 				{
-					e.Actor = this;
 					events.Add(e);
-					e.Initialize();
 				}
 			}
-			Debug.Log(name + " registered " + events.Count + " GameEvents.");
+#if DEBUG
+			if (events != null)
+				Debug.Log(name + " registered " + events.Count + " GameEvents.");
+#endif
+		}
+
+		void InitializeEvents()
+		{
+			foreach (GameEvent e in events)
+			{
+				e.Actor = this;
+				e.Initialize();
+			}
 		}
 
 		public void ScanReactions()
 		{
 			Component[] c = GetComponentsInChildren(typeof(Reaction));
+			
+			if (c.Length > 0 && reactions == null)
+				reactions = new List<Reaction>();
+
 			foreach (Component co in c)
 			{
 				Reaction r = co as Reaction;
 				if (!reactions.Contains(r))
 				{
-					r.Reactor = this;
 					reactions.Add(r);
-					r.Initialize();
 				}
 			}
-			Debug.Log(name + " registered " + reactions.Count + " Reactions.");
+#if DEBUG
+			if (reactions != null)
+				Debug.Log(name + " registered " + reactions.Count + " Reactions.");
+#endif
+		}
+
+		void InitializeReactions()
+		{
+			foreach (Reaction r in reactions)
+			{
+				r.Reactor = this;
+				r.Initialize();
+			}
 		}
 
 		public override void Reset()
 		{
-			// reset components to original set
-			List<Component> newComps = new List<Component>();
-			newComps.AddRange(GetComponents(typeof(Component)));
-
-			foreach (Component c in newComps)
+			if (generateElement && generateElement.OriginalComponents != null)
 			{
-				if (!generateElement.OriginalComponents.Contains(c))
+				// reset components to original set
+				List<Component> newComps = new List<Component>();
+				newComps.AddRange(GetComponents(typeof(Component)));
+
+				foreach (Component c in newComps)
 				{
-					Destroy(c);
+					if (!generateElement.OriginalComponents.Contains(c))
+					{
+						Destroy(c);
+					}
 				}
+				newComps.Clear();
 			}
-			newComps.Clear();
 
 			// destroy all events and reactions belonging to this actor
-			foreach(GameEvent gameEvent in events)
+			if (events != null)
 			{
-				Destroy(gameEvent);
+				foreach (GameEvent gameEvent in events)
+				{
+					Destroy(gameEvent);
+				}
+				events.Clear();
+				Destroy(Events);
 			}
-			events.Clear();
-			Destroy(Events);
-			foreach (Reaction reaction in reactions)
+
+			if (reactions != null)
 			{
-				reaction.Unregister();
-				Destroy(reaction);
+				foreach (Reaction reaction in reactions)
+				{
+					reaction.Unregister();
+					Destroy(reaction);
+				}
+				reactions.Clear();
+				Destroy(Reactions);
 			}
-			reactions.Clear();
-			Destroy(Reactions);
 
 			// enable placeholder
 			GetComponent<GenerateElement>().enabled = true;
@@ -135,9 +173,13 @@ namespace ModularRules
 
 		public void UpdateEvents()
 		{
-			foreach (GameEvent e in events)
+			if (events != null)
 			{
-				e.UpdateEvent();
+				foreach (GameEvent e in events)
+				{
+					if (e != null)
+						e.UpdateEvent();
+				}
 			}
 		}
 	}

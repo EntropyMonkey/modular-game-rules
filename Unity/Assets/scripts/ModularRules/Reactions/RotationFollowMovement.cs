@@ -6,8 +6,13 @@ namespace ModularRules
 	/// <summary>
 	/// The rotation follows a relative movement value
 	/// </summary>
-	public class RotationFollowMovement : Reaction
+	public class RotationFollowMouse : Reaction
 	{
+		public float Sensitivity = 10;
+		public float MaxYRotation = 60;
+
+		float yRotation;
+
 		void OnEnable()
 		{
 			Register();
@@ -26,10 +31,14 @@ namespace ModularRules
 			{
 				Vector2 deltaMovement = ((MouseInput.MouseData)inputData.data).axisValues;
 
-				if (Reactor is IRotate)
-				{
-					((IRotate)Reactor).Rotate(data, deltaMovement);
-				}
+				//((IRotate)Reactor).Rotate(data, deltaMovement);
+
+				float xRotation = Reactor.transform.localEulerAngles.y + deltaMovement.x * Sensitivity;
+				yRotation += deltaMovement.y * Sensitivity;
+
+				yRotation = Mathf.Clamp(yRotation, -MaxYRotation, MaxYRotation);
+
+				Reactor.transform.localEulerAngles = new Vector3(-yRotation, xRotation, 0);
 			}
 		}
 	}

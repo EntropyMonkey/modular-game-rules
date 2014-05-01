@@ -128,7 +128,7 @@ namespace ModularRules
 				// get value as string
 				string v = xParam.Element("value").Value;
 
-				float tryparsef; int tryparsei;
+				float tryparsef; int tryparsei; bool tryparseb;
 
 				// handle parameter value according to type
 				if (newP.type.IsSubclassOf(typeof(Actor)) || newP.type.IsAssignableFrom(typeof(Actor)))
@@ -155,6 +155,20 @@ namespace ModularRules
 					vec.y = float.Parse(s[1]);
 					vec.z = float.Parse(s[2]);
 					newP.value = vec;
+				}
+				else if (bool.TryParse(v, out tryparseb))
+				{
+					newP.value = bool.Parse(v);
+				}
+				else if (newP.type == typeof(string))
+				{
+					newP.value = v;
+				}
+				else if (newP.type == typeof(List<string>))
+				{
+					List<string> strings = new List<string>();
+					strings.AddRange(v.Split(' '));
+					newP.value = strings;
 				}
 				else
 				{
