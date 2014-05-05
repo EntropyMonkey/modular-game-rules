@@ -19,6 +19,7 @@ namespace ModularRules
 				{
 					eventsGO = new GameObject("Events");
 					eventsGO.transform.parent = transform;
+					eventsGO.transform.localPosition = Vector3.zero;
 				}
 
 				return eventsGO;
@@ -34,13 +35,14 @@ namespace ModularRules
 				{
 					reactionsGO = new GameObject("Reactions");
 					reactionsGO.transform.parent = transform;
+					reactionsGO.transform.localPosition = Vector3.zero;
 				}
 
 				return reactionsGO;
 			}
 		}
 
-		private GenerateElement generateElement;
+		private PlaceholderElement generateElement;
 
 		/// <summary>
 		/// Collects all events, so that they can be updated when appropriate
@@ -49,7 +51,7 @@ namespace ModularRules
 		{
 			base.Initialize();
 
-			generateElement = gameObject.GetComponent<GenerateElement>();
+			generateElement = gameObject.GetComponent<PlaceholderElement>();
 
 			// get all events
 			ScanEvents();
@@ -83,6 +85,8 @@ namespace ModularRules
 
 		void InitializeEvents()
 		{
+			if (events == null) return;
+
 			foreach (GameEvent e in events)
 			{
 				e.Actor = this;
@@ -113,6 +117,8 @@ namespace ModularRules
 
 		void InitializeReactions()
 		{
+			if (reactions == null) return;
+
 			foreach (Reaction r in reactions)
 			{
 				r.Reactor = this;
@@ -161,7 +167,7 @@ namespace ModularRules
 			}
 
 			// enable placeholder
-			GetComponent<GenerateElement>().enabled = true;
+			GetComponent<PlaceholderElement>().enabled = true;
 
 			base.Reset();
 		}

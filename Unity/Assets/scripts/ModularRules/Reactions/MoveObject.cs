@@ -5,16 +5,11 @@ using System.Collections.Generic;
 
 namespace ModularRules
 {
-	public enum Direction { FORWARD = 0, BACKWARD, LEFT, RIGHT, UP, DOWN }
-
-	public enum RelativeTo { WORLD = 0, CAMERA, SELF }
-
 	public class MoveObject : Reaction
 	{
 		public Direction MoveDirection;
 
 		public float MoveSpeed = 10;
-		public float MaxSpeed = 10;
 
 		public RelativeTo DirectionRelativeTo = RelativeTo.SELF;
 
@@ -31,6 +26,7 @@ namespace ModularRules
 				Reactor.gameObject.AddComponent<Rigidbody>();
 
 			Reactor.rigidbody.freezeRotation = true;
+			Reactor.rigidbody.useGravity = false;
 		}
 
 		void OnEnable()
@@ -60,12 +56,6 @@ namespace ModularRules
 				name = "MoveSpeed",
 				type = MoveSpeed.GetType(),
 				value = MoveSpeed
-			});
-			rule.parameters.Add(new Param()
-			{
-				name = "MaxSpeed",
-				type = MaxSpeed.GetType(),
-				value = MaxSpeed
 			});
 			rule.parameters.Add(new Param()
 			{
@@ -102,7 +92,7 @@ namespace ModularRules
 		protected override void React(GameEventData eventData)
 		{
 			if (eventData == null ||
-				(DirectionRelativeTo == RelativeTo.CAMERA && ActorDirectionIsRelativeTo == null)) 
+				(DirectionRelativeTo == RelativeTo.ACTOR && ActorDirectionIsRelativeTo == null)) 
 				return;
 
 			float v;
@@ -114,7 +104,7 @@ namespace ModularRules
 				v = 1;
 
 			Transform relevantTransform;
-			if (DirectionRelativeTo == RelativeTo.CAMERA)
+			if (DirectionRelativeTo == RelativeTo.ACTOR)
 				relevantTransform = ActorDirectionIsRelativeTo.transform;
 			else if (DirectionRelativeTo == RelativeTo.SELF)
 				relevantTransform = transform;
@@ -148,14 +138,18 @@ namespace ModularRules
 					break;
 			}
 
-			if (Reactor.rigidbody.velocity.magnitude < MaxSpeed)
-				Reactor.rigidbody.AddForce(dir * v * MoveSpeed);
+			Reactor.rigidbody.AddForce(dir * v * MoveSpeed);
 
 			if (relevantTransform.name == "origin")
 				Destroy(relevantTransform.gameObject);
 
+
 			if (RotateWithMovement)
-				Reactor.transform.forward = Vector3.Lerp(Reactor.transform.forward, Reactor.rigidbody.velocity.normalized, RotationSpeed * Time.deltaTime);
+			{
+				Vector3 horizontalVelocity = Reactor.rigidbody.velocity;
+				horizontalVelocity.y = 0;
+				Reactor.transform.forward = Vector3.Lerp(Reactor.transform.forward, horizontalVelocity, RotationSpeed * Time.deltaTime);
+			}
 		//	Reactor.transform.Rotate(Vector3.up, 1 * (MoveDirection == Direction.LEFT ? -1 : MoveDirection == Direction.RIGHT ? 1 : 0));
 		}
 	}

@@ -1,14 +1,15 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\ModularRules\Events\CollisionEvent.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Resources\rules_1.xml">
     <Files>
-      <File FileName="Assets\Scripts\ModularRules\Events\GameEvent.cs" Line="60" Column="6" />
+      <File FileName="Assets\Scripts\ModularRules\Events\GameEvent.cs" Line="1" Column="1" />
       <File FileName="Assets\scripts\GameRules\Actors\PlayerCamera.cs" Line="1" Column="1" />
       <File FileName="Assets\scripts\ModularRules\Events\Input\JoypadInput.cs" Line="1" Column="1" />
-      <File FileName="Assets\scripts\ModularRules\Events\CollisionEventRelay.cs" Line="11" Column="16" />
-      <File FileName="Assets\scripts\ModularRules\Events\CollisionEvent.cs" Line="113" Column="1" />
-      <File FileName="Assets\scripts\ModularRules\RuleGenerator\RuleGenerator.cs" Line="379" Column="6" />
-      <File FileName="Assets\scripts\ModularRules\Events\GameEventData.cs" Line="8" Column="1" />
+      <File FileName="Assets\scripts\ModularRules\Events\CollisionEventRelay.cs" Line="1" Column="1" />
+      <File FileName="Assets\scripts\ModularRules\Events\CollisionEvent.cs" Line="1" Column="1" />
+      <File FileName="Assets\scripts\ModularRules\RuleGenerator\RuleGenerator.cs" Line="1" Column="1" />
+      <File FileName="Assets\scripts\ModularRules\Events\GameEventData.cs" Line="1" Column="1" />
+      <File FileName="Assets\Resources\rules_1.xml" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

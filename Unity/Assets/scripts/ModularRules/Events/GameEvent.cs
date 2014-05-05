@@ -71,9 +71,9 @@ namespace ModularRules
 		{
 			//if (!ConditionsMet()) return false;
 
-			foreach(Reaction r in triggeredReactions)
+			for (int i = 0; i < triggeredReactions.Count; i++ )
 			{
-				r.Execute(data);
+				triggeredReactions[i].Execute(data);
 			}
 
 			return true;

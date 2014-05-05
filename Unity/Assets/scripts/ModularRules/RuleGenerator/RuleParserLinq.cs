@@ -124,6 +124,7 @@ namespace ModularRules
 				string t = xParam.Element("type").Value;
 
 				newP.type = ReflectOverSeveralNamespaces(t, ExtraNamespaces);
+				if (newP.type == null) continue;
 
 				// get value as string
 				string v = xParam.Element("value").Value;
@@ -189,6 +190,7 @@ namespace ModularRules
 		#region Saving Rules
 		public void SaveRules(List<BaseRuleElement.RuleData> data, string filename)
 		{
+			// TODO rework filepath finding for build!
 			string filepath = Directory.GetCurrentDirectory() + @"/Assets/Resources/" + filename + ".xml";
 
 			XDocument xmlDoc = new XDocument();
@@ -282,12 +284,15 @@ namespace ModularRules
 		{
 			string result = "" + type;
 
-			if (result.Contains("."))
+			if (result.Contains("["))
+			{
+
+			}
+			else if (result.Contains("."))
 			{
 				int index = result.LastIndexOf('.');
 
 				result = result.Substring(result.LastIndexOf('.') + 1, result.Length - (index + 1));
-
 			}
 
 			Debug.Log(result);

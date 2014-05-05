@@ -10,19 +10,19 @@ namespace ModularRules
 
 		void Start()
 		{
-			position = transform.position;
+			position = Actor.transform.position;
 		}
 
 		public override GameEvent UpdateEvent()
 		{
 			if (transform == null) return this;
 
-			if (Vector3.Distance(position, transform.position) > minDistance)
+			if (Vector3.Distance(position, Actor.transform.position) > minDistance)
 			{
 				Trigger(new GameEventData()
 					.Add(new DataPiece(EventDataKeys.TargetObject) { data = gameObject }));
 
-				position = transform.position;
+				position = Actor.transform.position;
 			}
 
 			return this;

@@ -9,6 +9,8 @@ public class LevelPatch : Actor
 	void Start()
 	{
 		tag = Tag;
+
+		Initialize();
 	}
 
 	void Update()

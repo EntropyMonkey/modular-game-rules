@@ -98,10 +98,12 @@ namespace ModularRules
 						Time.deltaTime * FollowSpeed);
 				}
 
-				Reactor.transform.rotation = Quaternion.Lerp(
-					Reactor.transform.rotation, 
-					Quaternion.LookRotation(targetTransform.position - Reactor.transform.position), 
-					Time.deltaTime * FollowSpeed);
+				//Reactor.transform.rotation = Quaternion.Lerp(
+				//	Reactor.transform.rotation, 
+				//	Quaternion.LookRotation(targetTransform.position - Reactor.transform.position), 
+				//	Time.deltaTime * FollowSpeed);
+
+				Reactor.transform.LookAt(targetTransform.position);
 			}
 		}
 	}

@@ -13,15 +13,19 @@ namespace ModularRules
 	{
 		public bool ShowButton = true;
 
+		public bool editMode = false;
+
 		RuleParserLinq ruleParser;
 
 		// contains all placeholders for actors in the scene, in order of their Id
-		List<GenerateElement> placeholders;
+		List<PlaceholderElement> placeholders;
 
 		// keeping track of generated elements
 		List<Actor> genActors = new List<Actor>();
 		List<GameEvent> genEvents = new List<GameEvent>();
 		List<Reaction> genReactions = new List<Reaction>();
+
+		private int currentActorId = 0;
 
 		void Awake()
 		{
@@ -29,9 +33,9 @@ namespace ModularRules
 		}
 
 		#region Finding generation placeholders in scene
-		private class GenerationElementComparer : IComparer<GenerateElement>
+		private class GenerationElementComparer : IComparer<PlaceholderElement>
 		{
-			public int Compare(GenerateElement x, GenerateElement y)
+			public int Compare(PlaceholderElement x, PlaceholderElement y)
 			{
 				if (x == null || y == null || x == y) return 0;
 
@@ -47,10 +51,10 @@ namespace ModularRules
 
 		void FindGenerationPlaceholdersInScene()
 		{
-			if (placeholders == null) placeholders = new List<GenerateElement>();
+			if (placeholders == null) placeholders = new List<PlaceholderElement>();
 			else placeholders.Clear();
 
-			placeholders.AddRange(FindObjectsOfType<GenerateElement>());
+			placeholders.AddRange(FindObjectsOfType<PlaceholderElement>());
 			GenerationElementComparer gec = new GenerationElementComparer();
 			placeholders.Sort(gec); // sort according to ids, starting with 0, assuming there are no left-over ids
 
@@ -70,7 +74,7 @@ namespace ModularRules
 
 		public void AddActorToScene(BaseRuleElement.ActorData data)
 		{
-			if (placeholders[data.id].enabled == true)
+			if (data.id < placeholders.Count && placeholders[data.id].enabled == true)
 			{
 #if DEBUG
 				Debug.Log("Adding actor " + data.id + ", " + data.type);
@@ -83,9 +87,13 @@ namespace ModularRules
 					Actor actor = pGo.AddComponent(data.type) as Actor;
 					actor.Id = data.id;
 
+					// keeping current id up to date
+					if (actor.Id > currentActorId)
+						currentActorId = actor.Id;
+
 					SetParameters(actor, data);
 
-					SetComponentParameters(actor, data);
+					//SetComponentParameters(actor, data);
 
 					genActors.Add(actor);
 					// commented because ids might not be a series without missing ids
@@ -105,6 +113,22 @@ namespace ModularRules
 			}
 		}
 
+		public void AddActorToScene(GameObject newActor)
+		{
+			Actor actor = newActor.GetComponent(typeof(Actor)) as Actor;
+			if (actor == null)
+			{
+				Debug.LogError("Trying to interpret a GameObject as actor, but it doesn't have an Actor component.");
+				return;
+			}
+
+			actor.Id = ++currentActorId;
+#if DEBUG
+			Debug.Log("Adding actor " + newActor);
+#endif
+
+		}
+
 		public void AddEventToScene(BaseRuleElement.EventData data)
 		{
 #if DEBUG
@@ -121,6 +145,7 @@ namespace ModularRules
 				{
 					GameObject newEventGO = new GameObject("E => " + data.type);
 					newEventGO.transform.parent = actor.Events.transform;
+					newEventGO.transform.localPosition = Vector3.zero;
 
 					gameEvent = newEventGO.AddComponent(data.type) as GameEvent;
 					gameEvent.Id = data.id;
@@ -160,6 +185,7 @@ namespace ModularRules
 				{
 					GameObject newReactionGO = new GameObject("R => " + data.type);
 					newReactionGO.transform.parent = actor.Reactions.transform;
+					newReactionGO.transform.localPosition = Vector3.zero;
 
 					reaction = newReactionGO.AddComponent(data.type) as Reaction;
 
@@ -182,6 +208,7 @@ namespace ModularRules
 			}
 		}
 
+		#region SetParameters
 		private void SetParameters<T, U>(T gObject, U data) 
 			where T : Component 
 			where U : BaseRuleElement.RuleData
@@ -196,7 +223,7 @@ namespace ModularRules
 
 				if (pFieldInfo == null)
 				{
-					Debug.LogError("Couldn't find parameter.");
+					Debug.LogError("Couldn't find parameter " + parameter.name + " (in type " + parameter.type + ").");
 					continue;
 				}
 
@@ -236,13 +263,15 @@ namespace ModularRules
 		}
 		#endregion
 
+		#endregion
+
 		#region Updating Elements
 		void UpdateActor(BaseRuleElement.ActorData actorData)
 		{
 			// check if matching id actor has same type
 			// if different type, change it. Self-destroy old one, create new actor.
 			Actor oldActor = genActors.Find(item => item.Id == actorData.id);
-			if (oldActor.GetType() != actorData.type)
+			if (oldActor != null && oldActor.GetType() != actorData.type)
 			{
 				oldActor.Reset();
 				genActors.Remove(oldActor);
@@ -333,7 +362,7 @@ namespace ModularRules
 
 			ruleParser.Parse(this, filename);
 
-			// initialize elements. order of initializing is important
+			// initialize elements. order of initializing is important (first actors, then events, then reactions)
 			InitializeRuleElements();
 
 			Debug.LogWarning("Completed generating level.");
@@ -382,12 +411,12 @@ namespace ModularRules
 				}
 			}
 
-			if (ShowButton && GUI.Button(new Rect(0, 50, 100, 50), "Save Rules"))
+			if (editMode && ShowButton && GUI.Button(new Rect(0, 50, 100, 50), "Save Rules"))
 			{
 				SaveRules("rules_0");
 			}
 
-			if (ShowButton && GUI.Button(new Rect(0, 100, 100, 50), "Reset Scene"))
+			if (editMode && ShowButton && GUI.Button(new Rect(0, 100, 100, 50), "Reset Scene"))
 			{
 				foreach(Actor a in genActors)
 				{

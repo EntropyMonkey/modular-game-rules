@@ -16,8 +16,6 @@ namespace ModularRules
 			public Vector3 relativeVelocity;
 		}
 
-		public enum CollisionPhase { ENTER, STAY, EXIT, ANY }
-
 		public string CollideWithTag;
 
 		public CollisionPhase TriggerOn = CollisionPhase.ANY;
@@ -71,7 +69,8 @@ namespace ModularRules
 		#region OnCollision
 		void OnCollisionEnter(Collision collision)
 		{
-			if (collision.collider.tag == CollideWithTag)
+			if (collision.collider.tag == CollideWithTag && 
+				(TriggerOn == CollisionPhase.ENTER || TriggerOn == CollisionPhase.ANY))
 			{
 				Trigger(new CollisionData() {
 					otherCollider = collision.collider,
@@ -84,7 +83,8 @@ namespace ModularRules
 
 		void OnCollisionStay(Collision collision)
 		{
-			if (collision.collider.tag == CollideWithTag)
+			if (collision.collider.tag == CollideWithTag &&
+				(TriggerOn == CollisionPhase.STAY || TriggerOn == CollisionPhase.ANY))
 			{
 				Trigger(new CollisionData()
 				{
@@ -98,7 +98,8 @@ namespace ModularRules
 
 		void OnCollisionExit(Collision collision)
 		{
-			if (collision.collider.tag == CollideWithTag)
+			if (collision.collider.tag == CollideWithTag &&
+				(TriggerOn == CollisionPhase.EXIT || TriggerOn == CollisionPhase.ANY))
 			{
 				Trigger(new CollisionData()
 				{
@@ -114,7 +115,8 @@ namespace ModularRules
 		#region OnTrigger
 		void OnTriggerEnter(Collider other)
 		{
-			if (other.collider.tag == CollideWithTag)
+			if (other.collider.tag == CollideWithTag &&
+				(TriggerOn == CollisionPhase.ENTER || TriggerOn == CollisionPhase.ANY))
 			{
 				Trigger(new CollisionData()
 				{
@@ -128,7 +130,8 @@ namespace ModularRules
 
 		void OnTriggerStay(Collider other)
 		{
-			if (other.collider.tag == CollideWithTag)
+			if (other.collider.tag == CollideWithTag && 
+				(TriggerOn == CollisionPhase.STAY || TriggerOn == CollisionPhase.ANY))
 			{
 				Trigger(new CollisionData()
 				{
@@ -142,7 +145,8 @@ namespace ModularRules
 
 		void OnTriggerExit(Collider other)
 		{
-			if (other.collider.tag == CollideWithTag)
+			if (other.collider.tag == CollideWithTag &&
+				(TriggerOn == CollisionPhase.EXIT || TriggerOn == CollisionPhase.ANY))
 			{
 				Trigger(new CollisionData()
 				{
