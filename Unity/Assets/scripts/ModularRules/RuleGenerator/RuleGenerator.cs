@@ -74,12 +74,16 @@ namespace ModularRules
 
 		public void AddActorToScene(BaseRuleElement.ActorData data)
 		{
-			if (data.id < placeholders.Count && placeholders[data.id].enabled == true)
+			if (data.id < placeholders.Count && placeholders[data.id] != null)
 			{
 #if DEBUG
 				Debug.Log("Adding actor " + data.id + ", " + data.type);
 #endif
-				if (placeholders.Count > data.id && placeholders[data.id] != null)
+				if (placeholders[data.id].enabled != true)
+				{
+					UpdateActor(data);
+				}
+				else
 				{
 					GameObject pGo = placeholders[data.id].gameObject;
 
@@ -102,14 +106,11 @@ namespace ModularRules
 					// deactivate placeholder
 					placeholders[data.id].enabled = false;
 				}
-				else
-				{
-					Debug.LogError("There is no placeholder for actor " + data.id + " in the scene.");
-				}
+				
 			}
 			else // has already been created
 			{
-				UpdateActor(data);
+				Debug.LogError("There is no placeholder for actor " + data.id + " in the scene.");
 			}
 		}
 
