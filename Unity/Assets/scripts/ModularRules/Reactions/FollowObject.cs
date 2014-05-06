@@ -15,9 +15,9 @@ namespace ModularRules
 
 		private Transform targetTransform;
 
-		public override void Initialize()
+		public override void Initialize(RuleGenerator generator)
 		{
-			base.Initialize();
+			base.Initialize(generator);
 
 			if (FixedToObject)
 			{

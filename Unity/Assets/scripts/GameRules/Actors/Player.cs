@@ -12,9 +12,17 @@ public class Player : Actor
 	public float HorizontalMaxSpeed = 10;
 	public float VerticalMaxSpeed = 10;
 
+	void Awake()
+	{
+		if (generator == null)
+			generator = FindObjectOfType<RuleGenerator>();
+	}
+
 	void Start()
 	{
 		tag = Tag;
+
+		Initialize(generator);
 	}
 
 	public override BaseRuleElement.RuleData GetRuleInformation()

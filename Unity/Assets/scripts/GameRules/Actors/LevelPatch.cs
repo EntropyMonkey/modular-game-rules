@@ -10,7 +10,10 @@ public class LevelPatch : Actor
 	{
 		tag = Tag;
 
-		Initialize();
+		if (generator == null)
+			generator = GameObject.FindObjectOfType<RuleGenerator>();
+
+		Initialize(generator);
 	}
 
 	void Update()

@@ -14,9 +14,9 @@ namespace ModularRules
 
 		protected List<Reaction> reactionComponents = new List<Reaction>();
 
-		public override void Initialize()
+		public override void Initialize(RuleGenerator generator)
 		{
-			base.Initialize();
+			base.Initialize(generator);
 
 			Register();
 		}

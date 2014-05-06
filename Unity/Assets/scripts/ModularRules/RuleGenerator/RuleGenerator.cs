@@ -15,6 +15,8 @@ namespace ModularRules
 
 		public bool editMode = false;
 
+		public static string Tag = "RuleGenerator";
+
 		RuleParserLinq ruleParser;
 
 		// contains all placeholders for actors in the scene, in order of their Id
@@ -29,6 +31,7 @@ namespace ModularRules
 
 		void Awake()
 		{
+			tag = Tag;
 			ruleParser = gameObject.AddComponent<RuleParserLinq>();
 		}
 
@@ -347,10 +350,26 @@ namespace ModularRules
 		{
 			foreach (Actor a in genActors)
 			{
-				a.Initialize();
+				a.Initialize(this);
 			}
 		}
 		#endregion
+
+		public void RegisterRuleElement(BaseRuleElement element)
+		{
+			if (element as Actor != null)
+			{
+				Debug.Log("Created actor " + element.name);
+			}
+			else if (element as GameEvent != null)
+			{
+				Debug.Log("Created event " + element.name);
+			}
+			else if (element as Reaction != null)
+			{
+				Debug.Log("Created reaction " + element.name);
+			}
+		}
 
 		void LoadRules(string filename)
 		{

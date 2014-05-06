@@ -13,9 +13,9 @@ namespace ModularRules
 
 		private Counters counters;
 
-		public override void Initialize()
+		public override void Initialize(RuleGenerator generator)
 		{
-			base.Initialize();
+			base.Initialize(generator);
 
 			if (!(counters = Actor.GetComponent<Counters>()))
 			{

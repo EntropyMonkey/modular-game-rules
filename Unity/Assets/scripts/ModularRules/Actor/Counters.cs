@@ -16,6 +16,11 @@ namespace ModularRules
 	{
 		private Dictionary<string, Counter> counters;
 
+		void Start()
+		{
+			counters = new Dictionary<string, Counter>();
+		}
+
 		public void AddCounter(string name, float startValue, float minValue = 0, float maxValue = 1)
 		{
 			if (!counters.ContainsKey(name))

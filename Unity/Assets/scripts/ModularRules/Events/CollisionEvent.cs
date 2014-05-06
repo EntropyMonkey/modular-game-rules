@@ -45,9 +45,9 @@ namespace ModularRules
 			return result;
 		}
 
-		public override void Initialize()
+		public override void Initialize(RuleGenerator generator)
 		{
-			base.Initialize();
+			base.Initialize(generator);
 
 			if (relay == null)
 				relay = Actor.gameObject.AddComponent<CollisionEventRelay>();

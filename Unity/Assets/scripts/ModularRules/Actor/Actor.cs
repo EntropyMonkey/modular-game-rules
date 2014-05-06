@@ -10,6 +10,8 @@ namespace ModularRules
 
 		protected List<Reaction> reactions;
 
+		protected RuleGenerator generator;
+
 		private GameObject eventsGO;
 		public GameObject Events
 		{
@@ -47,9 +49,9 @@ namespace ModularRules
 		/// <summary>
 		/// Collects all events, so that they can be updated when appropriate
 		/// </summary>
-		public override void Initialize()
+		public override void Initialize(RuleGenerator generator)
 		{
-			base.Initialize();
+			base.Initialize(generator);
 
 			generateElement = gameObject.GetComponent<PlaceholderElement>();
 
@@ -90,7 +92,7 @@ namespace ModularRules
 			foreach (GameEvent e in events)
 			{
 				e.Actor = this;
-				e.Initialize();
+				e.Initialize(generator);
 			}
 		}
 
@@ -122,7 +124,7 @@ namespace ModularRules
 			foreach (Reaction r in reactions)
 			{
 				r.Reactor = this;
-				r.Initialize();
+				r.Initialize(generator);
 			}
 		}
 

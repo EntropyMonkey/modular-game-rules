@@ -13,6 +13,8 @@ public class PlayerCamera : Actor
 	{
 		tag = Tag;
 
+		Initialize(generator);
+
 		if (camera)
 		{
 			Rect camRect = camera.rect;

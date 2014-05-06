@@ -46,8 +46,18 @@ namespace ModularRules
 		public int Id;
 
 		// called upon generation
-		public virtual void Initialize()
+		public virtual void Initialize(RuleGenerator generator)
 		{
+			if (generator == null)
+				generator = GameObject.FindGameObjectWithTag(RuleGenerator.Tag).GetComponent(typeof(RuleGenerator)) as RuleGenerator;
+
+			if (generator == null)
+			{
+				Debug.LogError("There's no rule generator in the scene. Aborting.");
+				return;
+			}
+
+			generator.RegisterRuleElement(this);
 		}
 
 		/// <summary>

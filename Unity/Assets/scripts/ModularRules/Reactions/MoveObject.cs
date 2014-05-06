@@ -18,9 +18,9 @@ namespace ModularRules
 		public bool RotateWithMovement = true;
 		public float RotationSpeed;
 
-		public override void Initialize()
+		public override void Initialize(RuleGenerator generator)
 		{
-			base.Initialize();
+			base.Initialize(generator);
 
 			if (Reactor.rigidbody == null)
 				Reactor.gameObject.AddComponent<Rigidbody>();
