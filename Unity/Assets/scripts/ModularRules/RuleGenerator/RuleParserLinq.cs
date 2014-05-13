@@ -139,13 +139,13 @@ namespace ModularRules
 				{
 					newP.value = Enum.Parse(newP.type, v);
 				}
-				else if (float.TryParse(v, out tryparsef))
-				{
-					newP.value = float.Parse(v);
-				}
 				else if (int.TryParse(v, out tryparsei))
 				{
 					newP.value = int.Parse(v);
+				}
+				else if (float.TryParse(v, out tryparsef))
+				{
+					newP.value = float.Parse(v);
 				}
 				else if (newP.type == typeof(Vector3))
 				{

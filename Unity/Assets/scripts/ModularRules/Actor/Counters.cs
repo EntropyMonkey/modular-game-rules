@@ -4,24 +4,19 @@ using System.Collections.Generic;
 
 namespace ModularRules
 {
-	public class Counter
-	{
-		public float value;
-		public float minValue;
-		public float maxValue;
-		public string name;
-	};
-
 	public class Counters : MonoBehaviour
 	{
-		private Dictionary<string, Counter> counters;
-
-		void Start()
+		public class Counter
 		{
-			counters = new Dictionary<string, Counter>();
-		}
+			public float value;
+			public float minValue;
+			public float maxValue;
+			public string name;
+		};
 
-		public void AddCounter(string name, float startValue, float minValue = 0, float maxValue = 1)
+		private Dictionary<string, Counter> counters = new Dictionary<string,Counter>();
+
+		public void AddCounter(string name, float startValue, float minValue, float maxValue)
 		{
 			if (!counters.ContainsKey(name))
 			{
@@ -79,7 +74,18 @@ namespace ModularRules
 
 		void SetValue(Counter counter, float value)
 		{
-			counter.value = Mathf.Min(counter.minValue, Mathf.Max(counter.maxValue, value));
+			counter.value = Mathf.Max(counter.minValue, Mathf.Min(counter.maxValue, value));
+		}
+
+		void OnGUI()
+		{
+			int y = 0;
+			foreach (KeyValuePair<string, Counter> kvp in counters)
+			{
+				GUI.Label(new Rect(700, y, 50, 50), kvp.Value.value.ToString());
+				y += 50;
+			}
 		}
 	}
+
 }

@@ -1,0 +1,522 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<rules>
+  <actors>
+    <actor>
+      <id>2</id>
+      <type>LevelPatch</type>
+      <label>Patch1</label>
+    </actor>
+    <actor>
+      <id>1</id>
+      <type>PlayerCamera</type>
+      <label>Player1Camera</label>
+      <param name="ViewportWidth">
+        <type>Single</type>
+        <value>1</value>
+      </param>
+      <param name="ViewportXPos">
+        <type>Single</type>
+        <value>0</value>
+      </param>
+    </actor>
+    <actor>
+      <id>0</id>
+      <type>Player</type>
+      <label>Player1</label>
+      <param name="HorizontalMaxSpeed">
+        <type>Single</type>
+        <value>10</value>
+      </param>
+      <param name="VerticalMaxSpeed">
+        <type>Single</type>
+        <value>10</value>
+      </param>
+    </actor>
+  </actors>
+  <events>
+    <event>
+      <id>6</id>
+      <type>CollisionEvent</type>
+      <label>Patch1 E (ModularRules.CollisionEvent) =&gt; Patch1 E =&gt; ModularRules.CollisionEvent</label>
+      <actorId>2</actorId>
+      <param name="CollideWithTag">
+        <type>String</type>
+        <value>Player</value>
+      </param>
+      <param name="TriggerOn">
+        <type>CollisionPhase</type>
+        <value>2</value>
+      </param>
+    </event>
+    <event>
+      <id>5</id>
+      <type>ObjectMovedEvent</type>
+      <label>Player1 E (ModularRules.ObjectMovedEvent) =&gt; Player1 E =&gt; ModularRules.ObjectMovedEvent</label>
+      <actorId>0</actorId>
+    </event>
+    <event>
+      <id>4</id>
+      <type>MouseInput</type>
+      <label>Player1 E (ModularRules.MouseInput) =&gt; Player1 E =&gt; ModularRules.MouseInput</label>
+      <actorId>0</actorId>
+      <param name="TrackedButton">
+        <type>MouseInput+MouseButton</type>
+        <value>0</value>
+      </param>
+      <param name="TrackedCamera">
+        <type>PlayerCamera</type>
+        <value>1</value>
+      </param>
+    </event>
+    <event>
+      <id>3</id>
+      <type>KeyboardInput</type>
+      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>100</value>
+      </param>
+    </event>
+    <event>
+      <id>2</id>
+      <type>KeyboardInput</type>
+      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>115</value>
+      </param>
+    </event>
+    <event>
+      <id>1</id>
+      <type>KeyboardInput</type>
+      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>119</value>
+      </param>
+    </event>
+    <event>
+      <id>0</id>
+      <type>KeyboardInput</type>
+      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>97</value>
+      </param>
+    </event>
+    <event>
+      <id>7</id>
+      <type>KeyboardInput</type>
+      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>273</value>
+      </param>
+    </event>
+    <event>
+      <id>8</id>
+      <type>KeyboardInput</type>
+      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>274</value>
+      </param>
+    </event>
+  </events>
+  <reactions>
+    <reaction>
+      <id>8</id>
+      <type>ChangeCounter</type>
+      <label>Player1 R =&gt; Count</label>
+      <actorId>0</actorId>
+      <listenedEventId>4</listenedEventId>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Mouse</value>
+      </param>
+      <param name="MaxValue">
+        <type>Int32</type>
+        <value>100</value>
+      </param>
+      <param name="MinValue">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>4</id>
+      <type>FollowObject</type>
+      <label>Player1Camera R (ModularRules.FollowObject) =&gt; Player1Camera R =&gt; ModularRules.FollowObject</label>
+      <actorId>1</actorId>
+      <listenedEventId>5</listenedEventId>
+      <param name="FollowSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+      <param name="Offset">
+        <type>Vector3</type>
+        <value>0 2 -5</value>
+      </param>
+      <param name="StayBehindObject">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>3</id>
+      <type>MoveObject</type>
+      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>3</listenedEventId>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>3</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>20</value>
+      </param>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>2</value>
+      </param>
+      <param name="RotateWithMovement">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+      <param name="RotationSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>2</id>
+      <type>MoveObject</type>
+      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>2</listenedEventId>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>1</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>20</value>
+      </param>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>2</value>
+      </param>
+      <param name="RotateWithMovement">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+      <param name="RotationSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>1</id>
+      <type>MoveObject</type>
+      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>1</listenedEventId>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>0</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>20</value>
+      </param>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>2</value>
+      </param>
+      <param name="RotateWithMovement">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+      <param name="RotationSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>0</id>
+      <type>MoveObject</type>
+      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>0</listenedEventId>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>2</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>20</value>
+      </param>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>2</value>
+      </param>
+      <param name="RotateWithMovement">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+      <param name="RotationSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>5</id>
+      <type>MoveObject</type>
+      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>7</listenedEventId>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>4</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>25</value>
+      </param>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>0</value>
+      </param>
+      <param name="RotateWithMovement">
+        <type>Boolean</type>
+        <value>False</value>
+      </param>
+      <param name="RotationSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>6</id>
+      <type>MoveObject</type>
+      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>8</listenedEventId>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>5</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>25</value>
+      </param>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>0</value>
+      </param>
+      <param name="RotateWithMovement">
+        <type>Boolean</type>
+        <value>False</value>
+      </param>
+      <param name="RotationSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>14</id>
+      <type>SpawnObject</type>
+      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <actorId>2</actorId>
+      <listenedEventId>6</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Patch1</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>1 0 -1</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>100</value>
+      </param>
+      <param name="DeactivateAfterSpawning">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>13</id>
+      <type>SpawnObject</type>
+      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <actorId>2</actorId>
+      <listenedEventId>6</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Patch1</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>0 0 -1</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>100</value>
+      </param>
+      <param name="DeactivateAfterSpawning">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>12</id>
+      <type>SpawnObject</type>
+      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <actorId>2</actorId>
+      <listenedEventId>6</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Patch1</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>-1 0 -1</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>100</value>
+      </param>
+      <param name="DeactivateAfterSpawning">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>11</id>
+      <type>SpawnObject</type>
+      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <actorId>2</actorId>
+      <listenedEventId>6</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Patch1</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>1 0 0</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>100</value>
+      </param>
+      <param name="DeactivateAfterSpawning">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>10</id>
+      <type>SpawnObject</type>
+      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <actorId>2</actorId>
+      <listenedEventId>6</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Patch1</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>-1 0 0</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>100</value>
+      </param>
+      <param name="DeactivateAfterSpawning">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>9</id>
+      <type>SpawnObject</type>
+      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <actorId>2</actorId>
+      <listenedEventId>6</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Patch1</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>1 0 1</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>100</value>
+      </param>
+      <param name="DeactivateAfterSpawning">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>8</id>
+      <type>SpawnObject</type>
+      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <actorId>2</actorId>
+      <listenedEventId>6</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Patch1</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>0 0 1</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>100</value>
+      </param>
+      <param name="DeactivateAfterSpawning">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>7</id>
+      <type>SpawnObject</type>
+      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <actorId>2</actorId>
+      <listenedEventId>6</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Patch1</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>-1 0 1</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>100</value>
+      </param>
+      <param name="DeactivateAfterSpawning">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+  </reactions>
+</rules>

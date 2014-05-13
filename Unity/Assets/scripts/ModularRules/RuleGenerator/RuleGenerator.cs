@@ -1,4 +1,4 @@
-﻿//#define DEBUG
+﻿#define DEBUG
 
 using UnityEngine;
 using System.Collections;
@@ -167,7 +167,7 @@ namespace ModularRules
 
 				if (reaction == null)
 				{
-					GameObject newReactionGO = new GameObject("R (" + data.type + ") => " + data.label);
+					GameObject newReactionGO = new GameObject(data.label);
 
 					reaction = newReactionGO.AddComponent(data.type) as Reaction;
 					reaction.Id = data.id;
@@ -389,7 +389,7 @@ namespace ModularRules
 
 		public void RegisterRuleElement(Actor actor)
 		{
-			if (!genActors.Contains(actor))
+			if (!genActors.Find(item => item.Id == actor.Id))
 			{
 				Actor[] fakeActors = new Actor[genActors.Count + placeholders.Count];
 				genActors.CopyTo(fakeActors);
@@ -412,7 +412,7 @@ namespace ModularRules
 
 		public void RegisterRuleElement(GameEvent gameEvent)
 		{
-			if (!genEvents.Contains(gameEvent))
+			if (!genEvents.Find(item => item.Id == gameEvent.Id))
 			{
 				if (gameEvent.Id == -1)
 					gameEvent.Id = GetId(genEvents.ToArray());
@@ -423,12 +423,14 @@ namespace ModularRules
 
 		public void RegisterRuleElement(Reaction reaction)
 		{
-			if (!genReactions.Contains(reaction))
+			if (!genReactions.Find(item => item.Id == reaction.Id))
 			{
 				if (reaction.Id == -1)
 					reaction.Id = GetId(genReactions.ToArray());
 
 				genReactions.Add(reaction);
+
+				Debug.LogWarning("Registered reaction: " + reaction.name + " (" + reaction.Id + ")");
 			}
 		}
 
@@ -462,6 +464,9 @@ namespace ModularRules
 				{
 					if (element as GameEvent) genEvents.Remove(element as GameEvent);
 					else if (element as Reaction) genReactions.Remove(element as Reaction);
+#if DEBUG
+					Debug.Log("Destroyed unused element: " + element.name + " (" + element.Id + ")");
+#endif
 					Destroy(element.gameObject);
 				}
 				else
@@ -586,16 +591,6 @@ namespace ModularRules
 			if (editMode && ShowButton && GUI.Button(new Rect(0, 50, 100, 50), "Save Rules"))
 			{
 				SaveRules("rules_0");
-			}
-
-			if (editMode && ShowButton && GUI.Button(new Rect(0, 100, 100, 50), "Reset Scene"))
-			{
-				foreach(Actor a in genActors)
-				{
-					a.Reset();
-					Destroy(a);
-				}
-				genActors.Clear();
 			}
 
 #if UNITY_EDITOR
