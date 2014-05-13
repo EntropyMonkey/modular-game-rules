@@ -15,11 +15,11 @@ namespace ModularRules
 
 		public override void Initialize(RuleGenerator generator)
 		{
-			base.Initialize(generator);
+			//base.Initialize(generator);
 
 			if (!(counters = Actor.GetComponent<Counters>()))
 			{
-				Debug.LogWarning("Deactivating " + name + " because the actor doesn't have counters.");
+				Debug.LogWarning("Deactivating " + name + " because the actor doesn't have fitting counters.");
 				gameObject.SetActive(false);
 			}
 		}

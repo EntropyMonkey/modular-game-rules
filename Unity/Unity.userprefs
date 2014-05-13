@@ -1,21 +1,20 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Resources\rules_1.xml">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\ModularRules\Events\CollisionEvent.cs">
     <Files>
       <File FileName="Assets\Scripts\ModularRules\Events\GameEvent.cs" Line="1" Column="1" />
       <File FileName="Assets\scripts\GameRules\Actors\PlayerCamera.cs" Line="1" Column="1" />
       <File FileName="Assets\scripts\ModularRules\Events\Input\JoypadInput.cs" Line="1" Column="1" />
-      <File FileName="Assets\scripts\ModularRules\Events\CollisionEventRelay.cs" Line="1" Column="1" />
-      <File FileName="Assets\scripts\ModularRules\Events\CollisionEvent.cs" Line="1" Column="1" />
-      <File FileName="Assets\scripts\ModularRules\RuleGenerator\RuleGenerator.cs" Line="1" Column="1" />
+      <File FileName="Assets\scripts\ModularRules\Events\CollisionEvent.cs" Line="50" Column="1" />
+      <File FileName="Assets\scripts\ModularRules\RuleGenerator\RuleGenerator.cs" Line="156" Column="53" />
       <File FileName="Assets\scripts\ModularRules\Events\GameEventData.cs" Line="1" Column="1" />
-      <File FileName="Assets\Resources\rules_1.xml" Line="1" Column="1" />
+      <File FileName="Assets\scripts\ModularRules\Actor\Actor.cs" Line="1" Column="1" />
+      <File FileName="Assets\scripts\ModularRules\Actor\CollisionEventRelay.cs" Line="51" Column="37" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="Q:\Dokumente\1 ITU Kopenhagen\Faecher\Semester 4\Master Thesis\modular-game-rules\Unity\Assets\scripts\ModularRules\Events\CollisionEventRelay.cs" line="49" />
-      <Breakpoint file="Q:\Dokumente\1 ITU Kopenhagen\Faecher\Semester 4\Master Thesis\modular-game-rules\Unity\Assets\scripts\ModularRules\Events\CollisionEvent.cs" line="103" />
+      <Breakpoint file="Q:\Dokumente\1 ITU Kopenhagen\Faecher\Semester 4\Master Thesis\modular-game-rules\Unity\Assets\scripts\ModularRules\Events\CollisionEvent.cs" line="50" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />

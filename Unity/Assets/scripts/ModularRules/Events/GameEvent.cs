@@ -73,7 +73,8 @@ namespace ModularRules
 
 			for (int i = 0; i < triggeredReactions.Count; i++ )
 			{
-				triggeredReactions[i].Execute(data);
+				if (triggeredReactions[i] != null)
+					triggeredReactions[i].Execute(data);
 			}
 
 			return true;

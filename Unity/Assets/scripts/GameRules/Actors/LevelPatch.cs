@@ -10,10 +10,16 @@ public class LevelPatch : Actor
 	{
 		tag = Tag;
 
-		if (generator == null)
-			generator = GameObject.FindObjectOfType<RuleGenerator>();
+		if (events == null || events.Count <= 0)
+		{
+			ScanEvents();
+			ScanReactions();
+		}
 
-		Initialize(generator);
+		if (GetComponent<PlaceholderElement>())
+		{
+			GetComponent<PlaceholderElement>().Id = Id;
+		}
 	}
 
 	void Update()

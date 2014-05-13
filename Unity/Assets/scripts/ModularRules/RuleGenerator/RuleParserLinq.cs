@@ -15,8 +15,7 @@ namespace ModularRules
 
 		public void Parse(RuleGenerator generator, string filename)
 		{
-
-			string filepath = Directory.GetCurrentDirectory() + @"/Assets/Resources/" + filename + ".xml";
+			string filepath = Application.dataPath + @"/Rules/" + filename + ".xml";
 			XDocument xmlDoc = XDocument.Load(filepath);
 
 			if (xmlDoc == null)
@@ -190,8 +189,7 @@ namespace ModularRules
 		#region Saving Rules
 		public void SaveRules(List<BaseRuleElement.RuleData> data, string filename)
 		{
-			// TODO rework filepath finding for build!
-			string filepath = Directory.GetCurrentDirectory() + @"/Assets/Resources/" + filename + ".xml";
+			string filepath = Application.dataPath + @"/Rules/" + filename + ".xml";
 
 			XDocument xmlDoc = new XDocument();
 			if (File.Exists(filepath))
@@ -294,8 +292,6 @@ namespace ModularRules
 
 				result = result.Substring(result.LastIndexOf('.') + 1, result.Length - (index + 1));
 			}
-
-			Debug.Log(result);
 
 			return result;
 		}

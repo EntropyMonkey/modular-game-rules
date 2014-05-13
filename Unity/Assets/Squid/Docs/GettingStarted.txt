@@ -1,0 +1,10 @@
+Getting started:
+
+1. open Samples/Sample01
+2. run the game
+3. play with the gui
+4. stop the game
+5. open Sample/SampleGui01.cs
+6. digest the sourcecode
+7. go to http://www.ionstar.org/forum/ and create a user account
+8. go to http://ionstar.org/forum/index.php?board=5.0 and ask questions!

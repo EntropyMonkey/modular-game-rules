@@ -59,7 +59,7 @@ namespace ModularRules
 
 
 		#region Register/Unregister with events
-		protected virtual void Register()
+		public virtual void Register()
 		{
 			if (ListenedEvent != null)
 				ListenedEvent.Register(this);

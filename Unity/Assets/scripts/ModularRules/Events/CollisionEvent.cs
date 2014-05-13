@@ -45,12 +45,21 @@ namespace ModularRules
 			return result;
 		}
 
+		void Awake()
+		{
+			// HACK for spawning objects
+			//Initialize(GameObject.FindGameObjectWithTag(RuleGenerator.Tag).GetComponent<RuleGenerator>());
+		}
+
 		public override void Initialize(RuleGenerator generator)
 		{
 			base.Initialize(generator);
 
+			relay = Actor.gameObject.GetComponent<CollisionEventRelay>();
 			if (relay == null)
+			{
 				relay = Actor.gameObject.AddComponent<CollisionEventRelay>();
+			}
 
 			relay.OnTriggerEnter_Relay += OnTriggerEnter;
 			relay.OnTriggerStay_Relay += OnTriggerStay;
@@ -59,6 +68,26 @@ namespace ModularRules
 			relay.OnCollisionEnter_Relay += OnCollisionEnter;
 			relay.OnCollisionStay_Relay += OnCollisionStay;
 			relay.OnCollisionExit_Relay += OnCollisionExit;
+
+#if UNITY_EDITOR
+			//relay.OnTriggerEnter_Relay += DebugTriggers;
+			////relay.OnTriggerStay_Relay += DebugTriggers;
+			//relay.OnTriggerExit_Relay += DebugTriggers;
+
+			//relay.OnCollisionEnter_Relay += DebugCollisions;
+			////relay.OnCollisionStay_Relay += DebugCollisions;
+			//relay.OnCollisionExit_Relay += DebugCollisions;
+#endif
+		}
+
+		void DebugCollisions(Collision collision)
+		{
+			Debug.Log("Collision: " + collision.collider);
+		}
+
+		void DebugTriggers(Collider collider)
+		{
+			Debug.Log("Trigger: " + collider);
 		}
 
 		public override GameEvent UpdateEvent()

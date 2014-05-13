@@ -10,8 +10,6 @@ namespace ModularRules
 
 		protected List<Reaction> reactions;
 
-		protected RuleGenerator generator;
-
 		private GameObject eventsGO;
 		public GameObject Events
 		{
@@ -19,8 +17,15 @@ namespace ModularRules
 			{
 				if (eventsGO == null)
 				{
-					eventsGO = new GameObject("Events");
-					eventsGO.transform.parent = transform;
+					Transform e = transform.FindChild("Events");
+					if (e) 
+						eventsGO = e.gameObject;
+					else
+					{
+						eventsGO = new GameObject("Events");
+						eventsGO.transform.parent = transform;
+					}
+					// resetting position, just to be sure
 					eventsGO.transform.localPosition = Vector3.zero;
 				}
 
@@ -35,8 +40,15 @@ namespace ModularRules
 			{
 				if (reactionsGO == null)
 				{
-					reactionsGO = new GameObject("Reactions");
-					reactionsGO.transform.parent = transform;
+					Transform r = transform.FindChild("Reactions");
+					if (r)
+						reactionsGO = r.gameObject;
+					else
+					{
+						reactionsGO = new GameObject("Reactions");
+						reactionsGO.transform.parent = transform;
+					}
+					// resetting position, just to be sure
 					reactionsGO.transform.localPosition = Vector3.zero;
 				}
 
@@ -46,12 +58,23 @@ namespace ModularRules
 
 		private PlaceholderElement generateElement;
 
+		[HideInInspector]
+		public bool WasSpawned = false; // treat spawned actors differently - no storing in the rule files f.ex.
+
+		public RuleGenerator RuleGenerator
+		{
+			get;
+			protected set;
+		}
+
 		/// <summary>
 		/// Collects all events, so that they can be updated when appropriate
 		/// </summary>
 		public override void Initialize(RuleGenerator generator)
 		{
 			base.Initialize(generator);
+
+			RuleGenerator = generator;
 
 			generateElement = gameObject.GetComponent<PlaceholderElement>();
 
@@ -68,63 +91,104 @@ namespace ModularRules
 		{
 			Component[] c = GetComponentsInChildren(typeof(GameEvent));
 
-			if (c.Length > 0 && events == null)
+			if (events != null)
+				events.Clear();
+			else if (c.Length > 0 && events == null)
 				events = new List<GameEvent>();
 
 			foreach (Component co in c)
 			{
 				GameEvent e = co as GameEvent;
-				if (!events.Contains(e))
-				{
-					events.Add(e);
-				}
+				AddEvent(e);
 			}
 #if DEBUG
 			if (events != null)
-				Debug.Log(name + " registered " + events.Count + " GameEvents.");
+				Debug.Log(name + " found " + events.Count + " events.");
 #endif
 		}
 
-		void InitializeEvents()
+		public void AddEvent(GameEvent gameEvent)
+		{
+			if (events == null)
+				events = new List<GameEvent>();
+
+			if (!events.Contains(gameEvent))
+			{
+				events.Add(gameEvent);
+				gameEvent.transform.parent = Events.transform;
+				gameEvent.transform.localPosition = Vector3.zero;
+				gameEvent.Actor = this;
+#if DEBUG
+				Debug.Log(name + " added " + gameEvent.name + ".");
+#endif
+			}
+		}
+
+		public void RemoveEvent(GameEvent gameEvent)
+		{
+			events.Remove(gameEvent);
+		}
+
+		public void InitializeEvents()
 		{
 			if (events == null) return;
 
 			foreach (GameEvent e in events)
 			{
-				e.Actor = this;
-				e.Initialize(generator);
+				e.Initialize(RuleGenerator);
 			}
 		}
 
 		public void ScanReactions()
 		{
 			Component[] c = GetComponentsInChildren(typeof(Reaction));
-			
-			if (c.Length > 0 && reactions == null)
+
+			if (reactions != null)
+				reactions.Clear();
+			else if (c.Length > 0 && reactions == null)
 				reactions = new List<Reaction>();
 
 			foreach (Component co in c)
 			{
 				Reaction r = co as Reaction;
-				if (!reactions.Contains(r))
-				{
-					reactions.Add(r);
-				}
+				AddReaction(r);
 			}
 #if DEBUG
 			if (reactions != null)
-				Debug.Log(name + " registered " + reactions.Count + " Reactions.");
+				Debug.Log(name + " found " + reactions.Count + " reactions.");
 #endif
 		}
 
-		void InitializeReactions()
+		public void AddReaction(Reaction reaction)
+		{
+			if (reactions == null)
+				reactions = new List<Reaction>();
+
+			if (!reactions.Contains(reaction))
+			{
+				reactions.Add(reaction);
+				reaction.transform.parent = Reactions.transform;
+				reaction.transform.localPosition = Vector3.zero;
+				reaction.Reactor = this;
+
+#if DEBUG
+				Debug.Log(name + " added " + reaction.name + ".");
+#endif
+			}
+		}
+
+		public void RemoveReaction(Reaction reaction)
+		{
+			reactions.Remove(reaction);
+		}
+
+		public void InitializeReactions()
 		{
 			if (reactions == null) return;
 
 			foreach (Reaction r in reactions)
 			{
-				r.Reactor = this;
-				r.Initialize(generator);
+				r.Initialize(RuleGenerator);
 			}
 		}
 
@@ -151,6 +215,7 @@ namespace ModularRules
 			{
 				foreach (GameEvent gameEvent in events)
 				{
+					RuleGenerator.Unregister(gameEvent);
 					Destroy(gameEvent);
 				}
 				events.Clear();
@@ -162,6 +227,7 @@ namespace ModularRules
 				foreach (Reaction reaction in reactions)
 				{
 					reaction.Unregister();
+					RuleGenerator.Unregister(reaction);
 					Destroy(reaction);
 				}
 				reactions.Clear();
@@ -169,7 +235,11 @@ namespace ModularRules
 			}
 
 			// enable placeholder
-			GetComponent<PlaceholderElement>().enabled = true;
+			PlaceholderElement placeholder = GetComponent<PlaceholderElement>();
+			if (placeholder)
+				placeholder.enabled = true;
+			else if (!WasSpawned)
+				gameObject.AddComponent<PlaceholderElement>();
 
 			base.Reset();
 		}

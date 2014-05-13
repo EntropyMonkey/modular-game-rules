@@ -13,6 +13,13 @@ public class CollisionEventRelay : MonoBehaviour
 	public event OnCollisionRelay OnCollisionStay_Relay;
 	public event OnCollisionRelay OnCollisionExit_Relay;
 
+	void Start()
+	{
+		int callbacks = 0;
+		if (OnCollisionExit_Relay != null)
+			callbacks += OnCollisionExit_Relay.GetInvocationList().Length;
+	}
+
 	void OnTriggerEnter(Collider other)
 	{
 		if (OnTriggerEnter_Relay != null)

@@ -18,14 +18,14 @@
       <id>1</id>
       <type>PlayerCamera</type>
       <label>Player1Camera</label>
-      <param name="ViewportWidth">
-        <type>Single</type>
-        <value>1</value>
-      </param>
-      <param name="ViewportXPos">
-        <type>Single</type>
-        <value>0</value>
-      </param>
+		<param name="ViewportWidth">
+			<type>Single</type>
+			<value>1</value>
+		</param>
+		<param name="ViewportXPos">
+			<type>Single</type>
+			<value>0</value>
+		</param>
     </actor>
     <actor>
       <id>2</id>

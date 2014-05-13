@@ -12,8 +12,13 @@ public class PlayerCamera : Actor
 	void Start()
 	{
 		tag = Tag;
+	}
 
-		Initialize(generator);
+	public override void Initialize(RuleGenerator generator)
+	{
+		base.Initialize(generator);
+
+		gameObject.AddComponent<Camera>();
 
 		if (camera)
 		{

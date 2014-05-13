@@ -42,21 +42,15 @@ namespace ModularRules
 			public int eventId;
 		};
 
-//		[HideInInspector]
-		public int Id;
+		//		[HideInInspector]
+		public int Id = -1;
+
+		// if objects arent defined in the rules, they are usually deleted after rule generation. This enables exceptions.
+		public bool DontDeleteOnLoad = false;
 
 		// called upon generation
 		public virtual void Initialize(RuleGenerator generator)
 		{
-			if (generator == null)
-				generator = GameObject.FindGameObjectWithTag(RuleGenerator.Tag).GetComponent(typeof(RuleGenerator)) as RuleGenerator;
-
-			if (generator == null)
-			{
-				Debug.LogError("There's no rule generator in the scene. Aborting.");
-				return;
-			}
-
 			generator.RegisterRuleElement(this);
 		}
 

@@ -1,0 +1,4 @@
+Known Issues:
+
+- Rendering: Some integrated graphics cards cause border artifacts (Intel HD 3000)
+- Atlas: auto-atlas can run out of texture space and may have artifacts on certain hardware

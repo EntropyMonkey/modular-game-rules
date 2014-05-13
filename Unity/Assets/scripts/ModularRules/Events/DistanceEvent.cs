@@ -35,7 +35,7 @@ namespace ModularRules
 				value = TriggerWhenDistance
 			});
 
-			if (WatchedObject)
+			if (WatchedObject) 
 			{
 				data.parameters.Add(new Param()
 				{

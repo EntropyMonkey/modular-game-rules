@@ -1,0 +1,302 @@
+1.0.4e
+
+- Editor: Moved Squid menu entries to Window/Squid
+- DropDownButton: .Dropdown is now settable and defaults to null
+- Label: added bbcode tag [CTRL=string/], use Label.ControlRequest delegate to return the desired control
+
+1.04d
+
+- Label: multiple/nested bbcode color tags are now parsed correctly
+- Label: fixed linebreaks when bbcode was used
+- Label: removed leading whitespaces in a new line
+- Editor: Toolbox window can now be dragged again
+
+1.0.4c
+
+- missing textures and fonts now log a warning instead of an error
+- Control.Cursor property now shows a dropdown in the Inspector
+- ImageControl now supports the same texture modes as styles
+- moved editor settings into a dropdown window
+- mixed values in a multiselection now use the unity standard ellipsis ("---")
+- added send backward/forward/front/back to editor context menu
+- added IText interface
+- Label, TextBox, TextArea, CheckBox, RadioButton now implement IText
+- controls that implement IText now receive their Type name as default Text when dropped to the canvas
+- dragging a new control to the canvas now shows an exact preview of the control
+- when dropping a new control the selection now changes to that control
+- removed unnwanted controls from toolbox
+- fixed a bug that caused drag&drop from toolbox to fail
+- fixed a problem with dropping a new control into a nested container
+- fixed a bug that caused the selection widget to disappear after selecting something in the outline
+- improved rendering performance
+
+1.0.4b
+
+- GuiHost.SetClipboard/GetClipboard now works with the OS clipboard. (builds only)
+- TextBox copy/paste now works across applications. (builds only)
+- fixed TextArea text wrapping. added bool TextWrap property.
+- fixed crashes in TextArea text navigation
+- squid editor now tries to dock next to game view when first opened
+- outline window now shows layout, skin and history pages
+- outline&editor now display a message when no squid asset is selected
+- new skin editing with multiselect and context menus (rightlick styles)
+- added context menu to squid layout editor (rightlick selection)
+- shrinked the editor toolbar to unity standard size
+- added DragEnter/Leave/Response sample (SampleGui01.cs)
+- fixed toolbox indentation and selection visuals
+- fixed issues with controlcontainer add/remove during update phase
+- fixed several Unity GUIExceptions
+- inspector now hightlights values that are not equal in a multiselection
+- added new toolbar icons
+- added adjustable line grid
+- added background color and texture
+- added Grid and Snap toggles (snap is work in progress)
+- moved CursorCollection from Desktop to Skin
+- Cursors can now be edited through Outline and Inspector
+- removed Desktop.AddCursor, use Skin.Cursors.Add instead
+- selecting a skin asset previews the selected styles again
+- fixed gui not showing in builds using deferred lighting
+- fixed the need to append "_xml" to a font data textasset
+
+1.0.4a
+
+- improved performance for multiline labels
+- fixed a bug that caused controls to animate twice as fast
+- fixed a bug that caused a newly focused TextBox to print a char of the last keyDown
+- fixed a bug that prevented Style.BackColor from drawing in builds
+- fixed wrong text align when the first word exceeded the control area
+- fixed broken key input in builds
+- added ListView.Column.MinWidth/MaxWidth
+
+- added Label.AutoEllipsis.
+  Set this property to True to draw the Ellipsis characters (...) when the text is too long.
+  Works with Labels that:   1. display a single line of Text. 
+							2. do not use auto TextWrap.
+							3. do not auto-size horizontally
+
+- added new events:
+					Control.DragEnter
+					Control.DragLeave
+					Control.DragResponse
+
+1.0.4
+
+NOTE: This build contains breaking changes!
+Special Thanks: to Sally P. for PDFs and intense testing efforts.
+
+1. Control.Initialize was removed
+The Initialize method used to be called in the Control base class, subclassed controls then used to override Initialize. This lead to subclass constructors being called after Initialize, which was confusing for most users and rarely useful. Because of this, we decided to remove Initialize completely.
+As a result, all controls are now initialized in their constructors.
+
+2. UVCoords were removed and replaced with Rectangle.
+Style textures are now expressed in pixels instead of UV coords.
+This makes building styles a lot easier, thinking in pixels is much more straight forward.
+Thanks to all the Beta testers that urged me to make this happen!
+
+3. Changed 2 method signatures in ISquidRenderer
+ISquidRenderer.DrawTexture now uses a Rectangle instead of UVCoords.
+The Rectangle represents the source texture rectangle in pixels.
+Most renderer implementations benefit from this change, since Graphics APIs usually work with a similar rectangle struct layout.
+ISquidRenderer.SetScissor now uses width/height parameters, instead of x2/y2
+A small but important change to avoid redundant calculations in renderer implementations.
+
+4. HScrollbar and VScrollbar replaced with ScrollBar
+These two controls were redundant, so now there’s only one control, the ScrollBar.
+You can change between horizontal/vertical scrolling via the Orientation property.
+
+5. Naming conventions
+We’ve aligned the naming conventions for events with those proposed and used by Microsoft.
+Before 1.0.4 : control.OnMouseClick
+After 1.0.4 : control.MouseClick
+Additionally several methods have been renamed.
+
+6. Radical changes to Tooltip behaviour
+Desktop.TooltipControl is now of type Tooltip.
+Inherit the abstract Tooltip class to create your own Tooltip behaviour.
+Tooltip inherits Frame. Override the SetContext method to receive the current tooltip context.
+Several Desktop properties wered moved into this new class.
+See SimpleTooltip.cs for a basic implementation of a text tooltip.
+
+- changed signature: ISquidRenderer.SetScissor(int x, int y, int width, int height)
+- changed signature: ISquidRenderer.DrawTexture(int texture, int x, int y, int width, int height, Rectangle source, int color)
+- replaced Style.TextureUV (UVCoords) with Style.TextureRect (Rectangle)
+- replaced ImageControl.TextureUV with ImageControl.TextureRect
+- replaced Cursor.TextureUV with Cursor.TextureRect
+- removed UVCoords struct
+- removed Control.Initialize method
+- removed HScrollbar and VScrollbar
+- removed Desktop.TooltipAlign, TooltipOffset, TooltipDelay
+- added new ScrollBar control (use Orientation property)
+- added event Control.MouseDrag (useful to initiate drag&drop actions)
+- added TextBox.BlinkInterval, BlinkColor, SelectionColor
+- added TextArea control (multiline textbox)
+- added new DockStyles Center, CenterX, CenterY
+- added new abstract Tooltip control. Inherit this class to create your own Tooltip behaviour.
+- added new control SimpleTooltip. Basic implementation of a Tooltip control.
+- added int TreeView.Indent. If not 0, this will overwrite TreeNode.Margin.Left with Indent*NodeDepth.
+- added TreeNode.Selected, TreeNode.SelectedChanged
+- added TreeNode.Expanded, TreeNode.ExpandedChanged
+- added experimental ListView control
+- changed Desktop.TooltipControl from type Label to type Tooltip (SimpleTooltip by default)
+- renamed event OnUpdate to Update, virtual void Update to OnUpdate
+- renamed HandleAutoSize to OnAutoSize, HandleKeyDown/Up to OnKeyDown/Up
+- fixed Panel: now scrolls vertically with mouse wheel
+- fixed Label: Text was vertically offset when several font sizes were used in the same line
+- fixed Label: several edge cases with linebreaks
+- fixed TextBox: text was drawn to the far right under certain circumstances
+- fixed TextBox: caret blinks again!
+- fixed TextBox: caret not showing on the first character
+- fixed:TreeView.SelectedNode now updates correctly
+- included compiled HTML help (work in progress)
+- Unity: added method Desktop.GetCursor, event Desktop.CursorChanged
+- Unity: Squid now uses the Unity Cursor API out of the box
+- Unity: ImageControl now works in Inspector
+- Unity: Fixed controls sometimes distorted when scissored on multiple edges.
+- Unity: Arrow keys(+Shift) now nudge the selection by 1(5) Pixels
+- Unity: Fixed wrong node clipping in Outline.
+- Unity: Fixed editor selection. Ctrl key now adds to & removes from selection again.
+- Unity: Fixed node drag&drop inside Outline and from Toolbox to Outline.
+- Unity: Fixed several visual glitches with SquidEditor selection tool
+- Unity: Fixed an exception thrown by ColorFields
+- Unity: Fixed an exception caused by SquidEditor toolbar icons
+- Unity: SquidEditor now properly updates when the unity selection changed
+- Unity: SquidEditor toolbar and canvas is now disabled when in Play mode
+- Unity: SquidEditor now lets you save your changes when entering Play mode. Dialog to Confirm/Cancel shows only when actual changes have been made to any SquidLayout.
+- Unity: Rearranged several control properties into different inspector categories for user convenience
+
+1.0.3d
+
+- Alt keys now work in Textbox again (@, etc.)
+- fixed Return/Enter keys causing a new line sometimes
+- fixed Tab key not working correctly
+- added method UnityRenderer.InsertTexture(Texture2D texture, string name)
+
+1.0.3c
+
+- added new event Button.BeforeCheckedChanged
+- added new control RadioButton, suppports grouping
+- added new method Control.FindControls<T> to find direct children of a given type
+- added int TextBox.HighlightColor to change the background color of selected text
+- added property ListBox.SelectedItems and event ListBox.SelectedItemsChanged
+- added ListBox.MaxSelected to limit the max number or selected items
+- added new event Control.OnUpdate
+- renamed virtual void Control.OnUpdate to Control.Update
+- renamed virtual void Control.OnStateChanged to Control.StateChanged
+- renamed virtual void Control.OnLateUpdate to Control.LateUpdate
+- minor changes to sample skin code (GameGui.cs)
+- minor changes to sample desktop code (GameGui.cs)
+
+
+1.0.3b
+
+- changed texture formats to Android/iOS compatible
+- changed sample GuiScene to use the Skin created from code by default
+- minor changes to sample GameGui, adding a tooltip style
+
+
+1.0.3a
+
+- further improvements to per-frame memory allocations
+- reduced the memory footprint of keyboard handler
+- Label.BBCodeEnabled is now false by default
+- fixed an exception occuring in Keyboard mapper
+- fixed a null exception in GuiRenderer
+
+1.0.3
+
+- fixed control.AutoSize for controls that don't implement IControlContainer
+- fixed a bug that caused only button 0 to fire some events
+- fixed a bug that caused wrong linebreaks in Label.Text when TextWrap was true
+- fixed Desktop.TooltipControl go out of screen bounds
+- fixed a bug in Window.Show() that caused double modality
+- fixed cursor position while resizing. cursor remains perfectly sticky now
+- fixed a null exception in ListBox.SelectedItem
+- fixed text display problems with some special characters
+- fixed a bug that caused some controls to be inactive in a modal window
+- fixed input handler. Modifier keys now work correctly
+- fixed rendering artifacts that occured on odd screen resolutions
+- Textbox now works in editor game view
+- ActiveList<T> now exposes events ItemRemove, ItemAdded, ItemsCleared, BeforeItemAdded, BeforeItemRemoved, BeforeItemsCleared
+- added Color.Tint property. Used to tint the control style.
+- massive improvements to per-frame garbage collection
+
+
+1.0.2
+
+- fixed a fatal bug in XmlSerializer
+- fixed an issue with smooth scrolling getting out of bounds on low frame rates
+- added MouseEventArgs to OnMouseClick, OnMouseDown, OnMouseUp, OnMousePress, OnMouseDoubleClick
+- removed Control.OnKeyEvent
+- added Control.OnKeyDown and Control.OnKeyUp
+- MouseEventArgs carry the mouse button index
+- KeyEventArgs now carry the key/scancode that is down or up
+- added GridView control sourcecode to SampleControls
+
+1.0.1
+
+
+General:
+
+- fixed several exceptions in base Control class
+- fixed wrong Font offset caused by TextPadding.Bottom
+- fixed wrong Font offset when TextAlign.MiddleLeft/Right/Center was used
+- fixed Font import for fontbuilder Divo files (Unity3D)
+- fixed Font rendering issues with large fonts (Unity3D) 
+
+- added bool Slider.Ease, float Slider.EasedValue for smooth content scrolling
+- added Ease/EasedValue to HScrollbar and VScrollbar
+
+- added enum: Alignment.Inherit
+- added enum: TextureMode
+
+	.Stretch   : stretch texture to fit control
+	.Grid      : use 9slice defined in style.Grid
+	.GridRepeat: like Grid, but repeats the borders
+	.Repeat    : repeat texture on both axis
+	.RepeatX   : repeat texture on X
+	.RepeatY   : repeat texture on Y
+
+
+* Glyph
+
+- added fields: Width, Height, OffsetX, OffsetY, Advance
+
+* Style
+
+- removed properties: GridEnabled, GridRepeat
+- added property: Tiling (defaults to TextureMode.Stretch)
+- Style.TextAlign now defaults to Inherit
+
+* Label
+
+- added property: TextAlign (defaults to Alignment.MiddleLeft)
+- Text will now use control.TextAlign if style.TextAlign is Inherit.
+
+
+
+1.0.0
+
+General:
+
+- added Squid.Xml.XmlSerializer for loading/saving desktops, controls and skins
+- added (Label) Leading (en.wikipedia.org/wiki/Leading)
+- added (Label) BBCode support (font, color, url, img)
+- added (Label) clickable links (Label.OnLinkClicked(string url))
+- added style.GridRepeat (repeats left/top/right/bottom slices)
+- added control.TabIndex
+- added control.Animation
+- added Skin class
+- added VS9 and VS10 solutions
+- added SplitContainer.Orientation (hor/vert)
+- added Control.GetControl(string name). (searches any depth)
+- added Control.MinSize/MaxSize (only used if maxsize > 0)
+- added DockStyle.Middle/Center
+- added Desktop.TooltipAlign (TopLeft/TopRight/MiddleLeft/etc.)
+- renamed SplitContainer.Aspect to AspectRatio
+- SplitContainer.Frame1 now respects MinSize/MaxSize
+- Desktop now also fires OnDragDrop if drop target was null
+- fixed window resizing behaviour in respect to min/max size
+- fixed (Label) TextAlign (text is now properly aligned in all cases)
+- fixed FlowLayoutFrame not updating correctly if AutoSize != None
+- fixed Panel.Content not showing sometimes
+- fixed Opacity for drawn text
