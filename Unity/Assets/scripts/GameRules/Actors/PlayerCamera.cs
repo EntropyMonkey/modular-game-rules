@@ -18,7 +18,8 @@ public class PlayerCamera : Actor
 	{
 		base.Initialize(generator);
 
-		gameObject.AddComponent<Camera>();
+		if (!camera)
+			gameObject.AddComponent<Camera>();
 
 		if (camera)
 		{

@@ -131,14 +131,14 @@
   </events>
   <reactions>
     <reaction>
-      <id>8</id>
+      <id>15</id>
       <type>ChangeCounter</type>
-      <label>Player1 R =&gt; Count</label>
+      <label>Player1 Player1 R =&gt; Count</label>
       <actorId>0</actorId>
       <listenedEventId>4</listenedEventId>
       <param name="ChangeBy">
         <type>Int32</type>
-        <value>1</value>
+        <value>-1</value>
       </param>
       <param name="CounterName">
         <type>String</type>
@@ -152,11 +152,15 @@
         <type>Int32</type>
         <value>0</value>
       </param>
+      <param name="ShowInGUI">
+        <type>Boolean</type>
+        <value>False</value>
+      </param>
     </reaction>
     <reaction>
       <id>4</id>
       <type>FollowObject</type>
-      <label>Player1Camera R (ModularRules.FollowObject) =&gt; Player1Camera R =&gt; ModularRules.FollowObject</label>
+      <label>Player1Camera Player1Camera R =&gt; ModularRules.FollowObject</label>
       <actorId>1</actorId>
       <listenedEventId>5</listenedEventId>
       <param name="FollowSpeed">
@@ -175,7 +179,7 @@
     <reaction>
       <id>3</id>
       <type>MoveObject</type>
-      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>3</listenedEventId>
       <param name="MoveDirection">
@@ -202,7 +206,7 @@
     <reaction>
       <id>2</id>
       <type>MoveObject</type>
-      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>2</listenedEventId>
       <param name="MoveDirection">
@@ -229,7 +233,7 @@
     <reaction>
       <id>1</id>
       <type>MoveObject</type>
-      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>1</listenedEventId>
       <param name="MoveDirection">
@@ -256,7 +260,7 @@
     <reaction>
       <id>0</id>
       <type>MoveObject</type>
-      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>0</listenedEventId>
       <param name="MoveDirection">
@@ -283,7 +287,7 @@
     <reaction>
       <id>5</id>
       <type>MoveObject</type>
-      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>7</listenedEventId>
       <param name="MoveDirection">
@@ -310,7 +314,7 @@
     <reaction>
       <id>6</id>
       <type>MoveObject</type>
-      <label>Player1 R (ModularRules.MoveObject) =&gt; Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>8</listenedEventId>
       <param name="MoveDirection">
@@ -337,7 +341,7 @@
     <reaction>
       <id>14</id>
       <type>SpawnObject</type>
-      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -360,7 +364,7 @@
     <reaction>
       <id>13</id>
       <type>SpawnObject</type>
-      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -383,7 +387,7 @@
     <reaction>
       <id>12</id>
       <type>SpawnObject</type>
-      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -406,7 +410,7 @@
     <reaction>
       <id>11</id>
       <type>SpawnObject</type>
-      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -429,7 +433,7 @@
     <reaction>
       <id>10</id>
       <type>SpawnObject</type>
-      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -452,7 +456,7 @@
     <reaction>
       <id>9</id>
       <type>SpawnObject</type>
-      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -475,7 +479,7 @@
     <reaction>
       <id>8</id>
       <type>SpawnObject</type>
-      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -498,7 +502,7 @@
     <reaction>
       <id>7</id>
       <type>SpawnObject</type>
-      <label>Patch1 R (ModularRules.SpawnObject) =&gt; Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">

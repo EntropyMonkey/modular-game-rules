@@ -187,18 +187,21 @@ namespace ModularRules
 		#endregion
 
 		#region Saving Rules
-		public void SaveRules(List<BaseRuleElement.RuleData> data, string filename)
+		public void SaveRules(List<BaseRuleElement.RuleData> data, string filename, bool overwrite)
 		{
 			string filepath = Application.dataPath + @"/Rules/" + filename + ".xml";
 
 			XDocument xmlDoc = new XDocument();
 			if (File.Exists(filepath))
 			{
-				string newName = filename.Split('_')[0] + "_" + (int.Parse(filename.Split('_')[1]) + 1);
-				Debug.Log("File exists. Trying again: " + newName);
+				if (!overwrite)
+				{
+					string newName = filename.Split('_')[0] + "_" + (int.Parse(filename.Split('_')[1]) + 1);
+					Debug.Log("File exists. Trying again: " + newName);
 
-				SaveRules(data, newName);
-				return;
+					SaveRules(data, newName, overwrite);
+					return;
+				}
 			}
 			else
 			{
@@ -206,6 +209,11 @@ namespace ModularRules
 			}
 
 			Directory.CreateDirectory(Directory.GetCurrentDirectory() + @"/Assets/Resources");
+
+			if (overwrite && xmlDoc.Element("rules") != null)
+			{
+				xmlDoc.Element("rules").Remove();
+			}
 
 			XDeclaration declaration = new XDeclaration("1.0", null, null);
 			xmlDoc.Declaration = declaration;

@@ -44,6 +44,8 @@ namespace ModularRules
 		{
 			ReactionData rule = base.GetRuleInformation() as ReactionData;
 
+			if (rule == null) return rule;
+
 			rule.parameters = new List<Param>();
 			rule.parameters.Add(new Param()
 			{

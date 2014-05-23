@@ -222,7 +222,7 @@ namespace ModularRules
 				Destroy(Events);
 			}
 
-			if (reactions != null)
+			if (reactions != null && reactions.Count > 0)
 			{
 				foreach (Reaction reaction in reactions)
 				{

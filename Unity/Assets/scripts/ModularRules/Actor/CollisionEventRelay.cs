@@ -13,6 +13,8 @@ public class CollisionEventRelay : MonoBehaviour
 	public event OnCollisionRelay OnCollisionStay_Relay;
 	public event OnCollisionRelay OnCollisionExit_Relay;
 
+	public int UsedCount = 0;
+
 	void Start()
 	{
 		int callbacks = 0;

@@ -23,6 +23,8 @@ namespace ModularRules
 
 		RuleParserLinq ruleParser;
 
+		private string currentRuleFileName;
+
 		// contains all placeholders for actors in the scene, in order of their Id
 		List<PlaceholderElement> placeholders;
 
@@ -36,7 +38,8 @@ namespace ModularRules
 		void Awake()
 		{
 			tag = Tag;
-			ruleParser = gameObject.AddComponent<RuleParserLinq>();
+			if ((ruleParser = gameObject.GetComponent<RuleParserLinq>()) == null)
+				ruleParser = gameObject.AddComponent<RuleParserLinq>();
 		}
 
 		#region ID Handling
@@ -253,31 +256,36 @@ namespace ModularRules
 		#endregion
 
 		#region Updating Elements
-		void UpdateActor(BaseRuleElement.ActorData actorData, Actor oldActor)
+		void UpdateActor(BaseRuleElement.ActorData actorData, Actor actor)
 		{
 			// check if matching id actor has same type
 			// if different type, change it. Self-destroy old one, create new actor.
-			if (oldActor != null && oldActor.GetType() != actorData.type)
+			if (actor != null && actor.GetType() != actorData.type)
 			{
-				oldActor.Reset();
+				actor.Reset();
 
 				// remove from lists
-				genActors.Remove(oldActor);
-				unusedElements.Remove(oldActor);
+				genActors.Remove(actor);
+				unusedElements.Remove(actor);
 
-				Destroy(oldActor);
+
+#if DEBUG
+				Debug.LogWarning("Updating actor (" + actor.Id + "), new type: " + actorData.type);
+#endif
+
+				Destroy(actor);
 
 				AddActorToScene(actorData);
 			}
 			else
 			{
 				// update parameters
-				SetParameters(oldActor, actorData);
+				SetParameters(actor, actorData);
 
 				//SetComponentParameters(oldActor, actorData);
 
 				// element was processed, remove from unused list (would be deleted otherwise)
-				unusedElements.Remove(oldActor);
+				unusedElements.Remove(actor);
 			}
 		}
 
@@ -293,6 +301,10 @@ namespace ModularRules
 				// cleaning up lists
 				genEvents.Remove(gameEvent);
 				unusedElements.Remove(gameEvent);
+
+#if DEBUG
+				Debug.LogWarning("Updating event (" + gameEvent.Id + "), new type: " + eventData.type);
+#endif
 
 				// delete old event
 				Destroy(gameEvent);
@@ -328,6 +340,10 @@ namespace ModularRules
 				// clean up lists
 				genReactions.Remove(reaction);
 				unusedElements.Remove(reaction);
+
+#if DEBUG
+				Debug.LogWarning("Updating reaction (" + reaction.Id + "), new type: " + reactionData.type);
+#endif
 
 				// destroy reaction
 				Destroy(reaction);
@@ -391,6 +407,7 @@ namespace ModularRules
 		{
 			if (!genActors.Find(item => item.Id == actor.Id))
 			{
+				// check if actor id already exists - in created actors AND placeholders
 				Actor[] fakeActors = new Actor[genActors.Count + placeholders.Count];
 				genActors.CopyTo(fakeActors);
 				GameObject fakeObject = new GameObject("fakeActorsTemp");
@@ -430,7 +447,9 @@ namespace ModularRules
 
 				genReactions.Add(reaction);
 
+#if DEBUG
 				Debug.LogWarning("Registered reaction: " + reaction.name + " (" + reaction.Id + ")");
+#endif
 			}
 		}
 
@@ -472,6 +491,9 @@ namespace ModularRules
 				else
 				{
 					genActors.Remove(element as Actor);
+#if DEBUG
+					Debug.Log("Destroy unused actor: " + element.name + " (" + element.Id + ")");
+#endif
 					Destroy(element);
 				}
 			}
@@ -523,6 +545,8 @@ namespace ModularRules
 		{
 			Debug.LogWarning("Generating level rules from " + filename + ".xml ...");
 
+			currentRuleFileName = filename;
+
 			// find all active placeholders for actors in the scene
 			FindGenerationPlaceholdersInScene();
 
@@ -543,7 +567,7 @@ namespace ModularRules
 		#endregion
 
 		#region SaveRules
-		public void SaveRules(string filename)
+		public void SaveRules(string filename, bool overwrite)
 		{
 			Debug.LogWarning("Saving rules into " + filename + ".xml ...");
 			
@@ -562,7 +586,7 @@ namespace ModularRules
 				rules.Add(br.GetRuleInformation());
 			}
 
-			ruleParser.SaveRules(rules, filename);
+			ruleParser.SaveRules(rules, filename, overwrite);
 
 			Debug.LogWarning("Completed saving rules.");
 		}
@@ -588,13 +612,18 @@ namespace ModularRules
 				}
 			}
 
-			if (editMode && ShowButton && GUI.Button(new Rect(0, 50, 100, 50), "Save Rules"))
+			if (editMode && ShowButton && GUI.Button(new Rect(0, 50, 200, 50), "Save Rules As New"))
 			{
-				SaveRules("rules_0");
+				SaveRules(currentRuleFileName, false);
+			}
+
+			if (editMode && ShowButton && GUI.Button(new Rect(0, 100, 200, 50), "Save Rules As Current"))
+			{
+				SaveRules(currentRuleFileName, true);
 			}
 
 #if UNITY_EDITOR
-			if (editMode && ShowButton && GUI.Button(new Rect(0, 200, 200, 50), "Register selected actor"))
+			if (editMode && ShowButton && GUI.Button(new Rect(0, 200, 200, 50), "Add selected actor"))
 			{
 				Actor selected = Selection.activeTransform.gameObject.GetComponent(typeof(Actor)) as Actor;
 				if (selected)

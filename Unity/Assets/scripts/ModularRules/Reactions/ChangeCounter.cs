@@ -12,17 +12,9 @@ namespace ModularRules
 		public int MaxValue = 100;
 		public int MinValue = 0;
 
+		public bool ShowInGUI = false;
+
 		private Counters counters;
-
-		void Awake()
-		{
-			Debug.LogError("ChangeCounter::Awake");
-		}
-
-		void OnDestroy()
-		{
-			Debug.LogError("ChangeCounter::Destroy " + Environment.StackTrace);
-		}
 
 		void OnEnable()
 		{
@@ -45,7 +37,7 @@ namespace ModularRules
 					counters = Reactor.gameObject.AddComponent<Counters>();
 			}
 
-			counters.AddCounter(CounterName, 0, MinValue, MaxValue);
+			counters.AddCounter(CounterName, 0, MinValue, MaxValue, ShowInGUI);
 		}
 
 		public override BaseRuleElement.RuleData GetRuleInformation()
@@ -79,6 +71,12 @@ namespace ModularRules
 					name = "MinValue",
 					type = MinValue.GetType(),
 					value = MinValue
+				});
+			rule.parameters.Add(new Param()
+				{
+					name = "ShowInGUI",
+					type = ShowInGUI.GetType(),
+					value = ShowInGUI
 				});
 
 			return rule;

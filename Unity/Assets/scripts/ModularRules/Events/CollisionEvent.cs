@@ -59,8 +59,31 @@ namespace ModularRules
 			if (relay == null)
 			{
 				relay = Actor.gameObject.AddComponent<CollisionEventRelay>();
+				relay.UsedCount = 1;
 			}
+			else
+				relay.UsedCount++;
 
+			Subscribe();
+		}
+
+		public override void Reset()
+		{
+			Debug.LogError("resetting collision event");
+			base.Reset();
+
+			Unsubscribe();
+
+			relay.UsedCount--;
+
+			if (relay.UsedCount <= 0)
+			{
+				Destroy(relay);
+			}
+		}
+
+		void Subscribe()
+		{
 			relay.OnTriggerEnter_Relay += OnTriggerEnter;
 			relay.OnTriggerStay_Relay += OnTriggerStay;
 			relay.OnTriggerExit_Relay += OnTriggerExit;
@@ -77,6 +100,27 @@ namespace ModularRules
 			//relay.OnCollisionEnter_Relay += DebugCollisions;
 			////relay.OnCollisionStay_Relay += DebugCollisions;
 			//relay.OnCollisionExit_Relay += DebugCollisions;
+#endif
+		}
+
+		void Unsubscribe()
+		{
+			relay.OnTriggerEnter_Relay -= OnTriggerEnter;
+			relay.OnTriggerStay_Relay -= OnTriggerStay;
+			relay.OnTriggerExit_Relay -= OnTriggerExit;
+
+			relay.OnCollisionEnter_Relay -= OnCollisionEnter;
+			relay.OnCollisionStay_Relay -= OnCollisionStay;
+			relay.OnCollisionExit_Relay -= OnCollisionExit;
+
+#if UNITY_EDITOR
+			//relay.OnTriggerEnter_Relay -= DebugTriggers;
+			////relay.OnTriggerStay_Relay -= DebugTriggers;
+			//relay.OnTriggerExit_Relay -= DebugTriggers;
+
+			//relay.OnCollisionEnter_Relay -= DebugCollisions;
+			////relay.OnCollisionStay_Relay -= DebugCollisions;
+			//relay.OnCollisionExit_Relay -= DebugCollisions;
 #endif
 		}
 
