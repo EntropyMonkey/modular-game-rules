@@ -51,6 +51,7 @@ namespace ModularRules
 			//Initialize(GameObject.FindGameObjectWithTag(RuleGenerator.Tag).GetComponent<RuleGenerator>());
 		}
 
+		#region Initialize
 		public override void Initialize(RuleGenerator generator)
 		{
 			base.Initialize(generator);
@@ -64,15 +65,16 @@ namespace ModularRules
 			else
 				relay.UsedCount++;
 
-			Subscribe();
+			SubscribeRelay();
 		}
+		#endregion
 
+		#region Reset
 		public override void Reset()
 		{
-			Debug.LogError("resetting collision event");
 			base.Reset();
 
-			Unsubscribe();
+			UnsubscribeRelay();
 
 			relay.UsedCount--;
 
@@ -81,8 +83,9 @@ namespace ModularRules
 				Destroy(relay);
 			}
 		}
+		#endregion
 
-		void Subscribe()
+		void SubscribeRelay()
 		{
 			relay.OnTriggerEnter_Relay += OnTriggerEnter;
 			relay.OnTriggerStay_Relay += OnTriggerStay;
@@ -103,7 +106,7 @@ namespace ModularRules
 #endif
 		}
 
-		void Unsubscribe()
+		void UnsubscribeRelay()
 		{
 			relay.OnTriggerEnter_Relay -= OnTriggerEnter;
 			relay.OnTriggerStay_Relay -= OnTriggerStay;
@@ -124,15 +127,15 @@ namespace ModularRules
 #endif
 		}
 
-		void DebugCollisions(Collision collision)
-		{
-			Debug.Log("Collision: " + collision.collider);
-		}
+		//void DebugCollisions(Collision collision)
+		//{
+		//	Debug.Log("Collision: " + collision.collider);
+		//}
 
-		void DebugTriggers(Collider collider)
-		{
-			Debug.Log("Trigger: " + collider);
-		}
+		//void DebugTriggers(Collider collider)
+		//{
+		//	Debug.Log("Trigger: " + collider);
+		//}
 
 		public override GameEvent UpdateEvent()
 		{

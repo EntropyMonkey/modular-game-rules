@@ -15,15 +15,20 @@ namespace ModularRules
 {
 	public class RuleGenerator : MonoBehaviour
 	{
-		public bool ShowButton = true;
-
-		public bool editMode = false;
-
 		public static string Tag = "RuleGenerator";
+		public RuleGUI GUI
+		{
+			get;
+			private set;
+		}
 
 		RuleParserLinq ruleParser;
 
-		private string currentRuleFileName;
+		public string CurrentRuleFileName
+		{
+			get;
+			private set;
+		}
 
 		// contains all placeholders for actors in the scene, in order of their Id
 		List<PlaceholderElement> placeholders;
@@ -40,6 +45,9 @@ namespace ModularRules
 			tag = Tag;
 			if ((ruleParser = gameObject.GetComponent<RuleParserLinq>()) == null)
 				ruleParser = gameObject.AddComponent<RuleParserLinq>();
+
+			if ((GUI = GetComponent<RuleGUI>()) == null)
+				GUI = gameObject.AddComponent<RuleGUI>();
 		}
 
 		#region ID Handling
@@ -175,14 +183,14 @@ namespace ModularRules
 					reaction = newReactionGO.AddComponent(data.type) as Reaction;
 					reaction.Id = data.id;
 
-					//RegisterRuleElement(reaction); // already registering in the initialize method. work would be done twice
-
 					actor.AddReaction(reaction);
 
 					// parameters
 					SetParameters(reaction, data);
 
 					reaction.ListenedEvent = genEvents.Find(item => item.Id == data.eventId);
+
+					Debug.LogError(reaction.name + " -> " + reaction.ListenedEvent.Id);
 
 					// init after everything was prepared
 					reaction.Initialize(this);
@@ -448,7 +456,7 @@ namespace ModularRules
 				genReactions.Add(reaction);
 
 #if DEBUG
-				Debug.LogWarning("Registered reaction: " + reaction.name + " (" + reaction.Id + ")");
+				Debug.Log("Registered reaction: " + reaction.name + " (" + reaction.Id + ")");
 #endif
 			}
 		}
@@ -481,7 +489,11 @@ namespace ModularRules
 				element.Reset();
 				if (element as Actor == null)
 				{
-					if (element as GameEvent) genEvents.Remove(element as GameEvent);
+					if (element as GameEvent)
+					{
+						Debug.LogError("Destroyed event!");
+						genEvents.Remove(element as GameEvent);
+					}
 					else if (element as Reaction) genReactions.Remove(element as Reaction);
 #if DEBUG
 					Debug.Log("Destroyed unused element: " + element.name + " (" + element.Id + ")");
@@ -545,7 +557,7 @@ namespace ModularRules
 		{
 			Debug.LogWarning("Generating level rules from " + filename + ".xml ...");
 
-			currentRuleFileName = filename;
+			CurrentRuleFileName = filename;
 
 			// find all active placeholders for actors in the scene
 			FindGenerationPlaceholdersInScene();
@@ -589,51 +601,6 @@ namespace ModularRules
 			ruleParser.SaveRules(rules, filename, overwrite);
 
 			Debug.LogWarning("Completed saving rules.");
-		}
-		#endregion
-
-		#region OnGUI
-		void OnGUI()
-		{
-			string filepath = Application.dataPath + @"/Rules/";
-			string[] files = Directory.GetFiles(filepath, "rules_*.xml");
-
-			if (ShowButton)
-			{
-				int x = 0; int width = 150;
-				for (int i = 0; i < files.Length; i++)
-				{
-					string file = Path.GetFileNameWithoutExtension(files[i]);
-					if (GUI.Button(new Rect(x, 0, width, 50), "Load " + file))
-					{
-						LoadRules(file);
-					}
-					x += width;
-				}
-			}
-
-			if (editMode && ShowButton && GUI.Button(new Rect(0, 50, 200, 50), "Save Rules As New"))
-			{
-				SaveRules(currentRuleFileName, false);
-			}
-
-			if (editMode && ShowButton && GUI.Button(new Rect(0, 100, 200, 50), "Save Rules As Current"))
-			{
-				SaveRules(currentRuleFileName, true);
-			}
-
-#if UNITY_EDITOR
-			if (editMode && ShowButton && GUI.Button(new Rect(0, 200, 200, 50), "Add selected actor"))
-			{
-				Actor selected = Selection.activeTransform.gameObject.GetComponent(typeof(Actor)) as Actor;
-				if (selected)
-				{
-					selected.Initialize(this);
-					selected.InitializeReactions();
-					selected.InitializeEvents();
-				}
-			}
-#endif
 		}
 		#endregion
 	}

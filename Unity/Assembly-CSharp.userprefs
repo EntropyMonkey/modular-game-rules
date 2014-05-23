@@ -1,0 +1,13 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\ModularRules\RuleGenerator\RuleGenerator.cs">
+    <Files>
+      <File FileName="Assets\scripts\ModularRules\Reactions\MoveObject.cs" Line="30" Column="4" />
+      <File FileName="Assets\scripts\ModularRules\RuleGenerator\RuleGenerator.cs" Line="180" Column="6" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
