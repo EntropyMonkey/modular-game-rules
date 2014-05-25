@@ -2,9 +2,9 @@
 using System.Collections;
 using System.IO;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+//#if UNITY_EDITOR
+//using UnityEditor;
+//#endif
 
 using ModularRules;
 
@@ -12,8 +12,8 @@ using ModularRules;
 //{
 	public class RuleGUI : MonoBehaviour
 	{
-		[HideInInspector]
-		public RuleGenerator ruleGenerator;
+		//[HideInInspector]
+		//public RuleGenerator ruleGenerator;
 
 		public bool ShowButtons = true;
 
@@ -24,7 +24,7 @@ using ModularRules;
 
 		void Awake()
 		{
-			ruleGenerator = GetComponent<RuleGenerator>();
+	//		ruleGenerator = GetComponent<RuleGenerator>();
 		}
 
 		void OnGUI()
@@ -36,26 +36,26 @@ using ModularRules;
 			{
 				if (GUI.Button(new Rect(0, 50, 200, 50), "Save Rules As New", GuiStyle))
 				{
-					ruleGenerator.SaveRules(ruleGenerator.CurrentRuleFileName, false);
+	//				ruleGenerator.SaveRules(ruleGenerator.CurrentRuleFileName, false);
 				}
 
 				if (GUI.Button(new Rect(0, 100, 200, 50), "Save Rules As Current", GuiStyle))
 				{
-					ruleGenerator.SaveRules(ruleGenerator.CurrentRuleFileName, true);
+	//				ruleGenerator.SaveRules(ruleGenerator.CurrentRuleFileName, true);
 				}
 
-#if UNITY_EDITOR
-				if (GUI.Button(new Rect(0, 200, 200, 50), "Add selected actor", GuiStyle))
-				{
-					Actor selected = Selection.activeTransform.gameObject.GetComponent(typeof(Actor)) as Actor;
-					if (selected)
-					{
-						selected.Initialize(ruleGenerator);
-						selected.InitializeReactions();
-						selected.InitializeEvents();
-					}
-				}
-#endif
+//#if UNITY_EDITOR
+//				if (GUI.Button(new Rect(0, 200, 200, 50), "Add selected actor", GuiStyle))
+//				{
+//					Actor selected = Selection.activeTransform.gameObject.GetComponent(typeof(Actor)) as Actor;
+//					if (selected)
+//					{
+//						selected.Initialize(ruleGenerator);
+//						selected.InitializeReactions();
+//						selected.InitializeEvents();
+//					}
+//				}
+//#endif
 
 				//if (GUI.Button(new Rect()))
 			}
@@ -68,7 +68,7 @@ using ModularRules;
 					string file = Path.GetFileNameWithoutExtension(files[i]);
 					if (GUI.Button(new Rect(x, 0, width, 50), "Load " + file))
 					{
-						ruleGenerator.LoadRules(file);
+	//					ruleGenerator.LoadRules(file);
 						loadMode = false;
 					}
 					x += width;
