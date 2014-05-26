@@ -37,7 +37,7 @@
     <event>
       <id>6</id>
       <type>CollisionEvent</type>
-      <label>Patch1 E (ModularRules.CollisionEvent) =&gt; Patch1 E =&gt; ModularRules.CollisionEvent</label>
+      <label>CollisionEvent</label>
       <actorId>2</actorId>
       <param name="CollideWithTag">
         <type>String</type>
@@ -51,13 +51,13 @@
     <event>
       <id>5</id>
       <type>ObjectMovedEvent</type>
-      <label>Player1 E (ModularRules.ObjectMovedEvent) =&gt; Player1 E =&gt; ModularRules.ObjectMovedEvent</label>
+      <label>ObjectMoved</label>
       <actorId>0</actorId>
     </event>
     <event>
       <id>4</id>
       <type>MouseInput</type>
-      <label>Player1 E (ModularRules.MouseInput) =&gt; Player1 E =&gt; ModularRules.MouseInput</label>
+      <label>MouseInput</label>
       <actorId>0</actorId>
       <param name="TrackedButton">
         <type>MouseInput+MouseButton</type>
@@ -71,7 +71,7 @@
     <event>
       <id>3</id>
       <type>KeyboardInput</type>
-      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <label>KeyboardInput</label>
       <actorId>0</actorId>
       <param name="InputKey">
         <type>KeyCode</type>
@@ -81,7 +81,7 @@
     <event>
       <id>2</id>
       <type>KeyboardInput</type>
-      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <label>KeyboardInput</label>
       <actorId>0</actorId>
       <param name="InputKey">
         <type>KeyCode</type>
@@ -91,7 +91,7 @@
     <event>
       <id>1</id>
       <type>KeyboardInput</type>
-      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <label>KeyboardInput</label>
       <actorId>0</actorId>
       <param name="InputKey">
         <type>KeyCode</type>
@@ -101,7 +101,7 @@
     <event>
       <id>0</id>
       <type>KeyboardInput</type>
-      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <label>KeyboardInput</label>
       <actorId>0</actorId>
       <param name="InputKey">
         <type>KeyCode</type>
@@ -111,7 +111,7 @@
     <event>
       <id>7</id>
       <type>KeyboardInput</type>
-      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <label>KeyboardInput</label>
       <actorId>0</actorId>
       <param name="InputKey">
         <type>KeyCode</type>
@@ -121,7 +121,7 @@
     <event>
       <id>8</id>
       <type>KeyboardInput</type>
-      <label>Player1 E (ModularRules.KeyboardInput) =&gt; Player1 E =&gt; ModularRules.KeyboardInput</label>
+      <label>Player1 KeyboardInput</label>
       <actorId>0</actorId>
       <param name="InputKey">
         <type>KeyCode</type>
@@ -133,7 +133,7 @@
     <reaction>
       <id>4</id>
       <type>FollowObject</type>
-      <label>Player1Camera Player1Camera R =&gt; ModularRules.FollowObject</label>
+      <label>FollowObject</label>
       <actorId>1</actorId>
       <listenedEventId>5</listenedEventId>
       <param name="FollowSpeed">
@@ -152,7 +152,7 @@
     <reaction>
       <id>3</id>
       <type>MoveObject</type>
-      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>3</listenedEventId>
       <param name="MoveDirection">
@@ -179,7 +179,7 @@
     <reaction>
       <id>2</id>
       <type>MoveObject</type>
-      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>2</listenedEventId>
       <param name="MoveDirection">
@@ -206,7 +206,7 @@
     <reaction>
       <id>1</id>
       <type>MoveObject</type>
-      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>1</listenedEventId>
       <param name="MoveDirection">
@@ -233,7 +233,7 @@
     <reaction>
       <id>0</id>
       <type>MoveObject</type>
-      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>0</listenedEventId>
       <param name="MoveDirection">
@@ -260,7 +260,7 @@
     <reaction>
       <id>5</id>
       <type>MoveObject</type>
-      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>7</listenedEventId>
       <param name="MoveDirection">
@@ -287,7 +287,7 @@
     <reaction>
       <id>6</id>
       <type>MoveObject</type>
-      <label>Player1 Player1 R =&gt; ModularRules.MoveObject</label>
+      <label>MoveObject</label>
       <actorId>0</actorId>
       <listenedEventId>8</listenedEventId>
       <param name="MoveDirection">
@@ -314,7 +314,7 @@
     <reaction>
       <id>14</id>
       <type>SpawnObject</type>
-      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -337,7 +337,7 @@
     <reaction>
       <id>13</id>
       <type>SpawnObject</type>
-      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -360,7 +360,7 @@
     <reaction>
       <id>12</id>
       <type>SpawnObject</type>
-      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -383,7 +383,7 @@
     <reaction>
       <id>11</id>
       <type>SpawnObject</type>
-      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -406,7 +406,7 @@
     <reaction>
       <id>10</id>
       <type>SpawnObject</type>
-      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -429,7 +429,7 @@
     <reaction>
       <id>9</id>
       <type>SpawnObject</type>
-      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -452,7 +452,7 @@
     <reaction>
       <id>8</id>
       <type>SpawnObject</type>
-      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">
@@ -475,7 +475,7 @@
     <reaction>
       <id>7</id>
       <type>SpawnObject</type>
-      <label>Patch1 Patch1 R =&gt; ModularRules.SpawnObject</label>
+      <label>SpawnObject</label>
       <actorId>2</actorId>
       <listenedEventId>6</listenedEventId>
       <param name="SpawnedPrefabs">

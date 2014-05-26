@@ -1,70 +1,67 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace ModularRules
+public class CounterEvent : GameEvent
 {
-	public class CounterEvent : GameEvent
+	public string CounterName;
+
+	public Comparison Compare;
+
+	public float CounterLimit;
+
+	private Counters counters;
+
+	public override void Initialize(RuleGenerator generator)
 	{
-		public string CounterName;
+		//base.Initialize(generator);
 
-		public Comparison Compare;
-
-		public float CounterLimit;
-
-		private Counters counters;
-
-		public override void Initialize(RuleGenerator generator)
+		if (!(counters = Actor.GetComponent<Counters>()))
 		{
-			//base.Initialize(generator);
+			Debug.LogWarning("Deactivating " + name + " because the actor doesn't have fitting counters.");
+			gameObject.SetActive(false);
+		}
+	}
 
-			if (!(counters = Actor.GetComponent<Counters>()))
+	public override BaseRuleElement.RuleData GetRuleInformation()
+	{
+		RuleData rule =  base.GetRuleInformation();
+
+		if (rule.parameters == null) rule.parameters = new System.Collections.Generic.List<Param>();
+
+		rule.parameters.Add(new Param()
 			{
-				Debug.LogWarning("Deactivating " + name + " because the actor doesn't have fitting counters.");
-				gameObject.SetActive(false);
-			}
-		}
+				name = "CounterName",
+				type = CounterName.GetType(),
+				value = CounterName
+			});
 
-		public override BaseRuleElement.RuleData GetRuleInformation()
-		{
-			RuleData rule =  base.GetRuleInformation();
-
-			if (rule.parameters == null) rule.parameters = new System.Collections.Generic.List<Param>();
-
-			rule.parameters.Add(new Param()
-				{
-					name = "CounterName",
-					type = CounterName.GetType(),
-					value = CounterName
-				});
-
-			rule.parameters.Add(new Param()
-				{
-					name = "Compare",
-					type = Compare.GetType(),
-					value = Compare
-				});
-
-			rule.parameters.Add(new Param()
-				{
-					name = "CounterLimit",
-					type = CounterLimit.GetType(),
-					value = CounterLimit
-				});
-
-			return rule;
-		}
-
-		public override GameEvent UpdateEvent()
-		{
-			if ((Compare == Comparison.LESS && counters.GetValue(CounterName) < CounterLimit) ||
-				(Compare == Comparison.EQUAL && counters.GetValue(CounterName) - CounterLimit < 0.01f) ||
-				(Compare == Comparison.GREATER && counters.GetValue(CounterName) > CounterLimit))
+		rule.parameters.Add(new Param()
 			{
-				Trigger(GameEventData.Empty);
-				return this;
-			}
+				name = "Compare",
+				type = Compare.GetType(),
+				value = Compare
+			});
 
-			return null;
+		rule.parameters.Add(new Param()
+			{
+				name = "CounterLimit",
+				type = CounterLimit.GetType(),
+				value = CounterLimit
+			});
+
+		return rule;
+	}
+
+	public override GameEvent UpdateEvent()
+	{
+		if ((Compare == Comparison.LESS && counters.GetValue(CounterName) < CounterLimit) ||
+			(Compare == Comparison.EQUAL && counters.GetValue(CounterName) - CounterLimit < 0.01f) ||
+			(Compare == Comparison.GREATER && counters.GetValue(CounterName) > CounterLimit))
+		{
+			Trigger(GameEventData.Empty);
+			return this;
 		}
+
+		return null;
 	}
 }

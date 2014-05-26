@@ -1,29 +1,26 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace ModularRules
+public class InputReceived : GameEvent
 {
-	public class InputReceived : GameEvent
+	public enum InputType { NONE = 0, HELD, PRESSED, RELEASED, CONTINUOUS }
+
+	public class InputData
 	{
-		public enum InputType { NONE = 0, HELD, PRESSED, RELEASED, CONTINUOUS }
+		public InputType inputType;
+		public float inputValue;
 
-		public class InputData
+		public override string ToString()
 		{
-			public InputType inputType;
-			public float inputValue;
-
-			public override string ToString()
-			{
-				return " InputType: " + inputType + " InputValue: " + inputValue;
-			}
-		};
-
-		public bool ReceiveInput = true;
-
-		public override GameEvent UpdateEvent()
-		{
-			if (!ReceiveInput) return null;
-			else return this;
+			return " InputType: " + inputType + " InputValue: " + inputValue;
 		}
+	};
+
+	public bool ReceiveInput = true;
+
+	public override GameEvent UpdateEvent()
+	{
+		if (!ReceiveInput) return null;
+		else return this;
 	}
 }

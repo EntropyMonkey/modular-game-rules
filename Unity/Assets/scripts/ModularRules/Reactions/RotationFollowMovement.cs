@@ -1,45 +1,43 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace ModularRules
+/// <summary>
+/// The rotation follows a relative movement value
+/// </summary>
+public class RotationFollowMouse : Reaction
 {
-	/// <summary>
-	/// The rotation follows a relative movement value
-	/// </summary>
-	public class RotationFollowMouse : Reaction
+	public float Sensitivity = 10;
+	public float MaxYRotation = 60;
+
+	float yRotation;
+
+	void OnEnable()
 	{
-		public float Sensitivity = 10;
-		public float MaxYRotation = 60;
+		Register();
+	}
 
-		float yRotation;
+	void OnDisable()
+	{
+		Unregister();
+	}
 
-		void OnEnable()
+	protected override void React(GameEventData data)
+	{
+		DataPiece inputData;
+		if ((inputData = data.Get(EventDataKeys.InputData)) != null &&
+			inputData.dataType == typeof(MouseInput.MouseData))
 		{
-			Register();
-		}
+			Vector2 deltaMovement = ((MouseInput.MouseData)inputData.data).axisValues;
 
-		void OnDisable()
-		{
-			Unregister();
-		}
+			//((IRotate)Reactor).Rotate(data, deltaMovement);
 
-		protected override void React(GameEventData data)
-		{
-			DataPiece inputData;
-			if ((inputData = data.Get(EventDataKeys.InputData)) != null &&
-				inputData.dataType == typeof(MouseInput.MouseData))
-			{
-				Vector2 deltaMovement = ((MouseInput.MouseData)inputData.data).axisValues;
+			float xRotation = Reactor.transform.localEulerAngles.y + deltaMovement.x * Sensitivity;
+			yRotation += deltaMovement.y * Sensitivity;
 
-				//((IRotate)Reactor).Rotate(data, deltaMovement);
+			yRotation = Mathf.Clamp(yRotation, -MaxYRotation, MaxYRotation);
 
-				float xRotation = Reactor.transform.localEulerAngles.y + deltaMovement.x * Sensitivity;
-				yRotation += deltaMovement.y * Sensitivity;
-
-				yRotation = Mathf.Clamp(yRotation, -MaxYRotation, MaxYRotation);
-
-				Reactor.transform.localEulerAngles = new Vector3(-yRotation, xRotation, 0);
-			}
+			Reactor.transform.localEulerAngles = new Vector3(-yRotation, xRotation, 0);
 		}
 	}
 }
+

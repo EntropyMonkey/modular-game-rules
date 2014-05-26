@@ -22,7 +22,7 @@ public class LoadRulesButton : MonoBehaviour
 
 	void OnMouseDown()
 	{
-		FindObjectOfType<ModularRules.RuleGenerator>().LoadRules(Filename);
+		FindObjectOfType<RuleGenerator>().LoadRules(Filename);
 
 		if (feedbackParticles)
 		{

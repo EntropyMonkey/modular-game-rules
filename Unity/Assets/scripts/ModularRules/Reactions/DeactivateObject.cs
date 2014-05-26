@@ -2,64 +2,61 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace ModularRules
+public class DeactivateObject : Reaction
 {
-	public class DeactivateObject : Reaction
+	public Actor ObjectToDeactivate;
+
+	public float Timeout;
+
+	private bool deactivating = false;
+
+	public override RuleData GetRuleInformation()
 	{
-		public Actor ObjectToDeactivate;
+		RuleData data = base.GetRuleInformation();
 
-		public float Timeout;
+		if (data.parameters == null) data.parameters = new List<Param>();
 
-		private bool deactivating = false;
-
-		public override RuleData GetRuleInformation()
+		if (ObjectToDeactivate != null)
 		{
-			RuleData data = base.GetRuleInformation();
-
-			if (data.parameters == null) data.parameters = new List<Param>();
-
-			if (ObjectToDeactivate != null)
-			{
-				data.parameters.Add(new Param()
-				{
-					name = "ObjectToDeactivate",
-					type = ObjectToDeactivate.GetType(),
-					value = ObjectToDeactivate.Id
-				});
-			}
-
 			data.parameters.Add(new Param()
 			{
-				name = "Timeout",
-				type = Timeout.GetType(),
-				value = Timeout
+				name = "ObjectToDeactivate",
+				type = ObjectToDeactivate.GetType(),
+				value = ObjectToDeactivate.Id
 			});
-
-			return data;
 		}
 
-		public override void Initialize(RuleGenerator generator)
+		data.parameters.Add(new Param()
 		{
-			base.Initialize(generator);
+			name = "Timeout",
+			type = Timeout.GetType(),
+			value = Timeout
+		});
 
-			if (ObjectToDeactivate == null)
-			{
-				ObjectToDeactivate = Reactor;
-			}
-		}
+		return data;
+	}
 
-		protected override void React(GameEventData eventData)
+	public override void Initialize(RuleGenerator generator)
+	{
+		base.Initialize(generator);
+
+		if (ObjectToDeactivate == null)
 		{
-			if (!deactivating)
-				StartCoroutine(DeactivateAfter(Timeout));
-			deactivating = true;
+			ObjectToDeactivate = Reactor;
 		}
+	}
 
-		IEnumerator DeactivateAfter(float t)
-		{
-			yield return new WaitForSeconds(t);
-			ObjectToDeactivate.gameObject.SetActive(false);
-			deactivating = false;
-		}
+	protected override void React(GameEventData eventData)
+	{
+		if (!deactivating)
+			StartCoroutine(DeactivateAfter(Timeout));
+		deactivating = true;
+	}
+
+	IEnumerator DeactivateAfter(float t)
+	{
+		yield return new WaitForSeconds(t);
+		ObjectToDeactivate.gameObject.SetActive(false);
+		deactivating = false;
 	}
 }

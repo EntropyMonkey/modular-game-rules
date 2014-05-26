@@ -1,23 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace ModularRules
+public class DebugPrint : Reaction
 {
-	public class DebugPrint : Reaction
+	void OnEnable()
 	{
-		void OnEnable()
-		{
-			Register();
-		}
+		Register();
+	}
 
-		void OnDisable()
-		{
-			Unregister();
-		}
+	void OnDisable()
+	{
+		Unregister();
+	}
 
-		protected override void React(GameEventData eventData)
-		{
-			Debug.Log("Received event " + eventData.ToString());
-		}
+	protected override void React(GameEventData eventData)
+	{
+		Debug.Log("Received event " + eventData.ToString());
 	}
 }

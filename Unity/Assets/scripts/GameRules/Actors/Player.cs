@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-using ModularRules;
 using System.Collections.Generic;
 
 public class Player : Actor

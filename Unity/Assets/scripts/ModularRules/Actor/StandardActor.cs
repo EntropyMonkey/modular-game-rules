@@ -1,13 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-namespace ModularRules
+public class StandardActor : Actor
 {
-	public class StandardActor : Actor
+	void Update()
 	{
-		void Update()
-		{
-			UpdateEvents();
-		}
+		UpdateEvents();
 	}
 }
