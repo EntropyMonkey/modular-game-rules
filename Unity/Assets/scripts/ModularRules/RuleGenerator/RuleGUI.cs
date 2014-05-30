@@ -2,15 +2,13 @@
 using System.Collections;
 using System.IO;
 using System.Collections.Generic;
+using System;
 
 
 public class RuleGUI : MonoBehaviour
 {
 //	public RuleGenerator ruleGenerator;
 
-	List<BaseRuleElement.ActorData> actorData;
-	List<BaseRuleElement.EventData> eventData;
-	List<BaseRuleElement.ReactionData> reactionData;
 
 	public bool ShowButtons = true;
 
@@ -40,6 +38,10 @@ public class RuleGUI : MonoBehaviour
 	Dictionary<int, List<int>> actorEventDict = new Dictionary<int, List<int>>();
 	Dictionary<int, List<int>> actorReactionDict = new Dictionary<int, List<int>>();
 
+	List<BaseRuleElement.ActorData> actorData = new List<BaseRuleElement.ActorData>();
+	List<BaseRuleElement.EventData> eventData = new List<BaseRuleElement.EventData>();
+	List<BaseRuleElement.ReactionData> reactionData = new List<BaseRuleElement.ReactionData>();
+
 	void Awake()
 	{
 		GetComponent<RuleGenerator>().OnParsedRules += OnParsedRules;
@@ -51,17 +53,33 @@ public class RuleGUI : MonoBehaviour
 		labelSmallStyle = CustomSkin.GetStyle("labelSmallStyle");
 	}
 
-	void OnParsedRules(List<BaseRuleElement.ActorData> actorData, List<BaseRuleElement.EventData> eventData, List<BaseRuleElement.ReactionData> reactionData)
+	void OnParsedRules(List<BaseRuleElement.ActorData> originalActorData, List<BaseRuleElement.EventData> originalEventData, List<BaseRuleElement.ReactionData> originalReactionData)
 	{
+		actorData.Clear();
+		eventData.Clear();
+		reactionData.Clear();
+
 		// deep copy lists
+		for (int i = 0; i < originalActorData.Count; i++)
+		{
+			actorData.Add(originalActorData[i].DeepCopy());
+		}
+		for (int i = 0; i < originalEventData.Count; i++)
+		{
+			eventData.Add(originalEventData[i].DeepCopy());
+		}
+		for (int i = 0; i < originalReactionData.Count; i++)
+		{
+			reactionData.Add(originalReactionData[i].DeepCopy());
+		}
 
 		// events/reactions and actors/reactions
 		eventReactionDict.Clear();
 		actorReactionDict.Clear();
 
-		for (int i = 0; i < ruleGenerator.ReactionData.Count; i++)
+		for (int i = 0; i < reactionData.Count; i++)
 		{
-			BaseRuleElement.ReactionData rData = ruleGenerator.ReactionData[i];
+			BaseRuleElement.ReactionData rData = reactionData[i];
 			if (eventReactionDict.ContainsKey(rData.eventId))
 			{
 				eventReactionDict[rData.eventId].Add(rData.id);
@@ -83,9 +101,9 @@ public class RuleGUI : MonoBehaviour
 
 		// actors/events
 		actorEventDict.Clear();
-		for (int i = 0; i < ruleGenerator.EventData.Count; i++)
+		for (int i = 0; i < eventData.Count; i++)
 		{
-			BaseRuleElement.EventData eData = ruleGenerator.EventData[i];
+			BaseRuleElement.EventData eData = eventData[i];
 			if (actorEventDict.ContainsKey(eData.actorId))
 			{
 				actorEventDict[eData.actorId].Add(eData.id);
@@ -137,7 +155,7 @@ public class RuleGUI : MonoBehaviour
 			string file = Path.GetFileNameWithoutExtension(Files[i]);
 			if (GUILayout.Button("Load " + file, GUILayout.Height(70)))
 			{
-				ruleGenerator.LoadRules(file);
+				GetComponent<RuleGenerator>().LoadRules(file);
 				loadMode = false;
 			}
 		}
@@ -154,11 +172,11 @@ public class RuleGUI : MonoBehaviour
 
 	void EditRules()
 	{
-		if (ShowButtons && !editMode && !loadMode && ruleGenerator.ActorData.Count > 0 && 
+		if (ShowButtons && !editMode && !loadMode && actorData.Count > 0 && 
 			GUI.Button(new Rect(0, Screen.height - 50, 100, 50), "Edit Rules"))
 		{
 			editMode = true;
-			ruleGenerator.PauseEventExecution();
+			GetComponent<RuleGenerator>().PauseEventExecution();
 		}
 
 		if (!editMode) return;
@@ -172,7 +190,7 @@ public class RuleGUI : MonoBehaviour
 			editMode = false;
 			currentActor = null;
 			showDetails = false;
-			ruleGenerator.StartEventExecution();
+			GetComponent<RuleGenerator>().StartEventExecution();
 		}
 
 		//MainView();
@@ -208,12 +226,12 @@ public class RuleGUI : MonoBehaviour
 		GUILayout.FlexibleSpace();
 		GUILayout.Label("Choose actor:");
 		GUILayout.BeginHorizontal(GUILayout.Height(Screen.height * 0.3f));
-		for (int i = 0; i < ruleGenerator.ActorData.Count; i++)
+		for (int i = 0; i < actorData.Count; i++)
 		{
 			// draw button
-			if (GUILayout.Button(ruleGenerator.ActorData[i].label + "\n\t- " + ruleGenerator.ActorData[i].type, GUILayout.Height(50)))
+			if (GUILayout.Button(actorData[i].label + "\n\t- " + actorData[i].type, GUILayout.Height(50)))
 			{
-				currentActor = ruleGenerator.ActorData[i];
+				currentActor = actorData[i];
 			}
 		}
 		GUILayout.EndHorizontal();
@@ -240,11 +258,11 @@ public class RuleGUI : MonoBehaviour
 		{
 			for (int i = 0; i < actorEventDict[currentActor.id].Count; i++)
 			{
-				BaseRuleElement.EventData eventData = ruleGenerator.EventData[actorEventDict[currentActor.id][i]];
-				string buttonLabel = eventData.label;
-				if (eventData.parameters != null && eventData.parameters.Count > 0)
+				BaseRuleElement.EventData eData = eventData[actorEventDict[currentActor.id][i]];
+				string buttonLabel = eData.label;
+				if (eData.parameters != null && eData.parameters.Count > 0)
 				{
-					buttonLabel += "\n\t- " + eventData.parameters[0].name + ": " + eventData.parameters[0].value;
+					buttonLabel += "\n\t- " + eData.parameters[0].name + ": " + eData.parameters[0].value;
 				}
 
 				if (GUILayout.Button(buttonLabel))
@@ -270,29 +288,29 @@ public class RuleGUI : MonoBehaviour
 		GUILayout.Label("Actors:");
 		editActorsScrollValue = GUILayout.BeginScrollView(editActorsScrollValue, GUILayout.Width(Screen.width * 0.3f), GUILayout.Height(Screen.height * 0.7f));
 
-		for (int i = 0; i < ruleGenerator.ActorData.Count; i++)
+		for (int i = 0; i < actorData.Count; i++)
 		{
-			BaseRuleElement.ActorData actorData = ruleGenerator.ActorData[i];
+			BaseRuleElement.ActorData aData = actorData[i];
 
 			// choose right style for button
 			GUIStyle style = buttonStyle;
-			if (markedActor == actorData.id)
+			if (markedActor == aData.id)
 				style = markedButtonOriginStyle;
-			else if ((markedEvent > -1 && actorEventDict.ContainsKey(actorData.id) &&
-				actorEventDict[actorData.id].Contains(markedEvent)) ||
-				(markedReaction > -1 && actorReactionDict.ContainsKey(actorData.id) &&
-				actorReactionDict[actorData.id].Contains(markedReaction)))
+			else if ((markedEvent > -1 && actorEventDict.ContainsKey(aData.id) &&
+				actorEventDict[aData.id].Contains(markedEvent)) ||
+				(markedReaction > -1 && actorReactionDict.ContainsKey(aData.id) &&
+				actorReactionDict[aData.id].Contains(markedReaction)))
 			{
 				style = markedButtonChildStyle;
 			}
 
 			// draw button
-			if (GUILayout.Button(ruleGenerator.ActorData[i].label + "\n\t- " + ruleGenerator.ActorData[i].type, style, GUILayout.Height(50)))
+			if (GUILayout.Button(actorData[i].label + "\n\t- " + actorData[i].type, style, GUILayout.Height(50)))
 			{
-				if (markedActor != ruleGenerator.ActorData[i].id)
-					MarkActor(ruleGenerator.ActorData[i]);
+				if (markedActor != actorData[i].id)
+					MarkActor(actorData[i]);
 				else
-					ShowDetails(ruleGenerator.ActorData[i]); // open details window
+					ShowDetails(actorData[i]); // open details window
 			}
 		}
 
@@ -334,7 +352,7 @@ public class RuleGUI : MonoBehaviour
 		// events
 		detailEventScrollPos = GUILayout.BeginScrollView(detailEventScrollPos, GUILayout.Width(Screen.width * 0.3f));
 
-		foreach(BaseRuleElement.EventData e in ruleGenerator.EventData.FindAll(item => item.actorId == currentActor.id))
+		foreach(BaseRuleElement.EventData e in eventData.FindAll(item => item.actorId == currentActor.id))
 		{
 			GUIStyle style = buttonStyle;
 			if (markedEvent == e.id)
@@ -362,7 +380,7 @@ public class RuleGUI : MonoBehaviour
 		// reactions
 		detailReactionScrollPos = GUILayout.BeginScrollView(detailReactionScrollPos, GUILayout.Width(Screen.width * 0.3f));
 
-		foreach (BaseRuleElement.ReactionData r in ruleGenerator.ReactionData.FindAll(item => item.actorId == currentActor.id))
+		foreach (BaseRuleElement.ReactionData r in reactionData.FindAll(item => item.actorId == currentActor.id))
 		{
 			GUIStyle style = buttonStyle;
 			if (markedReaction == r.id)
@@ -396,11 +414,11 @@ public class RuleGUI : MonoBehaviour
 		{
 			// extra parameters:
 			GUI.enabled = false;
-			ShowParameter("Id:", currentActor.id);
-			ShowParameter("Type:", currentActor.type);
+			ShowParameter("Id:", currentActor.id.ToString());
+			ShowParameter("Type:", currentActor.type.ToString());
 			GUI.enabled = true;
 
-			ShowParameter("Label: ", currentActor.label);
+			currentActor.label = ShowParameter("Label: ", currentActor.label);
 
 			HorizontalLine();
 
@@ -408,14 +426,14 @@ public class RuleGUI : MonoBehaviour
 		}
 		else if (markedEvent > -1)
 		{
-			BaseRuleElement.EventData e = ruleGenerator.EventData.Find(item => item.id == markedEvent);
+			BaseRuleElement.EventData e = eventData.Find(item => item.id == markedEvent);
 			// extra parameters:
 			GUI.enabled = false;
-			ShowParameter("Id:", markedEvent);
-			ShowParameter("Type:", e.type);
+			ShowParameter("Id:", markedEvent.ToString());
+			ShowParameter("Type:", e.type.ToString());
 			GUI.enabled = true;
 
-			ShowParameter("Label: ", e.label);
+			e.label = ShowParameter("Label: ", e.label);
 
 			HorizontalLine();
 
@@ -423,14 +441,14 @@ public class RuleGUI : MonoBehaviour
 		}
 		else if (markedReaction > -1)
 		{
-			BaseRuleElement.ReactionData r = ruleGenerator.ReactionData.Find(item => item.id == markedReaction);
+			BaseRuleElement.ReactionData r = reactionData.Find(item => item.id == markedReaction);
 			// extra parameters:
 			GUI.enabled = false;
-			ShowParameter("Id:", markedReaction);
-			ShowParameter("Type:", r.type);
+			ShowParameter("Id:", markedReaction.ToString());
+			ShowParameter("Type:", r.type.ToString());
 			GUI.enabled = true;
 
-			ShowParameter("Label: ", r.label);
+			r.label = ShowParameter("Label: ", r.label);
 
 			HorizontalLine();
 
@@ -453,17 +471,69 @@ public class RuleGUI : MonoBehaviour
 	{
 		for (int i = 0; i < parameters.Count; i++)
 		{
-			ShowParameter(parameters[i].name, parameters[i].value);
+			ShowParameter(parameters[i]);
 		}
 	}
 
-	void ShowParameter(string label, object value)
+	void ShowParameter(BaseRuleElement.Param parameter)
+	{
+		GUILayout.BeginHorizontal(GUILayout.Width(Screen.width * 0.3f));
+		GUILayout.Label(parameter.name + ": ", labelSmallStyle, GUILayout.Width(150));
+
+		// handle parameter value according to type
+		if (parameter.type.IsSubclassOf(typeof(Actor)) || parameter.type.IsAssignableFrom(typeof(Actor)))
+		{
+			//ShowParameter(parameter.name, )
+		}
+		else if (parameter.type.IsEnum)
+		{
+			string[] names = Enum.GetNames(parameter.type);
+			int selected = GUILayout.SelectionGrid((int)parameter.value, names, 2);
+			parameter.value = Enum.Parse(parameter.type, names[selected]);
+		}
+		else if (parameter.value is int)
+		{
+			parameter.value = int.Parse(GUILayout.TextField(parameter.value.ToString(), GUILayout.Width(100)));
+		}
+		else if (parameter.value is float)
+		{
+			parameter.value = float.Parse(GUILayout.TextField(parameter.value.ToString(), GUILayout.Width(100)));
+		}
+		else if (parameter.type == typeof(Vector3))
+		{
+			//Vector3 vec;
+			//string[] s = v.Split(' ');
+			//vec.x = float.Parse(s[0]);
+			//vec.y = float.Parse(s[1]);
+			//vec.z = float.Parse(s[2]);
+			//newP.value = vec;
+		}
+		else if (parameter.value is bool)
+		{
+			parameter.value = GUILayout.Toggle((bool)parameter.value, "");
+		}
+		else if (parameter.type == typeof(string))
+		{
+			parameter.value = GUILayout.TextField(parameter.value.ToString(), GUILayout.Width(100));
+		}
+		else if (parameter.type == typeof(List<string>))
+		{
+			//string[] s = v.Split(' ');
+		}
+
+		GUILayout.EndHorizontal();
+	}
+
+	string ShowParameter(string label, string value)
 	{
 		GUILayout.BeginHorizontal();
 		GUILayout.Label(label + ": ", labelSmallStyle);
-		GUILayout.TextField(value.ToString(), GUILayout.Width(100));
+		string result = GUILayout.TextField(value);
 		GUILayout.EndHorizontal();
+
+		return result;
 	}
+
 
 	void ScrollviewEvents()
 	{
@@ -473,28 +543,28 @@ public class RuleGUI : MonoBehaviour
 		// events
 		editEventsScrollValue = GUILayout.BeginScrollView(editEventsScrollValue, GUILayout.Width(Screen.width * 0.3f));
 
-		for (int i = 0; i < ruleGenerator.EventData.Count; i++)
+		for (int i = 0; i < eventData.Count; i++)
 		{
-			BaseRuleElement.EventData eventData = ruleGenerator.EventData[i];
+			BaseRuleElement.EventData eData = eventData[i];
 			// create label
-			string buttonLabel = eventData.label;
-			if (eventData.parameters != null && eventData.parameters.Count > 0)
+			string buttonLabel = eData.label;
+			if (eData.parameters != null && eData.parameters.Count > 0)
 			{
-				buttonLabel += "\n\t- " + eventData.parameters[0].name + ": " + eventData.parameters[0].value;
+				buttonLabel += "\n\t- " + eData.parameters[0].name + ": " + eData.parameters[0].value;
 			}
 
 			bool markedRelevant = false;
 
 			// choose style
 			GUIStyle style = buttonStyle;
-			if (markedEvent == eventData.id)
+			if (markedEvent == eData.id)
 			{
 				style = markedButtonOriginStyle;
 				markedRelevant = true;
 			}
-			else if (markedActor == eventData.actorId ||
-				(markedReaction > -1 && eventReactionDict.ContainsKey(eventData.id) &&
-				eventReactionDict[eventData.id].Contains(markedReaction)))
+			else if (markedActor == eData.actorId ||
+				(markedReaction > -1 && eventReactionDict.ContainsKey(eData.id) &&
+				eventReactionDict[eData.id].Contains(markedReaction)))
 			{
 				style = markedButtonChildStyle;
 				markedRelevant = true;
@@ -503,8 +573,8 @@ public class RuleGUI : MonoBehaviour
 			// draw button
 			if ((showOnlyRelevant && markedRelevant || !showOnlyRelevant) && GUILayout.Button(buttonLabel, style, GUILayout.Height(50)))
 			{
-				if (markedEvent != eventData.id)
-					MarkEvent(eventData);
+				if (markedEvent != eData.id)
+					MarkEvent(eData);
 				//else
 				//	ShowDetails(eData);
 			}
@@ -522,9 +592,9 @@ public class RuleGUI : MonoBehaviour
 		// reactions
 		editReactionsScrollValue = GUILayout.BeginScrollView(editReactionsScrollValue, GUILayout.Width(Screen.width * 0.3f));
 
-		for (int i = 0; i < ruleGenerator.ReactionData.Count; i++)
+		for (int i = 0; i < reactionData.Count; i++)
 		{
-			BaseRuleElement.ReactionData rData = ruleGenerator.ReactionData[i];
+			BaseRuleElement.ReactionData rData = reactionData[i];
 
 			// create label
 			string buttonLabel = rData.label;
