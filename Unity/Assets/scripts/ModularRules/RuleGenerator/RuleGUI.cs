@@ -6,7 +6,11 @@ using System.Collections.Generic;
 
 public class RuleGUI : MonoBehaviour
 {
-	public RuleGenerator ruleGenerator;
+//	public RuleGenerator ruleGenerator;
+
+	List<BaseRuleElement.ActorData> actorData;
+	List<BaseRuleElement.EventData> eventData;
+	List<BaseRuleElement.ReactionData> reactionData;
 
 	public bool ShowButtons = true;
 
@@ -38,9 +42,7 @@ public class RuleGUI : MonoBehaviour
 
 	void Awake()
 	{
-		ruleGenerator = GetComponent<RuleGenerator>();
-
-		ruleGenerator.OnParsedRules += OnParsedRules;
+		GetComponent<RuleGenerator>().OnParsedRules += OnParsedRules;
 
 		markedButtonOriginStyle = CustomSkin.GetStyle("markedButtonOrigin");
 		markedButtonChildStyle = CustomSkin.GetStyle("markedButtonChild");
@@ -49,8 +51,10 @@ public class RuleGUI : MonoBehaviour
 		labelSmallStyle = CustomSkin.GetStyle("labelSmallStyle");
 	}
 
-	void OnParsedRules()
+	void OnParsedRules(List<BaseRuleElement.ActorData> actorData, List<BaseRuleElement.EventData> eventData, List<BaseRuleElement.ReactionData> reactionData)
 	{
+		// deep copy lists
+
 		// events/reactions and actors/reactions
 		eventReactionDict.Clear();
 		actorReactionDict.Clear();
@@ -159,11 +163,11 @@ public class RuleGUI : MonoBehaviour
 
 		if (!editMode) return;
 
-		else if (GUI.Button(new Rect(0, Screen.height - 30, 100, 30), "Save"))
-		{
+		//else if (GUI.Button(new Rect(0, Screen.height - 30, 50, 30), "Save"))
+		//{
 
-		}
-		else if (GUI.Button(new Rect(0, Screen.height - 60, 100, 30), "Cancel"))
+		//}
+		else if (GUI.Button(new Rect(0, Screen.height - 30, 50, 30), "Done"))
 		{
 			editMode = false;
 			currentActor = null;
@@ -303,27 +307,134 @@ public class RuleGUI : MonoBehaviour
 	}
 
 	Vector2 parameterScrollPos = Vector2.zero;
+	Vector2 detailEventScrollPos = Vector2.zero;
+	Vector2 detailReactionScrollPos = Vector2.zero;
 	void DetailWindow()
 	{
 		GUILayout.BeginVertical();
 
 		GUILayout.Label(currentActor.label + " (" + currentActor.type + ")", GUILayout.Width(Screen.width * 0.3f));
-		
-		if (GUILayout.Button("Back", GUILayout.Width(100), GUILayout.Height(30)))
+
+
+		GUILayout.BeginHorizontal();
+		if (GUILayout.Button("Back", GUILayout.Width(50), GUILayout.Height(30)))
 		{
 			showDetails = false;
 		}
 
+		GUILayout.Label("Events");
+		GUILayout.Label("Reactions");
+		GUILayout.Label("Parameters");
+		GUILayout.EndHorizontal();
+
 		GUILayout.BeginHorizontal();
 
+		GUILayout.Space(50);
+
+		// events
+		detailEventScrollPos = GUILayout.BeginScrollView(detailEventScrollPos, GUILayout.Width(Screen.width * 0.3f));
+
+		foreach(BaseRuleElement.EventData e in ruleGenerator.EventData.FindAll(item => item.actorId == currentActor.id))
+		{
+			GUIStyle style = buttonStyle;
+			if (markedEvent == e.id)
+				style = markedButtonOriginStyle;
+			else if (markedReaction > -1 && eventReactionDict.ContainsKey(e.id) && eventReactionDict[e.id].Contains(markedReaction))
+			{
+				style = markedButtonChildStyle;
+			}
+
+			if (GUILayout.Button(e.label, style, GUILayout.Height(50)))
+			{
+				if (markedEvent != e.id)
+				{
+					markedReaction = -1;
+					markedEvent = e.id;
+				}
+				else
+				{
+					markedEvent = -1;
+				}
+			}
+		}
+		GUILayout.EndScrollView();
+
+		// reactions
+		detailReactionScrollPos = GUILayout.BeginScrollView(detailReactionScrollPos, GUILayout.Width(Screen.width * 0.3f));
+
+		foreach (BaseRuleElement.ReactionData r in ruleGenerator.ReactionData.FindAll(item => item.actorId == currentActor.id))
+		{
+			GUIStyle style = buttonStyle;
+			if (markedReaction == r.id)
+				style = markedButtonOriginStyle;
+			else if (r.eventId == markedEvent)
+				style = markedButtonChildStyle;
+
+			if (GUILayout.Button(r.label, style, GUILayout.Height(50)))
+			{
+				if (markedReaction != r.id)
+				{
+					markedEvent = -1;
+					markedReaction = r.id;
+				}
+				else
+				{
+					markedReaction = -1;
+				}
+			}
+		}
+
+		GUILayout.EndScrollView();
+
+
+
+		// parameters
 		parameterScrollPos = GUILayout.BeginScrollView(parameterScrollPos, GUILayout.Width(Screen.width * 0.3f));
 
-		for (int i = 0; i < currentActor.parameters.Count; i++)
+
+		if (markedEvent == -1 && markedReaction == -1)
 		{
-			GUILayout.BeginHorizontal();
-			GUILayout.Label(currentActor.parameters[i].name + ": ", labelSmallStyle, GUILayout.MinWidth(100));
-			GUILayout.TextField(currentActor.parameters[i].value.ToString(), GUILayout.Width(30));
-			GUILayout.EndHorizontal();
+			// extra parameters:
+			GUI.enabled = false;
+			ShowParameter("Id:", currentActor.id);
+			ShowParameter("Type:", currentActor.type);
+			GUI.enabled = true;
+
+			ShowParameter("Label: ", currentActor.label);
+
+			HorizontalLine();
+
+			ShowParameters(currentActor.parameters);
+		}
+		else if (markedEvent > -1)
+		{
+			BaseRuleElement.EventData e = ruleGenerator.EventData.Find(item => item.id == markedEvent);
+			// extra parameters:
+			GUI.enabled = false;
+			ShowParameter("Id:", markedEvent);
+			ShowParameter("Type:", e.type);
+			GUI.enabled = true;
+
+			ShowParameter("Label: ", e.label);
+
+			HorizontalLine();
+
+			ShowParameters(e.parameters);
+		}
+		else if (markedReaction > -1)
+		{
+			BaseRuleElement.ReactionData r = ruleGenerator.ReactionData.Find(item => item.id == markedReaction);
+			// extra parameters:
+			GUI.enabled = false;
+			ShowParameter("Id:", markedReaction);
+			ShowParameter("Type:", r.type);
+			GUI.enabled = true;
+
+			ShowParameter("Label: ", r.label);
+
+			HorizontalLine();
+
+			ShowParameters(r.parameters);
 		}
 
 		GUILayout.EndScrollView();
@@ -331,6 +442,27 @@ public class RuleGUI : MonoBehaviour
 		GUILayout.EndHorizontal();
 
 		GUILayout.EndVertical();
+	}
+
+	void HorizontalLine()
+	{
+		GUILayout.Box("", new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(1) });
+	}
+
+	void ShowParameters(List<BaseRuleElement.Param> parameters)
+	{
+		for (int i = 0; i < parameters.Count; i++)
+		{
+			ShowParameter(parameters[i].name, parameters[i].value);
+		}
+	}
+
+	void ShowParameter(string label, object value)
+	{
+		GUILayout.BeginHorizontal();
+		GUILayout.Label(label + ": ", labelSmallStyle);
+		GUILayout.TextField(value.ToString(), GUILayout.Width(100));
+		GUILayout.EndHorizontal();
 	}
 
 	void ScrollviewEvents()

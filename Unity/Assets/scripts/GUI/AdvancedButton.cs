@@ -124,7 +124,7 @@ public class AdvancedButton
 	public AdvancedButtonResult DrawLayout(GUIContent content, GUIStyle style, params GUILayoutOption[] options)
 	{
 		// The drag test must be performed before the drawing, or events will be eaten.
-		AdvancedButtonResult dragoDropResult = dragoDropResult = HandleDragAndDrop(Time.time - lastMouseDown);
+		AdvancedButtonResult dragoDropResult = HandleDragAndDrop(Time.time - lastMouseDown);
 
 		// The usual button
 		bool click = GUILayout.Button(content, style, options);

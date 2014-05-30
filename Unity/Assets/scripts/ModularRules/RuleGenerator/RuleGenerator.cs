@@ -28,7 +28,7 @@ public class RuleGenerator : MonoBehaviour
 		private set;
 	}
 
-	public delegate void ParsedRules(); // fired when the parser is done with parsing
+	public delegate void ParsedRules(List<BaseRuleElement.ActorData> actorData, List<BaseRuleElement.EventData> eventData, List<BaseRuleElement.ReactionData> reactionData); // fired when the parser is done with parsing
 	public ParsedRules OnParsedRules;
 
 	// rule data collection
@@ -643,7 +643,7 @@ public class RuleGenerator : MonoBehaviour
 
 		// fire event
 		if (OnParsedRules != null)
-			OnParsedRules();
+			OnParsedRules(ActorData, EventData, ReactionData);
 
 		// store all base rule elements in a list, to keep track of which ones were used, which ones weren't
 		PopulateUnusedElementsList();
