@@ -3,6 +3,7 @@ using System.Collections;
 using System.IO;
 using System.Collections.Generic;
 using System;
+using System.Globalization;
 
 
 public class RuleGUI : MonoBehaviour
@@ -21,6 +22,7 @@ public class RuleGUI : MonoBehaviour
 	GUIStyle buttonStyle;
 	GUIStyle areaBackgroundStyle;
 	GUIStyle labelSmallStyle;
+	GUIStyle selectionGridStyle;
 
 	bool editMode = false;
 	bool loadMode = false;
@@ -51,6 +53,7 @@ public class RuleGUI : MonoBehaviour
 		buttonStyle = CustomSkin.GetStyle("button");
 		areaBackgroundStyle = CustomSkin.GetStyle("areaBackgroundStyle");
 		labelSmallStyle = CustomSkin.GetStyle("labelSmallStyle");
+		selectionGridStyle = CustomSkin.GetStyle("selectionGridStyle");
 	}
 
 	void OnParsedRules(List<BaseRuleElement.ActorData> originalActorData, List<BaseRuleElement.EventData> originalEventData, List<BaseRuleElement.ReactionData> originalReactionData)
@@ -471,11 +474,11 @@ public class RuleGUI : MonoBehaviour
 	{
 		for (int i = 0; i < parameters.Count; i++)
 		{
-			ShowParameter(parameters[i]);
+			parameters[i] = ShowParameter(parameters[i]);
 		}
 	}
 
-	void ShowParameter(BaseRuleElement.Param parameter)
+	BaseRuleElement.Param ShowParameter(BaseRuleElement.Param parameter)
 	{
 		GUILayout.BeginHorizontal(GUILayout.Width(Screen.width * 0.3f));
 		GUILayout.Label(parameter.name + ": ", labelSmallStyle, GUILayout.Width(150));
@@ -488,8 +491,9 @@ public class RuleGUI : MonoBehaviour
 		else if (parameter.type.IsEnum)
 		{
 			string[] names = Enum.GetNames(parameter.type);
-			int selected = GUILayout.SelectionGrid((int)parameter.value, names, 2);
-			parameter.value = Enum.Parse(parameter.type, names[selected]);
+			int selected = GUILayout.SelectionGrid((int)parameter.value, names, 2, selectionGridStyle);
+			if (selected < names.Length) // when invisible, this gets some weeeird values
+				parameter.value = Enum.Parse(parameter.type, names[selected]);
 		}
 		else if (parameter.value is int)
 		{
@@ -501,12 +505,20 @@ public class RuleGUI : MonoBehaviour
 		}
 		else if (parameter.type == typeof(Vector3))
 		{
-			//Vector3 vec;
-			//string[] s = v.Split(' ');
-			//vec.x = float.Parse(s[0]);
-			//vec.y = float.Parse(s[1]);
-			//vec.z = float.Parse(s[2]);
-			//newP.value = vec;
+			Vector3 vec = (Vector3)parameter.value;
+			string show = vec.x + " " + vec.y + " " + vec.z;
+			show = GUILayout.TextField(show);
+			string[] s = show.Split(' ');
+			float parseresult;
+			for (int i = 0; i < 3; i++)
+			{
+				if (float.TryParse(s[i], NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out parseresult))
+				{
+					vec[i] = parseresult;
+				}
+			}
+
+			parameter.value = vec;
 		}
 		else if (parameter.value is bool)
 		{
@@ -522,6 +534,8 @@ public class RuleGUI : MonoBehaviour
 		}
 
 		GUILayout.EndHorizontal();
+
+		return parameter;
 	}
 
 	string ShowParameter(string label, string value)
