@@ -144,6 +144,10 @@
         <type>Vector3</type>
         <value>0 2 -5</value>
       </param>
+	<param name="FixedToObject">
+		<type>Actor</type>
+		<value>-1</value>
+	</param>
       <param name="StayBehindObject">
         <type>Boolean</type>
         <value>True</value>

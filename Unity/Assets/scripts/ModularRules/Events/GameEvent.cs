@@ -54,7 +54,7 @@ public abstract class GameEvent : BaseRuleElement
 			id = Id,
 			actorId = Actor.Id,
 			type = this.GetType(),
-			label = Actor.name + " " + gameObject.name
+			label = gameObject.name
 		};
 	}
 

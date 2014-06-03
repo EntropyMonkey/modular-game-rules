@@ -304,6 +304,7 @@ public class RuleParserLinq : MonoBehaviour
 		return result;
 	}
 
+	// unused
 	void AddComponents(XElement element, List<BaseRuleElement.ComponentData> components)
 	{
 		if (components == null) return;
@@ -331,6 +332,22 @@ public class RuleParserLinq : MonoBehaviour
 			xParam.Add(new XElement("type") { Value = GetTypeStringWithoutNamespaces(param.type) });
 			if (param.type.IsEnum)
 				xParam.Add(new XElement("value") { Value = "" + (int)param.value });
+			else if (param.type == typeof(Vector3))
+			{
+				Vector3 vec = (Vector3)param.value;
+				xParam.Add(new XElement("value") { Value = vec.x + " " + vec.y + " " + vec.z });
+			}
+			else if (param.type == typeof(List<string>))
+			{
+				string result = "";
+				foreach (string s in (List<string>)param.value)
+				{
+					result += s + " ";
+				}
+				result.Remove(result.Length - 2, 1); // remove last space
+
+				xParam.Add(new XElement("value") { Value = result });
+			}
 			else
 				xParam.Add(new XElement("value") { Value = "" + param.value });
 

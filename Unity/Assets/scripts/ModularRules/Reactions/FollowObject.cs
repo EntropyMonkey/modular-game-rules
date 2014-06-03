@@ -50,6 +50,16 @@ public class FollowObject : Reaction
 				value = (FixedToObject.GetComponent(typeof(Actor)) as Actor).Id
 			});
 		}
+		else
+		{
+			rule.parameters.Add(new Param()
+			{
+				name = "FixedToObject",
+				type = typeof(Actor),
+				value = -1
+			});
+
+		}
 		rule.parameters.Add(new Param()
 		{
 			name = "StayBehindObject",

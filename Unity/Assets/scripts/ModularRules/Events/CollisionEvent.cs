@@ -22,25 +22,44 @@ public class CollisionEvent : GameEvent
 
 	public override RuleData GetRuleInformation()
 	{
-		RuleData result = base.GetRuleInformation();
+		RuleData rule = base.GetRuleInformation();
 
-		if (result.parameters == null)
-			result.parameters = new List<Param>();
+		if (rule.parameters == null)
+			rule.parameters = new List<Param>();
 
-		result.parameters.Add(new Param()
+		rule.parameters.Add(new Param()
 		{
 			name = "CollideWithTag",
 			type = CollideWithTag.GetType(),
 			value = CollideWithTag
 		});
-		result.parameters.Add(new Param()
+		rule.parameters.Add(new Param()
 		{
 			name = "TriggerOn",
 			type = TriggerOn.GetType(),
 			value = TriggerOn
 		});
 
-		return result;
+		// guistuff
+		rule.guiPrefix = "On";
+		rule.guiName = "Collision";
+
+		rule.guiParams.Add(new Param()
+		{
+			name = "CollisionActor",
+			type = this.GetType(),
+			value = Id,
+			guiPostfix = "and"
+		});
+		rule.guiParams.Add(new Param()
+		{
+			name = "CollideWithTag",
+			type = CollideWithTag.GetType(),
+			value = CollideWithTag,
+			guiPostfix = "(tag)"
+		});
+
+		return rule;
 	}
 
 	void Awake()

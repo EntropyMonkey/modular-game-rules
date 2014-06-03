@@ -23,10 +23,13 @@ public class RuleGUI : MonoBehaviour
 	GUIStyle areaBackgroundStyle;
 	GUIStyle labelSmallStyle;
 	GUIStyle selectionGridStyle;
+	GUIStyle popupWindowStyle;
 
 	bool editMode = false;
 	bool loadMode = false;
 	bool showDetails = false;
+	bool showRulesSaveDialogue = false;
+	bool showAlert = false;
 
 	BaseRuleElement.ActorData currentActor;
 
@@ -36,6 +39,18 @@ public class RuleGUI : MonoBehaviour
 
 	bool showOnlyRelevant = true;
 
+	string saveRulesFilename = "New Rules";
+	bool saveFileExists;
+
+	const int ruleFileSavingDialogId = 0;
+	const int alertId = 1;
+
+	string alertTitle;
+	string alertText;
+	delegate void AlertCallback();
+	AlertCallback alertOkCallback;
+	AlertCallback alertCancelCallback;
+
 	Dictionary<int, List<int>> eventReactionDict = new Dictionary<int,List<int>>();
 	Dictionary<int, List<int>> actorEventDict = new Dictionary<int, List<int>>();
 	Dictionary<int, List<int>> actorReactionDict = new Dictionary<int, List<int>>();
@@ -43,6 +58,8 @@ public class RuleGUI : MonoBehaviour
 	List<BaseRuleElement.ActorData> actorData = new List<BaseRuleElement.ActorData>();
 	List<BaseRuleElement.EventData> eventData = new List<BaseRuleElement.EventData>();
 	List<BaseRuleElement.ReactionData> reactionData = new List<BaseRuleElement.ReactionData>();
+
+	Dictionary<string, string> vectorParamTemporaries = new Dictionary<string, string>();
 
 	void Awake()
 	{
@@ -54,6 +71,7 @@ public class RuleGUI : MonoBehaviour
 		areaBackgroundStyle = CustomSkin.GetStyle("areaBackgroundStyle");
 		labelSmallStyle = CustomSkin.GetStyle("labelSmallStyle");
 		selectionGridStyle = CustomSkin.GetStyle("selectionGridStyle");
+		popupWindowStyle = CustomSkin.GetStyle("popupWindowStyle");
 	}
 
 	void OnParsedRules(List<BaseRuleElement.ActorData> originalActorData, List<BaseRuleElement.EventData> originalEventData, List<BaseRuleElement.ReactionData> originalReactionData)
@@ -121,6 +139,19 @@ public class RuleGUI : MonoBehaviour
 	void OnGUI()
 	{
 		GUI.skin = CustomSkin;
+		GUI.enabled = true;
+
+		if (showAlert)
+		{
+			GUILayout.Window(alertId, 
+				new Rect(Screen.width * 0.3f, Screen.height * 0.4f, Screen.width * .4f, Screen.height * .2f), 
+				AlertWindowFunc, 
+				alertTitle, 
+				popupWindowStyle);
+		}
+
+		if (showAlert || showRulesSaveDialogue)
+			GUI.enabled = false;
 
 		if (editMode)
 		{
@@ -139,6 +170,51 @@ public class RuleGUI : MonoBehaviour
 
 		GUILayout.EndArea();
 	}
+
+	#region Alert Popup
+	void ShowAlertWindow(string title, string text, AlertCallback okCallback, AlertCallback cancelCallback)
+	{
+		showAlert = true;
+		alertText = text;
+		alertOkCallback = okCallback;
+		alertCancelCallback = cancelCallback;
+	}
+
+	void AlertWindowFunc(int windowId)
+	{
+		GUI.enabled = true;
+		GUILayout.BeginVertical();
+
+		GUILayout.Label(alertText, labelSmallStyle);
+
+		GUILayout.BeginHorizontal();
+
+		if (GUILayout.Button("Cancel", GUILayout.Width(100)))
+		{
+			if (alertCancelCallback != null)
+				alertCancelCallback();
+			alertText = "";
+			alertOkCallback = null;
+			alertCancelCallback = null;
+			showAlert = false;
+		}
+		else if (GUILayout.Button("OK", GUILayout.Width(100)))
+		{
+			if (alertOkCallback != null)
+				alertOkCallback();
+
+			alertText = "";
+			alertOkCallback = null;
+			alertCancelCallback = null;
+			showAlert = false;
+		}
+
+		GUILayout.EndHorizontal();
+
+		GUILayout.EndVertical();
+		GUI.enabled = false;
+	}
+	#endregion
 
 	void LoadRules()
 	{
@@ -184,11 +260,12 @@ public class RuleGUI : MonoBehaviour
 
 		if (!editMode) return;
 
-		//else if (GUI.Button(new Rect(0, Screen.height - 30, 50, 30), "Save"))
-		//{
-
-		//}
-		else if (GUI.Button(new Rect(0, Screen.height - 30, 50, 30), "Done"))
+		else if (GUI.Button(new Rect(0, Screen.height - 60, 50, 30), "Save"))
+		{
+			// show pop-up asking for name. if same name as existing ruleset - overwrite
+			showRulesSaveDialogue = true;
+		}
+		else if (GUI.Button(new Rect(0, Screen.height - 30, 50, 30), "Quit without saving"))
 		{
 			editMode = false;
 			currentActor = null;
@@ -196,13 +273,89 @@ public class RuleGUI : MonoBehaviour
 			GetComponent<RuleGenerator>().StartEventExecution();
 		}
 
-		//MainView();
-		//ActorView();
+		//Version1GUI();
 
+		LowlevelRuleGUI();
+
+		//HighlevelRuleGUI();
+
+		if (showRulesSaveDialogue)
+		{
+			GUILayout.Window(ruleFileSavingDialogId,
+				new Rect(Screen.width * 0.3f, Screen.height * 0.1f, Screen.width * 0.4f, Screen.height * 0.2f),
+				SaveRulesDialogue,
+				"Save Rules",
+				popupWindowStyle);
+		}
+	}
+
+	Vector2 rulesScrollPos = Vector2.zero;
+	void HighlevelRuleGUI()
+	{
+		rulesScrollPos = GUILayout.BeginScrollView(rulesScrollPos);
+
+		foreach (BaseRuleElement.EventData eData in eventData)
+		{
+			GUILayout.Space(10);
+			GUILayout.BeginHorizontal(areaBackgroundStyle);
+
+			string intro = eData.guiPrefix + " " + eData.type.ToString();//eData.guiName;
+			GUILayout.Label(intro, labelSmallStyle);
+
+			for (int i = 0; i < eData.guiParams.Count; i++)
+			{
+				eData.guiParams[i] = ShowParameterValue(eData.guiParams[i]);
+			}
+
+			BaseRuleElement.ReactionData r;
+			if (eventReactionDict.ContainsKey(eData.id))
+			{
+				List<int> rIds = eventReactionDict[eData.id];
+
+				if (rIds.Count > 0)
+				{
+					r = reactionData.Find(item => item.id == rIds[0]);
+					ShowReactionData(r);
+				}
+
+				// TODO
+				//if (rIds.Count > 1)
+				//{
+				//}
+			}
+
+
+			GUILayout.EndHorizontal();
+		}
+
+		GUILayout.EndScrollView();
+	}
+
+	void ShowReactionData(BaseRuleElement.ReactionData rData)
+	{
+		string intro = rData.guiPrefix + " " + rData.type.ToString();//rData.guiName;
+		GUILayout.Label(intro, labelSmallStyle);
+
+		for (int i = 0; i < rData.guiParams.Count; i++)
+		{
+			//GUILayout.Label(rData.guiParams[i].guiPrefix, labelSmallStyle);
+			rData.guiParams[i] = ShowParameterValue(rData.guiParams[i]);
+			//GUILayout.Label(rData.guiParams[i].guiPostfix, labelSmallStyle);
+		}
+	}
+
+	void Version1GUI()
+	{
+		MainView();
+		ActorView();
+	}
+
+	void LowlevelRuleGUI()
+	{
 		if (!showDetails)
 		{
 			GUILayout.BeginVertical(GUILayout.Height(Screen.height * 0.1f));
-			
+
 			showOnlyRelevant = GUILayout.Toggle(showOnlyRelevant, "Show only related events/reactions");
 
 			GUILayout.BeginHorizontal();
@@ -217,6 +370,100 @@ public class RuleGUI : MonoBehaviour
 		{
 			DetailWindow();
 		}
+	}
+
+	void SaveRulesDialogue(int windowId)
+	{
+		if (showAlert) GUI.enabled = false;
+
+		GUILayout.BeginVertical();
+		// choose name
+
+		GUILayout.Label("Choose a name for the ruleset: ");
+
+		saveRulesFilename = GUILayout.TextField(saveRulesFilename, GUILayout.Width(100));
+
+		saveRulesFilename = saveRulesFilename.Replace(" ", "");
+		saveRulesFilename = saveRulesFilename.Replace(".", "");
+		saveRulesFilename = saveRulesFilename.Replace(",", "");
+		saveRulesFilename = saveRulesFilename.Replace(":", "");
+		saveRulesFilename = saveRulesFilename.Replace(";", "");
+		saveRulesFilename = saveRulesFilename.Replace("<", "");
+		saveRulesFilename = saveRulesFilename.Replace(">", "");
+		saveRulesFilename = saveRulesFilename.Replace("|", "");
+		saveRulesFilename = saveRulesFilename.Replace("!", "");
+		saveRulesFilename = saveRulesFilename.Replace("\\", "");
+		saveRulesFilename = saveRulesFilename.Replace("/", "");
+		saveRulesFilename = saveRulesFilename.Replace("\"", "");
+		saveRulesFilename = saveRulesFilename.Replace("'", "");
+		saveRulesFilename = saveRulesFilename.Replace("{", "");
+		saveRulesFilename = saveRulesFilename.Replace("}", "");
+		saveRulesFilename = saveRulesFilename.Replace("[", "");
+		saveRulesFilename = saveRulesFilename.Replace("]", "");
+		saveRulesFilename = saveRulesFilename.Replace("=", "");
+		saveRulesFilename = saveRulesFilename.Replace("(", "");
+		saveRulesFilename = saveRulesFilename.Replace(")", "");
+		saveRulesFilename = saveRulesFilename.Replace("*", "");
+		saveRulesFilename = saveRulesFilename.Replace("&", "");
+		saveRulesFilename = saveRulesFilename.Replace("^", "");
+		saveRulesFilename = saveRulesFilename.Replace("%", "");
+		saveRulesFilename = saveRulesFilename.Replace("#", "");
+		saveRulesFilename = saveRulesFilename.Replace("$", "");
+		saveRulesFilename = saveRulesFilename.Replace("@", "");
+		saveRulesFilename = saveRulesFilename.Replace("?", "");
+		saveRulesFilename = saveRulesFilename.Replace("`", "");
+		saveRulesFilename = saveRulesFilename.Replace("~", "");
+		saveRulesFilename = saveRulesFilename.Replace("+", "");
+		saveRulesFilename = saveRulesFilename.Replace("=", "");
+
+		GUILayout.BeginHorizontal();
+
+		if (GUILayout.Button("Save", GUILayout.Width(100)))
+		{
+			string filepath = Application.dataPath + @"/Rules/" + saveRulesFilename + ".xml";
+
+			// if same name as other ruleset - ask whether to overwrite or not
+			if (File.Exists(filepath))
+			{
+				saveFileExists = true;
+				ShowAlertWindow("Overwriting..", "Overwrite existing file '" + saveRulesFilename + ".xml'?", SaveRulesCallback, null);
+			}
+			else
+			// just save it
+			{
+				saveFileExists = false;
+				ShowAlertWindow("Saving..", "Save rules to '" + saveRulesFilename + ".xml'?", SaveRulesCallback, null);
+			}
+		}
+
+		// cancel
+		if (GUILayout.Button("Cancel", GUILayout.Width(100)))
+		{
+			showRulesSaveDialogue = false;
+			saveRulesFilename = "New Rules";
+		}
+
+		GUILayout.EndHorizontal();
+
+		GUILayout.EndVertical();
+
+		if (showAlert) GUI.enabled = true;
+	}
+
+	void SaveRulesCallback()
+	{
+		List<BaseRuleElement.RuleData> rules = new List<BaseRuleElement.RuleData>();
+		rules.AddRange(actorData.ToArray());
+		rules.AddRange(eventData.ToArray());
+		rules.AddRange(reactionData.ToArray());
+		RuleGenerator g = GetComponent<RuleGenerator>();
+		g.SaveRules(saveRulesFilename, true, rules);
+		g.LoadRules(saveRulesFilename);
+
+		showRulesSaveDialogue = showDetails = showAlert = editMode = false;
+		markedActor = markedEvent = markedReaction = -1;
+
+		GUI.enabled = true;
 	}
 
 	#region SecondVersion
@@ -341,6 +588,9 @@ public class RuleGUI : MonoBehaviour
 		if (GUILayout.Button("Back", GUILayout.Width(50), GUILayout.Height(30)))
 		{
 			showDetails = false;
+
+			vectorParamTemporaries.Clear();
+			markedActor = markedEvent = markedReaction = -1;
 		}
 
 		GUILayout.Label("Events");
@@ -474,20 +724,39 @@ public class RuleGUI : MonoBehaviour
 	{
 		for (int i = 0; i < parameters.Count; i++)
 		{
-			parameters[i] = ShowParameter(parameters[i]);
+			GUILayout.Space(10);
+			GUILayout.BeginHorizontal(GUILayout.Width(Screen.width * 0.3f));
+			GUILayout.Label(parameters[i].name + ": ", labelSmallStyle, GUILayout.Width(150));
+			parameters[i] = ShowParameterValue(parameters[i]);
+			GUILayout.EndHorizontal();
 		}
 	}
 
-	BaseRuleElement.Param ShowParameter(BaseRuleElement.Param parameter)
+	BaseRuleElement.Param ShowParameterValue(BaseRuleElement.Param parameter)
 	{
-		GUILayout.BeginHorizontal(GUILayout.Width(Screen.width * 0.3f));
-		GUILayout.Label(parameter.name + ": ", labelSmallStyle, GUILayout.Width(150));
-
 		// handle parameter value according to type
+
+		// ACTORS
 		if (parameter.type.IsSubclassOf(typeof(Actor)) || parameter.type.IsAssignableFrom(typeof(Actor)))
 		{
-			//ShowParameter(parameter.name, )
+			// get names
+			string[] names = new string[actorData.Count + 1];
+			for (int i = 0; i < actorData.Count; i++)
+			{
+				names[i] = actorData[i].label;
+			}
+			names[names.Length - 1] = "None"; // add option to have no actor selected
+
+			// show selection grid
+			int selected = GUILayout.SelectionGrid((int)parameter.value, names, 2, selectionGridStyle);
+
+			// feed back selected actor
+			if (selected == names.Length - 1) // chose "None"
+				parameter.value = -1;
+			else if (selected < names.Length - 1 && selected >= 0)
+				parameter.value = actorData.Find(item => item.label == names[selected]).id;
 		}
+		// ENUMS
 		else if (parameter.type.IsEnum)
 		{
 			string[] names = Enum.GetNames(parameter.type);
@@ -495,45 +764,105 @@ public class RuleGUI : MonoBehaviour
 			if (selected < names.Length) // when invisible, this gets some weeeird values
 				parameter.value = Enum.Parse(parameter.type, names[selected]);
 		}
+		// INT
 		else if (parameter.value is int)
 		{
-			parameter.value = int.Parse(GUILayout.TextField(parameter.value.ToString(), GUILayout.Width(100)));
+			string v = GUILayout.TextField(parameter.value.ToString(), GUILayout.Width(100));
+			if (v == "")
+				parameter.value = 0;
+			else
+				parameter.value = int.Parse(v);
 		}
+		// FLOAT
 		else if (parameter.value is float)
 		{
-			parameter.value = float.Parse(GUILayout.TextField(parameter.value.ToString(), GUILayout.Width(100)));
+			string v = GUILayout.TextField(parameter.value.ToString(), GUILayout.Width(100));
+			if (v == "")
+				parameter.value = 0;
+			else
+				parameter.value = float.Parse(v);
 		}
+		// VECTOR3
 		else if (parameter.type == typeof(Vector3))
 		{
-			Vector3 vec = (Vector3)parameter.value;
-			string show = vec.x + " " + vec.y + " " + vec.z;
-			show = GUILayout.TextField(show);
-			string[] s = show.Split(' ');
-			float parseresult;
-			for (int i = 0; i < 3; i++)
+			string show;
+			if (vectorParamTemporaries.ContainsKey(parameter.name))
 			{
-				if (float.TryParse(s[i], NumberStyles.AllowThousands, CultureInfo.CurrentCulture, out parseresult))
-				{
-					vec[i] = parseresult;
-				}
+				show = vectorParamTemporaries[parameter.name];
+			}
+			else
+			{
+				Vector3 vec = (Vector3)parameter.value;
+				show = vec.x + " " + vec.y + " " + vec.z;
+				vectorParamTemporaries.Add(parameter.name, show);
 			}
 
-			parameter.value = vec;
+			vectorParamTemporaries[parameter.name] = GUILayout.TextField(show);
+
+			if (GUILayout.Button("Set"))
+			{
+				string[] s = vectorParamTemporaries[parameter.name].Split(' ');
+				float parseresult;
+				Vector3 vec = (Vector3)parameter.value;
+				int i;
+				for (i = 0; i < s.Length && i < 3; i++)
+				{
+					if (float.TryParse(s[i], out parseresult))
+					{
+						vec[i] = parseresult;
+					}
+				}
+				// handling any number of spaces in string
+				for (; i < 3; i++)
+				{
+					vec[i] = 0;
+				}
+				vectorParamTemporaries.Remove(parameter.name);
+				parameter.value = vec;
+			}
 		}
+		// BOOL
 		else if (parameter.value is bool)
 		{
 			parameter.value = GUILayout.Toggle((bool)parameter.value, "");
 		}
+		// STRING
 		else if (parameter.type == typeof(string))
 		{
 			parameter.value = GUILayout.TextField(parameter.value.ToString(), GUILayout.Width(100));
 		}
+		// LIST<STRING>
 		else if (parameter.type == typeof(List<string>))
 		{
-			//string[] s = v.Split(' ');
-		}
+			List<string> values = parameter.value as List<string>;
+			List<int> delete = new List<int>();
+			GUILayout.BeginVertical();
+			for (int i = 0; i < values.Count; i++)
+			{
+				GUILayout.BeginHorizontal();
+				values[i] = GUILayout.TextField(values[i]);
+				
+				if (GUILayout.Button("Del"))
+				{
+					delete.Add(i);
+				}
 
-		GUILayout.EndHorizontal();
+				GUILayout.EndHorizontal();
+			}
+
+			if (GUILayout.Button("Add"))
+			{
+				values.Add("");
+			}
+			GUILayout.EndVertical();
+
+			for (int i = 0; i < delete.Count; i++)
+			{
+				values.RemoveAt(delete[i]);
+			}
+
+			parameter.value = values;
+		}
 
 		return parameter;
 	}

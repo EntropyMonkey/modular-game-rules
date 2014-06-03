@@ -15,6 +15,11 @@ public abstract class BaseRuleElement : MonoBehaviour
 		public string label;
 		public System.Type type;
 		public List<Param> parameters;
+
+		public string guiPrefix = "";
+		public string guiName = "";
+		public string guiPostfix = "";
+		public List<Param> guiParams = new List<Param>();
 	};
 
 	public class ActorData : RuleData, IDeepCopy<ActorData>
@@ -45,6 +50,8 @@ public abstract class BaseRuleElement : MonoBehaviour
 		public string name;
 		public System.Type type;
 		public object value;
+
+		public string guiPostfix;
 	};
 
 	public class EventData : RuleData, IDeepCopy<EventData>

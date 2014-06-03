@@ -64,7 +64,7 @@ public class RuleGenerator : MonoBehaviour
 
 		if (Directory.Exists(filepath))
 		{
-			ruleGUI.Files = Directory.GetFiles(filepath, "rules_*.xml");
+			ruleGUI.Files = Directory.GetFiles(filepath, "*.xml");
 		}
 		else
 		{
@@ -635,7 +635,7 @@ public class RuleGenerator : MonoBehaviour
 		// find all active placeholders for actors in the scene
 		FindGenerationPlaceholdersInScene();
 
-		// clear previously parsed data
+		// clear previously parsed rule data lists
 		ClearData();
 
 		// the actual parsing and adding elements to the scene
@@ -699,23 +699,26 @@ public class RuleGenerator : MonoBehaviour
 
 	#region Saving Rules
 	// TODO rewrite to using the ruledata, not the level elements?
-	public void SaveRules(string filename, bool overwrite)
+	public void SaveRules(string filename, bool overwrite, List<BaseRuleElement.RuleData> rules = null)
 	{
 		Debug.LogWarning("Saving rules into " + filename + ".xml ...");
-			
-		foreach (Actor a in GameObject.FindObjectsOfType(typeof(Actor)))
-		{
-			a.ScanEvents();
-			a.ScanReactions();
-		}
 
-		// broadcast save request, let elements handle storing info about themselves
-		BaseRuleElement[] brelements = GameObject.FindObjectsOfType(typeof(BaseRuleElement)) as BaseRuleElement[];
-
-		List<BaseRuleElement.RuleData> rules = new List<BaseRuleElement.RuleData>();
-		foreach (BaseRuleElement br in brelements)
+		if (rules == null)
 		{
-			rules.Add(br.GetRuleInformation());
+			foreach (Actor a in GameObject.FindObjectsOfType(typeof(Actor)))
+			{
+				a.ScanEvents();
+				a.ScanReactions();
+			}
+
+			// broadcast save request, let elements handle storing info about themselves
+			BaseRuleElement[] brelements = GameObject.FindObjectsOfType(typeof(BaseRuleElement)) as BaseRuleElement[];
+
+			rules = new List<BaseRuleElement.RuleData>();
+			foreach (BaseRuleElement br in brelements)
+			{
+				rules.Add(br.GetRuleInformation());
+			}
 		}
 
 		ruleParser.SaveRules(rules, filename, overwrite);

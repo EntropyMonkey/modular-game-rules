@@ -26,7 +26,7 @@ public abstract class Reaction : BaseRuleElement
 			ReactionData rule = new ReactionData()
 			{
 				id = Id,
-				label = Reactor.name + " " + gameObject.name, 
+				label = gameObject.name, 
 				actorId = Reactor.Id,
 				eventId = ListenedEvent.Id,
 				type = this.GetType()

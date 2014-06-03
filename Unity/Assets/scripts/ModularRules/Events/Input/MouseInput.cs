@@ -54,6 +54,17 @@ public class MouseInput : InputReceived
 			value = TrackedCamera.Id
 		});
 
+		// gui stuff
+		rule.guiPrefix = "On";
+		rule.guiName = "Mouse Input";
+
+		rule.guiParams.Add(new Param()
+		{
+			name = "TrackedButton",
+			type = TrackedButton.GetType(),
+			value = TrackedButton
+		});
+
 		return rule;
 	}
 

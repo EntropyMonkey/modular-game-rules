@@ -28,6 +28,16 @@ public class KeyboardInput : InputReceived
 			value = InputKey
 		});
 
+		// gui stuff
+		rule.guiPrefix = "On";
+		rule.guiName = "Keyboard Input";
+		rule.guiParams.Add(new Param()
+		{
+			name = "InputKey",
+			type = InputKey.GetType(),
+			value = InputKey
+		});
+
 		return rule;
 	}
 
