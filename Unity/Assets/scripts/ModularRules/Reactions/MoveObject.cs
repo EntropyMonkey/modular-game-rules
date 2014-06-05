@@ -88,6 +88,11 @@ public class MoveObject : Reaction
 	}
 	#endregion
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("move", RuleGUI.ruleLabelStyle);
+	}
+
 	protected override void React(GameEventData eventData)
 	{
 		if (eventData == null ||

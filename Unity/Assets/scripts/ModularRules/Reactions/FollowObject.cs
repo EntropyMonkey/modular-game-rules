@@ -70,6 +70,11 @@ public class FollowObject : Reaction
 		return rule;
 	}
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("follow", RuleGUI.ruleLabelStyle);
+	}
+
 	void OnEnable()
 	{
 		Register();

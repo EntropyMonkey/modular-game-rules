@@ -17,13 +17,15 @@ public class RuleGUI : MonoBehaviour
 
 	public GUISkin CustomSkin;
 
-	GUIStyle markedButtonOriginStyle;
-	GUIStyle markedButtonChildStyle;
-	GUIStyle buttonStyle;
-	GUIStyle areaBackgroundStyle;
-	GUIStyle labelSmallStyle;
-	GUIStyle selectionGridStyle;
-	GUIStyle popupWindowStyle;
+	public static GUIStyle markedButtonOriginStyle;
+	public static GUIStyle markedButtonChildStyle;
+	public static GUIStyle buttonStyle;
+	public static GUIStyle areaBackgroundStyle;
+	public static GUIStyle smallLabelStyle;
+	public static GUIStyle selectionGridStyle;
+	public static GUIStyle popupWindowStyle;
+
+	public static GUIStyle ruleLabelStyle;
 
 	bool editMode = false;
 	bool loadMode = false;
@@ -40,7 +42,6 @@ public class RuleGUI : MonoBehaviour
 	bool showOnlyRelevant = true;
 
 	string saveRulesFilename = "New Rules";
-	bool saveFileExists;
 
 	const int ruleFileSavingDialogId = 0;
 	const int alertId = 1;
@@ -63,15 +64,17 @@ public class RuleGUI : MonoBehaviour
 
 	void Awake()
 	{
-		GetComponent<RuleGenerator>().OnParsedRules += OnParsedRules;
+		GetComponent<RuleGenerator>().OnGeneratedLevel += OnParsedRules;
 
 		markedButtonOriginStyle = CustomSkin.GetStyle("markedButtonOrigin");
 		markedButtonChildStyle = CustomSkin.GetStyle("markedButtonChild");
 		buttonStyle = CustomSkin.GetStyle("button");
 		areaBackgroundStyle = CustomSkin.GetStyle("areaBackgroundStyle");
-		labelSmallStyle = CustomSkin.GetStyle("labelSmallStyle");
+		smallLabelStyle = CustomSkin.GetStyle("labelSmallStyle");
 		selectionGridStyle = CustomSkin.GetStyle("selectionGridStyle");
 		popupWindowStyle = CustomSkin.GetStyle("popupWindowStyle");
+
+		ruleLabelStyle = CustomSkin.GetStyle("ruleLabelStyle");
 	}
 
 	void OnParsedRules(List<BaseRuleElement.ActorData> originalActorData, List<BaseRuleElement.EventData> originalEventData, List<BaseRuleElement.ReactionData> originalReactionData)
@@ -175,6 +178,7 @@ public class RuleGUI : MonoBehaviour
 	void ShowAlertWindow(string title, string text, AlertCallback okCallback, AlertCallback cancelCallback)
 	{
 		showAlert = true;
+		alertTitle = title;
 		alertText = text;
 		alertOkCallback = okCallback;
 		alertCancelCallback = cancelCallback;
@@ -185,7 +189,7 @@ public class RuleGUI : MonoBehaviour
 		GUI.enabled = true;
 		GUILayout.BeginVertical();
 
-		GUILayout.Label(alertText, labelSmallStyle);
+		GUILayout.Label(alertText, smallLabelStyle);
 
 		GUILayout.BeginHorizontal();
 
@@ -275,9 +279,9 @@ public class RuleGUI : MonoBehaviour
 
 		//Version1GUI();
 
-		LowlevelRuleGUI();
-
-		//HighlevelRuleGUI();
+		//LowlevelRuleGUI();
+		
+		HighlevelRuleGUI();
 
 		if (showRulesSaveDialogue)
 		{
@@ -292,21 +296,18 @@ public class RuleGUI : MonoBehaviour
 	Vector2 rulesScrollPos = Vector2.zero;
 	void HighlevelRuleGUI()
 	{
-		rulesScrollPos = GUILayout.BeginScrollView(rulesScrollPos);
+		rulesScrollPos = GUILayout.BeginScrollView(rulesScrollPos, GUILayout.Height(Screen.height * 0.85f));
 
 		foreach (BaseRuleElement.EventData eData in eventData)
 		{
 			GUILayout.Space(10);
 			GUILayout.BeginHorizontal(areaBackgroundStyle);
 
-			string intro = eData.guiPrefix + " " + eData.type.ToString();//eData.guiName;
-			GUILayout.Label(intro, labelSmallStyle);
+			// display event
+			if (eData.OnShowGui != null)
+				eData.OnShowGui();
 
-			for (int i = 0; i < eData.guiParams.Count; i++)
-			{
-				eData.guiParams[i] = ShowParameterValue(eData.guiParams[i]);
-			}
-
+			// show all reactions to this event
 			BaseRuleElement.ReactionData r;
 			if (eventReactionDict.ContainsKey(eData.id))
 			{
@@ -315,7 +316,9 @@ public class RuleGUI : MonoBehaviour
 				if (rIds.Count > 0)
 				{
 					r = reactionData.Find(item => item.id == rIds[0]);
-					ShowReactionData(r);
+
+					if (r.OnShowGui != null)
+						r.OnShowGui();
 				}
 
 				// TODO
@@ -328,20 +331,20 @@ public class RuleGUI : MonoBehaviour
 			GUILayout.EndHorizontal();
 		}
 
-		GUILayout.EndScrollView();
-	}
+		HorizontalLine();
 
-	void ShowReactionData(BaseRuleElement.ReactionData rData)
-	{
-		string intro = rData.guiPrefix + " " + rData.type.ToString();//rData.guiName;
-		GUILayout.Label(intro, labelSmallStyle);
-
-		for (int i = 0; i < rData.guiParams.Count; i++)
+		foreach (BaseRuleElement.ActorData aData in actorData)
 		{
-			//GUILayout.Label(rData.guiParams[i].guiPrefix, labelSmallStyle);
-			rData.guiParams[i] = ShowParameterValue(rData.guiParams[i]);
-			//GUILayout.Label(rData.guiParams[i].guiPostfix, labelSmallStyle);
+			GUILayout.Space(10);
+			GUILayout.BeginHorizontal(areaBackgroundStyle);
+
+			if (aData.OnShowGui != null)
+				aData.OnShowGui();
+
+			GUILayout.EndHorizontal();
 		}
+
+		GUILayout.EndScrollView();
 	}
 
 	void Version1GUI()
@@ -425,13 +428,11 @@ public class RuleGUI : MonoBehaviour
 			// if same name as other ruleset - ask whether to overwrite or not
 			if (File.Exists(filepath))
 			{
-				saveFileExists = true;
 				ShowAlertWindow("Overwriting..", "Overwrite existing file '" + saveRulesFilename + ".xml'?", SaveRulesCallback, null);
 			}
 			else
 			// just save it
 			{
-				saveFileExists = false;
 				ShowAlertWindow("Saving..", "Save rules to '" + saveRulesFilename + ".xml'?", SaveRulesCallback, null);
 			}
 		}
@@ -726,7 +727,7 @@ public class RuleGUI : MonoBehaviour
 		{
 			GUILayout.Space(10);
 			GUILayout.BeginHorizontal(GUILayout.Width(Screen.width * 0.3f));
-			GUILayout.Label(parameters[i].name + ": ", labelSmallStyle, GUILayout.Width(150));
+			GUILayout.Label(parameters[i].name + ": ", smallLabelStyle, GUILayout.Width(150));
 			parameters[i] = ShowParameterValue(parameters[i]);
 			GUILayout.EndHorizontal();
 		}
@@ -870,7 +871,7 @@ public class RuleGUI : MonoBehaviour
 	string ShowParameter(string label, string value)
 	{
 		GUILayout.BeginHorizontal();
-		GUILayout.Label(label + ": ", labelSmallStyle);
+		GUILayout.Label(label + ": ", smallLabelStyle);
 		string result = GUILayout.TextField(value);
 		GUILayout.EndHorizontal();
 

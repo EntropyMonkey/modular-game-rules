@@ -16,10 +16,8 @@ public abstract class BaseRuleElement : MonoBehaviour
 		public System.Type type;
 		public List<Param> parameters;
 
-		public string guiPrefix = "";
-		public string guiName = "";
-		public string guiPostfix = "";
-		public List<Param> guiParams = new List<Param>();
+		public delegate void ShowGuiDelegate();
+		public ShowGuiDelegate OnShowGui;
 	};
 
 	public class ActorData : RuleData, IDeepCopy<ActorData>
@@ -32,6 +30,7 @@ public abstract class BaseRuleElement : MonoBehaviour
 			result.id = id;
 			result.label = label;
 			result.type = type;
+			result.OnShowGui = OnShowGui;
 			result.parameters = DeepCopyParams(parameters);
 			result.components = components;
 
@@ -50,8 +49,6 @@ public abstract class BaseRuleElement : MonoBehaviour
 		public string name;
 		public System.Type type;
 		public object value;
-
-		public string guiPostfix;
 	};
 
 	public class EventData : RuleData, IDeepCopy<EventData>
@@ -65,6 +62,7 @@ public abstract class BaseRuleElement : MonoBehaviour
 			result.id = id;
 			result.label = label;
 			result.type = type;
+			result.OnShowGui = OnShowGui;
 			result.parameters = DeepCopyParams(parameters);
 			result.actorId = actorId;
 
@@ -84,6 +82,7 @@ public abstract class BaseRuleElement : MonoBehaviour
 			result.id = id;
 			result.label = label;
 			result.type = type;
+			result.OnShowGui = OnShowGui;
 			result.parameters = DeepCopyParams(parameters);
 			result.actorId = actorId;
 			result.eventId = eventId;

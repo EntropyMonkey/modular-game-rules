@@ -11,6 +11,11 @@ public class ObjectMovedEvent : GameEvent
 		position = Actor.transform.position;
 	}
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("Object moved", RuleGUI.ruleLabelStyle);
+	}
+
 	public override GameEvent UpdateEvent()
 	{
 		if (transform == null) return this;

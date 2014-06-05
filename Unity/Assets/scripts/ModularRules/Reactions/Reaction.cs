@@ -29,13 +29,16 @@ public abstract class Reaction : BaseRuleElement
 				label = gameObject.name, 
 				actorId = Reactor.Id,
 				eventId = ListenedEvent.Id,
-				type = this.GetType()
+				type = this.GetType(),
+				OnShowGui = ShowGui
 			};
 
 			return rule;
 		}
 		return null;
 	}
+
+	public abstract void ShowGui();
 
 	/// <summary>
 	/// execute all sub reactions in depth first order

@@ -54,9 +54,12 @@ public abstract class GameEvent : BaseRuleElement
 			id = Id,
 			actorId = Actor.Id,
 			type = this.GetType(),
-			label = gameObject.name
+			label = gameObject.name,
+			OnShowGui = ShowGui
 		};
 	}
+
+	public abstract void ShowGui();
 
 	public abstract GameEvent UpdateEvent();
 

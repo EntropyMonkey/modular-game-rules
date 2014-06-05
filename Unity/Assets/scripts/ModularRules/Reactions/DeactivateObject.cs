@@ -46,6 +46,11 @@ public class DeactivateObject : Reaction
 		}
 	}
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("deactivate", RuleGUI.ruleLabelStyle);
+	}
+
 	protected override void React(GameEventData eventData)
 	{
 		if (!deactivating)

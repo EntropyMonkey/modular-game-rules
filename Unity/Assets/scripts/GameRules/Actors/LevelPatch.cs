@@ -21,6 +21,11 @@ public class LevelPatch : Actor
 		}
 	}
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("LevelPatch", RuleGUI.ruleLabelStyle);
+	}
+
 	void Update()
 	{
 		UpdateEvents();

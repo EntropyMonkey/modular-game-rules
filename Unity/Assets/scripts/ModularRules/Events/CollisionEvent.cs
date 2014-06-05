@@ -40,26 +40,12 @@ public class CollisionEvent : GameEvent
 			value = TriggerOn
 		});
 
-		// guistuff
-		rule.guiPrefix = "On";
-		rule.guiName = "Collision";
-
-		rule.guiParams.Add(new Param()
-		{
-			name = "CollisionActor",
-			type = this.GetType(),
-			value = Id,
-			guiPostfix = "and"
-		});
-		rule.guiParams.Add(new Param()
-		{
-			name = "CollideWithTag",
-			type = CollideWithTag.GetType(),
-			value = CollideWithTag,
-			guiPostfix = "(tag)"
-		});
-
 		return rule;
+	}
+
+	public override void ShowGui()
+	{
+		GUILayout.Label("On Collision", RuleGUI.ruleLabelStyle);
 	}
 
 	void Awake()

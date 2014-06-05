@@ -246,8 +246,16 @@ public abstract class Actor : BaseRuleElement
 
 	public override RuleData GetRuleInformation()
 	{
-		return new ActorData() { id = Id, type = this.GetType(), label = gameObject.name };
+		return new ActorData() 
+		{ 
+			id = Id, 
+			type = this.GetType(), 
+			label = gameObject.name, 
+			OnShowGui = ShowGui 
+		};
 	}
+
+	public abstract void ShowGui();
 
 	public void UpdateEvents()
 	{

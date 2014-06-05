@@ -70,6 +70,11 @@ public class SpawnObject : Reaction
 		return data;
 	}
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("spawn", RuleGUI.ruleLabelStyle);
+	}
+
 	protected override void React(GameEventData eventData)
 	{
 		if (SpawnedPrefabs == null || SpawnedPrefabs.Count == 0) return;

@@ -28,8 +28,8 @@ public class RuleGenerator : MonoBehaviour
 		private set;
 	}
 
-	public delegate void ParsedRules(List<BaseRuleElement.ActorData> actorData, List<BaseRuleElement.EventData> eventData, List<BaseRuleElement.ReactionData> reactionData); // fired when the parser is done with parsing
-	public ParsedRules OnParsedRules;
+	public delegate void GeneratedLevel(List<BaseRuleElement.ActorData> actorData, List<BaseRuleElement.EventData> eventData, List<BaseRuleElement.ReactionData> reactionData); // fired when the parser is done with parsing
+	public GeneratedLevel OnGeneratedLevel;
 
 	// rule data collection
 	public List<BaseRuleElement.ActorData> ActorData = new List<BaseRuleElement.ActorData>();
@@ -173,6 +173,8 @@ public class RuleGenerator : MonoBehaviour
 				actor.Id = data.id;
 				actor.Label = data.label;
 
+				data.OnShowGui = actor.ShowGui;
+
 				RegisterRuleElement(actor);
 
 				SetParameters(actor, data);
@@ -210,6 +212,8 @@ public class RuleGenerator : MonoBehaviour
 				gameEvent = newEventGO.AddComponent(data.type) as GameEvent;
 				gameEvent.Id = data.id;
 				gameEvent.Label = data.label;
+
+				data.OnShowGui = gameEvent.ShowGui;
 
 				//RegisterRuleElement(gameEvent);
 
@@ -252,6 +256,8 @@ public class RuleGenerator : MonoBehaviour
 				reaction = newReactionGO.AddComponent(data.type) as Reaction;
 				reaction.Id = data.id;
 				reaction.Label = data.label;
+
+				data.OnShowGui = reaction.ShowGui;
 
 				actor.AddReaction(reaction);
 
@@ -493,6 +499,7 @@ public class RuleGenerator : MonoBehaviour
 			Actor[] fakeActors = new Actor[genActors.Count + placeholders.Count];
 			genActors.CopyTo(fakeActors);
 			GameObject fakeObject = new GameObject("fakeActorsTemp");
+
 			// create fake Actors for Id handling from placeholders
 			for (int i = genActors.Count; i < fakeActors.Length; i++ )
 			{
@@ -641,10 +648,6 @@ public class RuleGenerator : MonoBehaviour
 		// the actual parsing and adding elements to the scene
 		ruleParser.Parse(this, filename);
 
-		// fire event
-		if (OnParsedRules != null)
-			OnParsedRules(ActorData, EventData, ReactionData);
-
 		// store all base rule elements in a list, to keep track of which ones were used, which ones weren't
 		PopulateUnusedElementsList();
 
@@ -653,6 +656,10 @@ public class RuleGenerator : MonoBehaviour
 
 		// delete all base rule elements which haven't been updated/created
 		DeleteUnusedElements();
+
+		// fire event
+		if (OnGeneratedLevel != null)
+			OnGeneratedLevel(ActorData, EventData, ReactionData);
 
 		// initialize elements. order of initializing is important (first actors, then events, then reactions)
 		InitializeRuleElements();

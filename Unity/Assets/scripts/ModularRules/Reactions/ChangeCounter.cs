@@ -80,6 +80,11 @@ public class ChangeCounter : Reaction
 		return rule;
 	}
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("change counter", RuleGUI.ruleLabelStyle);
+	}
+
 	protected override void React(GameEventData eventData)
 	{
 		counters.ChangeCounter(CounterName, ChangeBy);

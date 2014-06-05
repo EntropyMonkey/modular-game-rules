@@ -52,6 +52,11 @@ public class CounterEvent : GameEvent
 		return rule;
 	}
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("On Counter", RuleGUI.ruleLabelStyle);
+	}
+
 	public override GameEvent UpdateEvent()
 	{
 		if ((Compare == Comparison.LESS && counters.GetValue(CounterName) < CounterLimit) ||

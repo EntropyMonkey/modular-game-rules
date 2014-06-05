@@ -39,6 +39,11 @@ public class Player : Actor
 		return rule;
 	}
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("Shwoing off a player here", RuleGUI.ruleLabelStyle);
+	}
+
 	// Update is called once per frame
 	void Update()
 	{

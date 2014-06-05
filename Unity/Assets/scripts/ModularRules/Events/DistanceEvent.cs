@@ -46,6 +46,11 @@ public class DistanceEvent : GameEvent
 		return data;
 	}
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("On Distance", RuleGUI.ruleLabelStyle);
+	}
+
 	public override GameEvent UpdateEvent()
 	{
 		if (WatchedObject == null) return null;

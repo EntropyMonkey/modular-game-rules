@@ -23,4 +23,8 @@ public class InputReceived : GameEvent
 		if (!ReceiveInput) return null;
 		else return this;
 	}
+
+	public override void ShowGui()
+	{
+	}
 }

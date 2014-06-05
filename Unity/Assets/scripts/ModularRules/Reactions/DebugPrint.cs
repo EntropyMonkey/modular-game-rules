@@ -17,4 +17,9 @@ public class DebugPrint : Reaction
 	{
 		Debug.Log("Received event " + eventData.ToString());
 	}
+
+	public override void ShowGui()
+	{
+		GUILayout.Label("log");
+	}
 }

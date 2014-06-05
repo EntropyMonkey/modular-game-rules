@@ -21,6 +21,11 @@ public class RotationFollowMouse : Reaction
 		Unregister();
 	}
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("rotate with mouse", RuleGUI.ruleLabelStyle);
+	}
+
 	protected override void React(GameEventData data)
 	{
 		DataPiece inputData;

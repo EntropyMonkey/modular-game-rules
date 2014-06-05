@@ -7,4 +7,9 @@ public class StandardActor : Actor
 	{
 		UpdateEvents();
 	}
+
+	public override void ShowGui()
+	{
+		GUILayout.Label("Showing a standard actor");
+	}
 }

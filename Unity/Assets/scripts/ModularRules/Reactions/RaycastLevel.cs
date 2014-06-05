@@ -18,6 +18,11 @@ public class RaycastLevel : Reaction
 		Unregister();
 	}
 
+	public override void ShowGui()
+	{
+		GUILayout.Label("raycast", RuleGUI.ruleLabelStyle);
+	}
+
 	protected override void React(GameEventData eventData)
 	{
 		RaycastHit hitInfo;

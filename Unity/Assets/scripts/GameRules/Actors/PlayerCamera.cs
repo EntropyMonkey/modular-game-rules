@@ -51,4 +51,9 @@ public class PlayerCamera : Actor
 
 		return rule;
 	}
+
+	public override void ShowGui()
+	{
+		GUILayout.Label("Showing off a cam", RuleGUI.ruleLabelStyle);
+	}
 }
