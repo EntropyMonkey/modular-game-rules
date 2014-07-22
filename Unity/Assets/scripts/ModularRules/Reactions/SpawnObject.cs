@@ -70,9 +70,22 @@ public class SpawnObject : Reaction
 		return data;
 	}
 
-	public override void ShowGui()
+	public override void ShowGui(RuleData ruleData)
 	{
-		GUILayout.Label("spawn", RuleGUI.ruleLabelStyle);
+		GUILayout.Label("randomly spawn", RuleGUI.ruleLabelStyle);
+
+		SpawnedPrefabs = RuleGUI.ShowParameter(SpawnedPrefabs);
+		ChangeParameter("SpawnedPrefabs", (ruleData as ReactionData).parameters, SpawnedPrefabs);
+
+		GUILayout.Label("in direction", RuleGUI.ruleLabelStyle);
+
+		Direction = RuleGUI.ShowParameter(Direction, "spawnDirection" + Id);
+		ChangeParameter("Direction", (ruleData as ReactionData).parameters, Direction);
+
+		GUILayout.Label("at distance", RuleGUI.ruleLabelStyle);
+
+		Distance = RuleGUI.ShowParameter(Distance);
+		ChangeParameter("Distance", (ruleData as ReactionData).parameters, Distance);
 	}
 
 	protected override void React(GameEventData eventData)
@@ -107,7 +120,7 @@ public class SpawnObject : Reaction
 				element.Id = -1;
 				element.DontDeleteOnLoad = false;
 				element.WasSpawned = true;
-					
+
 				// can't do that, since this instance is of type BaseRuleElement and will not call derived Initialize methods
 				element.Initialize(Reactor.RuleGenerator);
 #if DEBUG

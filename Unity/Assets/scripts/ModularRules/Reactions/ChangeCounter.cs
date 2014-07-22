@@ -7,11 +7,6 @@ public class ChangeCounter : Reaction
 	public int ChangeBy = -1;
 	public string CounterName = "";
 
-	public int MaxValue = 100;
-	public int MinValue = 0;
-
-	public bool ShowInGUI = false;
-
 	private Counters counters;
 
 	void OnEnable()
@@ -30,12 +25,13 @@ public class ChangeCounter : Reaction
 
 		if (counters == null)
 		{
-			counters = Reactor.GetComponent<Counters>();
+			counters = FindObjectOfType<Counters>();
 			if (counters == null)
-				counters = Reactor.gameObject.AddComponent<Counters>();
+			{
+				Debug.LogError("Can't find Counters actor in scene. Deactivating " + name + ".");
+				gameObject.SetActive(false);
+			}
 		}
-
-		counters.AddCounter(CounterName, 0, MinValue, MaxValue, ShowInGUI);
 	}
 
 	public override BaseRuleElement.RuleData GetRuleInformation()
@@ -58,35 +54,26 @@ public class ChangeCounter : Reaction
 				type = CounterName.GetType(),
 				value = CounterName
 			});
-		rule.parameters.Add(new Param()
-			{
-				name = "MaxValue",
-				type = MaxValue.GetType(),
-				value = MaxValue
-			});
-		rule.parameters.Add(new Param()
-			{
-				name = "MinValue",
-				type = MinValue.GetType(),
-				value = MinValue
-			});
-		rule.parameters.Add(new Param()
-			{
-				name = "ShowInGUI",
-				type = ShowInGUI.GetType(),
-				value = ShowInGUI
-			});
 
 		return rule;
 	}
 
-	public override void ShowGui()
+	public override void ShowGui(RuleData ruleData)
 	{
 		GUILayout.Label("change counter", RuleGUI.ruleLabelStyle);
+
+		CounterName = RuleGUI.ShowParameter(CounterName);
+		ChangeParameter("CounterName", (ruleData as ReactionData).parameters, CounterName);
+
+		GUILayout.Label("by", RuleGUI.ruleLabelStyle);
+
+		ChangeBy = RuleGUI.ShowParameter(ChangeBy);
+		ChangeParameter("ChangeBy", (ruleData as ReactionData).parameters, ChangeBy);
 	}
 
 	protected override void React(GameEventData eventData)
 	{
-		counters.ChangeCounter(CounterName, ChangeBy);
+		if (counters != null)
+			counters.ChangeCounter(CounterName, ChangeBy);
 	}
 }

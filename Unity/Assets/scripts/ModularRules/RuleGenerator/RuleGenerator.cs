@@ -28,13 +28,18 @@ public class RuleGenerator : MonoBehaviour
 		private set;
 	}
 
-	public delegate void GeneratedLevel(List<BaseRuleElement.ActorData> actorData, List<BaseRuleElement.EventData> eventData, List<BaseRuleElement.ReactionData> reactionData); // fired when the parser is done with parsing
+	public delegate void GeneratedLevel(List<BaseRuleElement.ActorData> actorData, 
+		List<BaseRuleElement.EventData> eventData, 
+		List<BaseRuleElement.ReactionData> reactionData,
+		string filename); // fired when the parser is done with parsing
 	public GeneratedLevel OnGeneratedLevel;
 
 	// rule data collection
 	public List<BaseRuleElement.ActorData> ActorData = new List<BaseRuleElement.ActorData>();
 	public List<BaseRuleElement.EventData> EventData = new List<BaseRuleElement.EventData>();
 	public List<BaseRuleElement.ReactionData> ReactionData = new List<BaseRuleElement.ReactionData>();
+
+	public string[] ActorNames;
 
 	// contains all placeholders for actors in the scene, in order of their Id
 	List<PlaceholderElement> placeholders;
@@ -94,6 +99,7 @@ public class RuleGenerator : MonoBehaviour
 	void ClearData()
 	{
 		ActorData.Clear();
+		//ActorNames.Clear();
 		EventData.Clear();
 		ReactionData.Clear();
 	}
@@ -103,6 +109,7 @@ public class RuleGenerator : MonoBehaviour
 		if (ActorData.Find(item => item.id == actorData.id) == null)
 		{
 			ActorData.Add(actorData.DeepCopy());
+			//ActorNames.Add(actorData.id, actorData.label);
 		}
 	}
 
@@ -124,20 +131,37 @@ public class RuleGenerator : MonoBehaviour
 	#endregion
 
 	#region ID Handling
+	public int GetEventId()
+	{
+		return GetId(genEvents.ToArray());
+	}
+
+	public int GetReactionId()
+	{
+		return GetId(genReactions.ToArray());
+	}
+
+	public int GetActorId()
+	{
+		return GetId(genActors.ToArray());
+	}
+
 	int GetId(BaseRuleElement[] genElements)
 	{
 		int highestId = 0;
+		int scndHighestId = 0;
 		for (int i = 0; i < genElements.Length; i++)
 		{
-			if (genElements[i].Id > highestId && genElements[i].Id - highestId > 1)
+			if (genElements[i].Id > highestId) // keep track of highest id (so far)
 			{
-				// if there's an unused id between two others, use it, stop the loop
-				return genElements[i].Id + 1;
-			}
-			else if (genElements[i].Id > highestId)
-			{
+				scndHighestId = highestId;
 				highestId = genElements[i].Id;
 			}
+		}
+
+		if (highestId - scndHighestId > 1) // if there's an unused id between two others, use it, stop the loop
+		{
+			return scndHighestId + 1;
 		}
 
 		return highestId + 1;
@@ -151,7 +175,7 @@ public class RuleGenerator : MonoBehaviour
 
 	#region Adding Elements to the scene
 
-	void AddActorToScene(BaseRuleElement.ActorData data)
+	public void AddActorToScene(BaseRuleElement.ActorData data)
 	{
 		PlaceholderElement placeholder = placeholders.Find(item => item.Id == data.id);
 		if (placeholder != null)
@@ -185,7 +209,6 @@ public class RuleGenerator : MonoBehaviour
 				// deactivate placeholder
 				placeholder.enabled = false;
 			}
-				
 		}
 		else
 		{
@@ -193,10 +216,10 @@ public class RuleGenerator : MonoBehaviour
 		}
 	}
 
-	void AddEventToScene(BaseRuleElement.EventData data)
+	public void AddEventToScene(BaseRuleElement.EventData data)
 	{
 #if DEBUG
-		Debug.Log("Adding event " + data.id + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
+		Debug.Log("Adding event " + data.label + "(" + data.id + ")" + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
 #endif
 		// actor should exist by now - if it doesn't, don't create any related actions or events
 		Actor actor = genActors.Find(item => item.Id == data.actorId);
@@ -236,10 +259,10 @@ public class RuleGenerator : MonoBehaviour
 		}
 	}
 
-	void AddReactionToScene(BaseRuleElement.ReactionData data)
+	public void AddReactionToScene(BaseRuleElement.ReactionData data)
 	{
 #if DEBUG
-		Debug.Log("Adding reaction " + data.id + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
+		Debug.Log("Adding reaction " + data.label + "(" + data.id + ")" + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
 #endif
 		// actor should exist by now - if it doesn't, don't create or update any related actions or events
 		Actor actor = genActors.Find(item => item.Id == data.actorId);
@@ -300,7 +323,8 @@ public class RuleGenerator : MonoBehaviour
 			}
 
 			// different handling for object references
-			if (parameter.type.IsSubclassOf(typeof(Actor)) || parameter.type.IsAssignableFrom(typeof(Actor)))
+			if (parameter.type.IsSubclassOf(typeof(Actor)) || parameter.type.IsAssignableFrom(typeof(Actor))
+				|| (parameter.value is int && pFieldInfo.FieldType.IsAssignableFrom(typeof(Actor))))
 			{
 				if ((int)parameter.value < genActors.Count && (int)parameter.value >= 0)
 					pFieldInfo.SetValue(gObject, genActors.Find(item => item.Id == (int)parameter.value));
@@ -400,6 +424,10 @@ public class RuleGenerator : MonoBehaviour
 		{
 			gameEvent.Label = eventData.label;
 
+			Debug.Log("updating params..");
+			for (int i = 0; i < eventData.parameters.Count; i++)
+				Debug.Log("value: " + eventData.parameters[i].value);
+
 			// if same type, set the parameters
 			SetParameters(gameEvent, eventData);
 
@@ -458,6 +486,39 @@ public class RuleGenerator : MonoBehaviour
 			unusedElements.Remove(reaction);
 		}
 	}
+	#endregion
+
+	#region Moving Events and Reactions between Actors
+	public void ChangeActor(GameEvent gameEvent, int newActorId)
+	{
+		if (gameEvent.Actor.Id != newActorId)
+		{
+			gameEvent.Reset();
+			gameEvent.Actor.RemoveEvent(gameEvent);
+			Actor newActor = genActors.Find(item => item.Id == newActorId);
+			if (newActor)
+			{
+				newActor.AddEvent(gameEvent);
+				gameEvent.Initialize(this);
+			}
+		}
+	}
+
+	public void ChangeActor(Reaction reaction, int newActorId)
+	{
+		if (reaction.Reactor.Id != newActorId)
+		{
+			reaction.Reset();
+			reaction.Reactor.RemoveReaction(reaction);
+			Actor newActor = genActors.Find(item => item.Id == newActorId);
+			if (newActor)
+			{
+				newActor.AddReaction(reaction);
+				reaction.Initialize(this);
+			}
+		}
+	}
+
 	#endregion
 
 	#region Initialize Rule Elements
@@ -645,21 +706,11 @@ public class RuleGenerator : MonoBehaviour
 		// clear previously parsed rule data lists
 		ClearData();
 
-		// the actual parsing and adding elements to the scene
-		ruleParser.Parse(this, filename);
-
-		// store all base rule elements in a list, to keep track of which ones were used, which ones weren't
-		PopulateUnusedElementsList();
+		// the actual parsing and filling data lists
+		ruleParser.Parse(this, CurrentRuleFileName);
 
 		// generate or update the level objects from the collected data
-		GenerateLevelFromData();
-
-		// delete all base rule elements which haven't been updated/created
-		DeleteUnusedElements();
-
-		// fire event
-		if (OnGeneratedLevel != null)
-			OnGeneratedLevel(ActorData, EventData, ReactionData);
+		GenerateLevelFromData(ActorData, EventData, ReactionData);
 
 		// initialize elements. order of initializing is important (first actors, then events, then reactions)
 		InitializeRuleElements();
@@ -667,39 +718,76 @@ public class RuleGenerator : MonoBehaviour
 		Debug.LogWarning("Completed generating level.");
 	}
 
-	void GenerateLevelFromData()
+	public void LoadRules(List<BaseRuleElement.ActorData> actorData, 
+		List<BaseRuleElement.EventData> eventData, 
+		List<BaseRuleElement.ReactionData> reactionData)
 	{
-		GenerateActorsFromData();
+		Debug.LogWarning("Generating level from rule data.");
 
-		GenerateEventsFromData();
+		GenerateLevelFromData(actorData, eventData, reactionData);
 
-		GenerateReactionsFromData();
+		//ClearData();
+
+		//ActorData.AddRange(actorData);
+		//EventData.AddRange(eventData);
+		//ReactionData.AddRange(reactionData);
+
+		InitializeRuleElements();
+
+		Debug.LogWarning("Completed generating level.");
 	}
 
-	void GenerateActorsFromData()
+	void GenerateLevelFromData(List<BaseRuleElement.ActorData> actorData, 
+		List<BaseRuleElement.EventData> eventData, 
+		List<BaseRuleElement.ReactionData> reactionData)
+	{
+		// store all base rule elements in a list, to keep track of which ones were used, which ones weren't
+		PopulateUnusedElementsList();
+
+		GenerateActorsFromData(actorData);
+
+		GenerateEventsFromData(eventData);
+
+		GenerateReactionsFromData(reactionData);
+
+		// delete all base rule elements which haven't been updated/created
+		DeleteUnusedElements();
+
+		ActorNames = new string[actorData.Count];
+		for (int i = 0; i < actorData.Count; i++)
+		{
+			ActorNames[i] = actorData[i].label;
+		}
+
+		// fire event
+		if (OnGeneratedLevel != null)
+			OnGeneratedLevel(actorData, eventData, reactionData, CurrentRuleFileName);
+	}
+
+	void GenerateActorsFromData(List<BaseRuleElement.ActorData> actorData)
 	{
 		// generate actors
-		for (int i = 0; i < ActorData.Count; i++)
+		for (int i = 0; i < actorData.Count; i++)
 		{
-			AddActorToScene(ActorData[i]);
+			AddActorToScene(actorData[i]);
 		}
 	}
 
-	void GenerateEventsFromData()
+	void GenerateEventsFromData(List<BaseRuleElement.EventData> eventData)
 	{
 		// generate events
-		for (int i = 0; i < EventData.Count; i++)
+		for (int i = 0; i < eventData.Count; i++)
 		{
-			AddEventToScene(EventData[i]);
+			AddEventToScene(eventData[i]);
 		}
 	}
 
-	void GenerateReactionsFromData()
+	void GenerateReactionsFromData(List<BaseRuleElement.ReactionData> reactionData)
 	{
 		// generate reactions
-		for (int i = 0; i < ReactionData.Count; i++)
+		for (int i = 0; i < reactionData.Count; i++)
 		{
-			AddReactionToScene(ReactionData[i]);
+			AddReactionToScene(reactionData[i]);
 		}
 	}
 	#endregion
@@ -731,6 +819,23 @@ public class RuleGenerator : MonoBehaviour
 		ruleParser.SaveRules(rules, filename, overwrite);
 
 		Debug.LogWarning("Completed saving rules.");
+	}
+	#endregion
+
+	#region Accessors for generated elements
+	public Actor GetActor(int id)
+	{
+		return genActors.Find(item => item.Id == id);
+	}
+
+	public GameEvent GetEvent(int id)
+	{
+		return genEvents.Find(item => item.Id == id);
+	}
+
+	public Reaction GetReaction(int id)
+	{
+		return genReactions.Find(item => item.Id == id);
 	}
 	#endregion
 }

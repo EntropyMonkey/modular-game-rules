@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class CounterEvent : GameEvent
 {
@@ -11,16 +12,7 @@ public class CounterEvent : GameEvent
 
 	private Counters counters;
 
-	public override void Initialize(RuleGenerator generator)
-	{
-		//base.Initialize(generator);
-
-		if (!(counters = Actor.GetComponent<Counters>()))
-		{
-			Debug.LogWarning("Deactivating " + name + " because the actor doesn't have fitting counters.");
-			gameObject.SetActive(false);
-		}
-	}
+	private DropDown comparisonDropDown;
 
 	public override BaseRuleElement.RuleData GetRuleInformation()
 	{
@@ -52,9 +44,37 @@ public class CounterEvent : GameEvent
 		return rule;
 	}
 
-	public override void ShowGui()
+	public override void Initialize(RuleGenerator generator)
 	{
-		GUILayout.Label("On Counter", RuleGUI.ruleLabelStyle);
+		base.Initialize(generator);
+
+		if (!(counters = Actor.GetComponent<Counters>()))
+		{
+			Debug.LogWarning("Deactivating " + name + " because the actor doesn't have fitting counters.");
+			gameObject.SetActive(false);
+		}
+
+		comparisonDropDown = new DropDown((int)Compare, System.Enum.GetNames(typeof(Comparison)));
+	}
+
+	public override void ShowGui(RuleData ruleData)
+	{
+		GUILayout.Label("When counter", RuleGUI.ruleLabelStyle);
+
+		CounterName = RuleGUI.ShowParameter(CounterName);
+		ChangeParameter("CounterName", (ruleData as EventData).parameters, CounterName);
+
+		GUILayout.Label("becomes", RuleGUI.ruleLabelStyle);
+
+		int resultIndex = comparisonDropDown.Draw();
+		if (resultIndex > -1)
+		{
+			Compare = (Comparison)resultIndex;
+			ChangeParameter("Compare", (ruleData as EventData).parameters, Compare);
+		}
+
+		CounterLimit = RuleGUI.ShowParameter(CounterLimit);
+		ChangeParameter("CounterLimit", (ruleData as EventData).parameters, CounterLimit);
 	}
 
 	public override GameEvent UpdateEvent()

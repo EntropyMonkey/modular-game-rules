@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class Player : Actor
 {
-	public string Tag = "Player";
+	public static string Tag = "Player";
 
 	public float Gravity = 3;
 	public float HorizontalMaxSpeed = 10;
@@ -19,6 +19,8 @@ public class Player : Actor
 	public override BaseRuleElement.RuleData GetRuleInformation()
 	{
 		RuleData rule = base.GetRuleInformation();
+
+		(rule as ActorData).prefabName = "Player";
 
 		if (rule.parameters == null)
 			rule.parameters = new List<Param>();
@@ -39,7 +41,7 @@ public class Player : Actor
 		return rule;
 	}
 
-	public override void ShowGui()
+	public override void ShowGui(RuleData ruleData)
 	{
 		GUILayout.Label("Shwoing off a player here", RuleGUI.ruleLabelStyle);
 	}

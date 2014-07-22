@@ -4,11 +4,11 @@ using System.Collections.Generic;
 
 public class MouseInput : InputReceived
 {
-	public enum MouseButton { LEFT = 0, RIGHT = 1, MIDDLE = 2, NONE = 3 }
+	public enum MouseButton { LEFT = 0, RIGHT = 1, MIDDLE = 2}
 
 	public class MouseData : InputData
 	{
-		public MouseButton button = MouseButton.NONE;
+		public MouseButton button = MouseButton.LEFT;
 		public Vector3 screenPosition; // pixels
 		public Ray rayFromPosition;
 		public Vector2 axisValues;
@@ -19,8 +19,8 @@ public class MouseInput : InputReceived
 			{
 				return new MouseData
 				{
-					inputType = InputType.NONE,
-					button = MouseButton.NONE,
+					inputType = InputType.PRESSED,
+					button = MouseButton.LEFT,
 					inputValue = 0.0f,
 					screenPosition = Vector3.zero,
 					axisValues = Vector2.zero
@@ -35,6 +35,8 @@ public class MouseInput : InputReceived
 	public Actor TrackedCamera;
 
 	protected Vector3 lastScreenPosition = Vector3.zero;
+
+	private DropDown trackedButtonDropDown;
 
 	public override RuleData GetRuleInformation()
 	{
@@ -57,11 +59,26 @@ public class MouseInput : InputReceived
 		return rule;
 	}
 
-	public override void ShowGui()
+	public override void Initialize(RuleGenerator generator)
 	{
-		base.ShowGui();
+		base.Initialize(generator);
 
-		GUILayout.Label("Mouse", RuleGUI.ruleLabelStyle);
+		trackedButtonDropDown = new DropDown((int)TrackedButton, System.Enum.GetNames(typeof(MouseButton)));
+
+		if (TrackedCamera == null)
+			TrackedCamera = FindObjectOfType<PlayerCamera>();
+	}
+
+	public override void ShowGui(RuleData ruleData)
+	{
+		base.ShowGui(ruleData);
+
+		GUILayout.Label("When ", RuleGUI.ruleLabelStyle);
+
+		TrackedButton = (MouseButton)trackedButtonDropDown.Draw();
+		ChangeParameter("TrackedButton", (ruleData as EventData).parameters, TrackedButton);
+
+		GUILayout.Label("mouse button was clicked", RuleGUI.ruleLabelStyle);
 	}
 
 	// methods
@@ -71,7 +88,7 @@ public class MouseInput : InputReceived
 
 		if (TrackedCamera.camera == null) 
 		{
-			Debug.LogError("There is no camera component on the TrackedCamera actor.");
+		//	Debug.LogError("There is no camera component on the TrackedCamera actor.");
 			return null;
 		}
 			

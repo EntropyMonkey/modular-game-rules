@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using System.IO;
 using System;
+using System.Reflection;
 
 public class RuleParserLinq : MonoBehaviour
 {
 	#region XML Parsing
 	[HideInInspector]
-	public string[] ExtraNamespaces = { "System", "UnityEngine", "ModularRules" };
+	public static string[] ExtraNamespaces = { "System", "UnityEngine" };
 
 	public void Parse(RuleGenerator generator, string filename)
 	{
@@ -357,7 +358,7 @@ public class RuleParserLinq : MonoBehaviour
 	#endregion
 
 	#region Reflection Helpers
-	private System.Type ReflectOverSeveralNamespaces(string typeName, string[] namespaces)
+	public static System.Type ReflectOverSeveralNamespaces(string typeName, string[] namespaces)
 	{
 		// reflect type
 		System.Type type = System.Type.GetType(typeName);
@@ -387,6 +388,23 @@ public class RuleParserLinq : MonoBehaviour
 		}
 
 		return type;
+	}
+
+	public static Type[] GetTypesInCurrentAssembly()
+	{
+		Assembly assembly = Assembly.GetExecutingAssembly();
+		Type[] types = assembly.GetTypes();
+		List<Type> resultT = new List<Type>();
+		foreach (Type t in types)
+		{
+			for (int i = 0; i < ExtraNamespaces.Length; i++)
+			{
+				resultT.Add(t);
+			}
+		}
+
+
+		return resultT.ToArray();
 	}
 	#endregion
 }

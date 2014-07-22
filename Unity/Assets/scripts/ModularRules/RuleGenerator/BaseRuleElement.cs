@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public abstract class BaseRuleElement : MonoBehaviour
 {
@@ -16,7 +17,7 @@ public abstract class BaseRuleElement : MonoBehaviour
 		public System.Type type;
 		public List<Param> parameters;
 
-		public delegate void ShowGuiDelegate();
+		public delegate void ShowGuiDelegate(RuleData ruleData);
 		public ShowGuiDelegate OnShowGui;
 	};
 
@@ -24,11 +25,14 @@ public abstract class BaseRuleElement : MonoBehaviour
 	{
 		public List<ComponentData> components;
 
+		public string prefabName;
+
 		public ActorData DeepCopy()
 		{
 			ActorData result = new ActorData();
 			result.id = id;
 			result.label = label;
+			result.prefabName = prefabName;
 			result.type = type;
 			result.OnShowGui = OnShowGui;
 			result.parameters = DeepCopyParams(parameters);
@@ -93,6 +97,8 @@ public abstract class BaseRuleElement : MonoBehaviour
 
 	static List<Param> DeepCopyParams(List<Param> orig)
 	{
+		if (orig == null) return null;
+
 		List<Param> newList = new List<Param>();
 		for (int i = 0; i < orig.Count; i++)
 			newList.Add(orig[i]);
@@ -126,6 +132,8 @@ public abstract class BaseRuleElement : MonoBehaviour
 		generator.RegisterRuleElement(this);
 	}
 
+	public abstract void ShowGui(RuleData ruleData);
+
 	/// <summary>
 	/// Called when the component needs to be reset
 	/// </summary>
@@ -134,4 +142,67 @@ public abstract class BaseRuleElement : MonoBehaviour
 	}
 
 	public abstract RuleData GetRuleInformation();
+
+	protected void ChangeParameter<T>(string name, List<Param> parameters, T newValue)
+	{
+		int index = parameters.FindIndex(item => item.name == name);
+
+		Param param;
+		if (index < 0) // add new parameter if not found
+		{
+			param = new Param()
+			{
+				name = name,
+			};
+
+			if (newValue.GetType().IsEnum)
+			{
+				param.value = (int)Convert.ChangeType((object)newValue, typeof(int));
+			}
+			else if (newValue.GetType().IsAssignableFrom(typeof(Actor)))
+			{
+				param.value = ((Actor)Convert.ChangeType((object)newValue, typeof(Actor))).Id;
+			}
+			else
+			{
+				param.value = newValue;
+			}
+
+			param.type = typeof(T);
+		}
+		else
+		{
+			param = parameters[index];
+
+			if (param.type != newValue.GetType() && !param.type.IsEnum && !newValue.GetType().IsAssignableFrom(typeof(Actor)))
+			{
+				return;
+			}
+			else if ((param.type == typeof(Actor) && !(newValue is int) && newValue.GetType().IsAssignableFrom(typeof(Actor))))
+			{
+				param.value = ((Actor)Convert.ChangeType((object)newValue, typeof(Actor))).Id;
+			}
+			else if (param.type.IsEnum && !(newValue is int))
+			{
+				if (newValue.GetType().IsEnum)
+				{
+					parameters.RemoveAt(index);
+					param.value = (int)Convert.ChangeType((object)newValue, typeof(int));
+					parameters.Add(param);
+					return;
+				}
+				else
+				{
+					return;
+				}
+			}
+
+			parameters.RemoveAt(index);
+
+			param.value = newValue;
+		}
+
+		parameters.Add(param);
+	}
+
 }

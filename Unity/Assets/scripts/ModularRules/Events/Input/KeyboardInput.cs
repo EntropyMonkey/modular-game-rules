@@ -16,6 +16,18 @@ public class KeyboardInput : InputReceived
 
 	public KeyCode InputKey = KeyCode.None;
 
+	private DropDown keyDropDown;
+	private string[] dropdownNames;
+
+	public override void Initialize(RuleGenerator generator)
+	{
+		base.Initialize(generator);
+
+		dropdownNames = System.Enum.GetNames(typeof(KeyCode));
+
+		keyDropDown = new DropDown(System.Array.FindIndex(dropdownNames, item => item == InputKey.ToString()), dropdownNames);
+	}
+
 	public override RuleData GetRuleInformation()
 	{
 		EventData rule = base.GetRuleInformation() as EventData;
@@ -31,11 +43,19 @@ public class KeyboardInput : InputReceived
 		return rule;
 	}
 
-	public override void ShowGui()
+	public override void ShowGui(RuleData ruleData)
 	{
-		base.ShowGui();
+		base.ShowGui(ruleData);
 
 		GUILayout.Label("On Keypress", RuleGUI.ruleLabelStyle);
+		
+		int resultIndex = keyDropDown.Draw();
+		if (resultIndex > -1)
+		{
+			InputKey = (KeyCode)System.Enum.Parse(typeof(KeyCode), dropdownNames[resultIndex]);
+
+			ChangeParameter("InputKey", (ruleData as EventData).parameters, (int)InputKey);
+		}
 	}
 
 	public override GameEvent UpdateEvent()

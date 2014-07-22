@@ -59,8 +59,6 @@ public abstract class GameEvent : BaseRuleElement
 		};
 	}
 
-	public abstract void ShowGui();
-
 	public abstract GameEvent UpdateEvent();
 
 	/// <summary>

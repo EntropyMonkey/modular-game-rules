@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 
 public class CollisionEvent : GameEvent
 {
@@ -16,9 +17,17 @@ public class CollisionEvent : GameEvent
 
 	public string CollideWithTag;
 
+	public List<string> PossibleCollisionTags = new List<string>() { Player.Tag, LevelPatch.Tag };
+
 	public CollisionPhase TriggerOn = CollisionPhase.ANY;
 
 	private CollisionEventRelay relay;
+
+	private DropDown actorDropDown;
+	private DropDown tagDropDown;
+	private DropDown triggerDropDown;
+
+	private RuleGenerator generator;
 
 	public override RuleData GetRuleInformation()
 	{
@@ -40,12 +49,7 @@ public class CollisionEvent : GameEvent
 			value = TriggerOn
 		});
 
-		return rule;
-	}
-
-	public override void ShowGui()
-	{
-		GUILayout.Label("On Collision", RuleGUI.ruleLabelStyle);
+			return rule;
 	}
 
 	void Awake()
@@ -59,6 +63,18 @@ public class CollisionEvent : GameEvent
 	{
 		base.Initialize(generator);
 
+		this.generator = generator;
+
+		// setting up gui elements - actors
+		actorDropDown = new DropDown(generator.ActorData.FindIndex(item => item.id == Actor.Id), generator.ActorNames);
+
+		// gui - tags
+		tagDropDown = new DropDown(PossibleCollisionTags.FindIndex(item => item == CollideWithTag), PossibleCollisionTags.ToArray());
+
+		// gui - triggering
+		triggerDropDown = new DropDown((int)TriggerOn, System.Enum.GetNames(typeof(CollisionPhase)));
+
+		// setting up collision relay
 		relay = Actor.gameObject.GetComponent<CollisionEventRelay>();
 		if (relay == null)
 		{
@@ -72,6 +88,46 @@ public class CollisionEvent : GameEvent
 	}
 	#endregion
 
+	public override void ShowGui(RuleData ruleData)
+	{
+		GUILayout.Label("On Collision of", RuleGUI.ruleLabelStyle);
+
+		// actor dropdown
+		int resultIndex = actorDropDown.Draw();
+		if (resultIndex > -1)
+		{
+			int resultId = generator.ActorData.Find(item => item.label == actorDropDown.Content[resultIndex].text).id;
+
+			(ruleData as EventData).actorId = resultId;
+			generator.ChangeActor(this, resultId);
+		}
+
+		GUILayout.Label("and", RuleGUI.ruleLabelStyle);
+
+		// tag dropdown
+		resultIndex = tagDropDown.Draw();
+		if (resultIndex >= 0)
+		{
+			string resultTag = tagDropDown.Content[resultIndex].text;
+
+			if (resultTag.Length > 0)
+			{
+				CollideWithTag = resultTag;
+				ChangeParameter("CollideWithTag", (ruleData as EventData).parameters, CollideWithTag);
+			}
+		}
+
+		GUILayout.Label("when", RuleGUI.ruleLabelStyle);
+
+		// trigger dropdown
+		resultIndex = triggerDropDown.Draw();
+		if (resultIndex >= 0)
+		{
+			TriggerOn = (CollisionPhase)resultIndex;
+			ChangeParameter("TriggerOn", (ruleData as EventData).parameters, TriggerOn);
+		}
+	}
+
 	#region Reset
 	public override void Reset()
 	{
@@ -80,7 +136,6 @@ public class CollisionEvent : GameEvent
 		UnsubscribeRelay();
 
 		relay.UsedCount--;
-
 		if (relay.UsedCount <= 0)
 		{
 			Destroy(relay);

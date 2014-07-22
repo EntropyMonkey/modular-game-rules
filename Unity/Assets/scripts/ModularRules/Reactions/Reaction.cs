@@ -38,8 +38,6 @@ public abstract class Reaction : BaseRuleElement
 		return null;
 	}
 
-	public abstract void ShowGui();
-
 	/// <summary>
 	/// execute all sub reactions in depth first order
 	/// </summary>

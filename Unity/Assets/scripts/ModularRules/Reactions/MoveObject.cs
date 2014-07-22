@@ -15,15 +15,27 @@ public class MoveObject : Reaction
 	public bool RotateWithMovement = true;
 	public float RotationSpeed;
 
+	private DropDown actorDropDown;
+	private DropDown moveDirectionDropdown;
+
+	RuleGenerator generator;
+
 	public override void Initialize(RuleGenerator generator)
 	{
 		base.Initialize(generator);
+
+		this.generator = generator;
 
 		if (Reactor.rigidbody == null)
 			Reactor.gameObject.AddComponent<Rigidbody>();
 
 		Reactor.rigidbody.freezeRotation = true;
 		Reactor.rigidbody.useGravity = false;
+
+		actorDropDown = new DropDown(
+			System.Array.FindIndex<string>(generator.ActorNames, 0, generator.ActorNames.Length, item => item == Reactor.Label),
+			generator.ActorNames);
+		moveDirectionDropdown = new DropDown((int)MoveDirection, System.Enum.GetNames(typeof(Direction)));
 	}
 
 	void OnEnable()
@@ -88,9 +100,27 @@ public class MoveObject : Reaction
 	}
 	#endregion
 
-	public override void ShowGui()
+	public override void ShowGui(RuleData ruleData)
 	{
 		GUILayout.Label("move", RuleGUI.ruleLabelStyle);
+
+		int resultIndex = actorDropDown.Draw();
+		if (resultIndex > -1)
+		{
+			int resultId = generator.ActorData.Find(item => item.label == actorDropDown.Content[resultIndex].text).id;
+			generator.ChangeActor(this, resultId);
+			(ruleData as ReactionData).actorId = resultId;
+		}
+
+		MoveDirection = (Direction)moveDirectionDropdown.Draw();
+		ChangeParameter("MoveDirection", (ruleData as ReactionData).parameters, MoveDirection);
+
+		GUILayout.Label("with a speed of", RuleGUI.ruleLabelStyle);
+
+		MoveSpeed = RuleGUI.ShowParameter((float)MoveSpeed);
+		ChangeParameter("MoveSpeed", (ruleData as ReactionData).parameters, MoveSpeed);
+
+		GUILayout.Label("units", RuleGUI.ruleLabelStyle);
 	}
 
 	protected override void React(GameEventData eventData)

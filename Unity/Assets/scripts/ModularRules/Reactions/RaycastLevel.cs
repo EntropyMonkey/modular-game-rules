@@ -18,7 +18,7 @@ public class RaycastLevel : Reaction
 		Unregister();
 	}
 
-	public override void ShowGui()
+	public override void ShowGui(RuleData ruleData)
 	{
 		GUILayout.Label("raycast", RuleGUI.ruleLabelStyle);
 	}

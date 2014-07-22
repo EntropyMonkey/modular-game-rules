@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class LevelPatch : Actor
 {
-	public string Tag = "LevelPatch";
+	public static string Tag = "LevelPatch";
 
 	void Start()
 	{
@@ -21,7 +22,16 @@ public class LevelPatch : Actor
 		}
 	}
 
-	public override void ShowGui()
+	public override BaseRuleElement.RuleData GetRuleInformation()
+	{
+		BaseRuleElement.ActorData actorData = base.GetRuleInformation() as BaseRuleElement.ActorData;
+
+		actorData.prefabName = "LevelPatch";
+
+		return actorData;
+	}
+
+	public override void ShowGui(RuleData ruleData)
 	{
 		GUILayout.Label("LevelPatch", RuleGUI.ruleLabelStyle);
 	}

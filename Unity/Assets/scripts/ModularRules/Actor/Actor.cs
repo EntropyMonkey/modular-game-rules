@@ -250,12 +250,11 @@ public abstract class Actor : BaseRuleElement
 		{ 
 			id = Id, 
 			type = this.GetType(), 
-			label = gameObject.name, 
+			label = gameObject.name,
+ 			prefabName = "",
 			OnShowGui = ShowGui 
 		};
 	}
-
-	public abstract void ShowGui();
 
 	public void UpdateEvents()
 	{

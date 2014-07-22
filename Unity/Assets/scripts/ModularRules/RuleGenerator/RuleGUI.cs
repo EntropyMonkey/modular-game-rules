@@ -4,12 +4,14 @@ using System.IO;
 using System.Collections.Generic;
 using System;
 using System.Globalization;
+using System.Reflection;
 
 
 public class RuleGUI : MonoBehaviour
 {
 //	public RuleGenerator ruleGenerator;
 
+	private enum RuleGUIState { NORMAL, SAVE, ALERT, ADDRULE_1, ADDRULE_2 };
 
 	public bool ShowButtons = true;
 
@@ -26,25 +28,26 @@ public class RuleGUI : MonoBehaviour
 	public static GUIStyle popupWindowStyle;
 
 	public static GUIStyle ruleLabelStyle;
+	public static GUIStyle ruleEditableStyle;
+	public static GUIStyle ruleReactionStyle;
+
+	public static GUIStyle ruleIconEditStyle;
+	public static GUIStyle ruleIconDelStyle;
+	public static GUIStyle ruleIconAddStyle;
 
 	bool editMode = false;
 	bool loadMode = false;
-	bool showDetails = false;
-	bool showRulesSaveDialogue = false;
-	bool showAlert = false;
+	bool isTesting = false;
 
-	BaseRuleElement.ActorData currentActor;
+	private RuleGUIState guiState;
 
-	int markedActor = -1;
-	int markedEvent = -1;
-	int markedReaction = -1;
-
-	bool showOnlyRelevant = true;
+	//bool showOnlyRelevant = true;
 
 	string saveRulesFilename = "New Rules";
 
 	const int ruleFileSavingDialogId = 0;
 	const int alertId = 1;
+	const int addRuleId = 2;
 
 	string alertTitle;
 	string alertText;
@@ -60,11 +63,25 @@ public class RuleGUI : MonoBehaviour
 	List<BaseRuleElement.EventData> eventData = new List<BaseRuleElement.EventData>();
 	List<BaseRuleElement.ReactionData> reactionData = new List<BaseRuleElement.ReactionData>();
 
-	Dictionary<string, string> vectorParamTemporaries = new Dictionary<string, string>();
+	static Dictionary<string, string> vectorParamTemporaries = new Dictionary<string, string>();
+
+	BaseRuleElement.EventData ruleToDelete;
+
+	int addRule_selectedEventType = 0;
+	int addRule_selectedEventId = -1;
+	List<int> addRule_selectedReactionTypes = new List<int>();
+	int addRule_selectedReactionId = -1;
+	int currentSelectedReactionTypeIndex = 0;
+	List<Type> eventTypes = new List<Type>();
+	List<Type> reactionTypes = new List<Type>();
+	string[] eventNames;
+	string[] reactionNames;
+	BaseRuleElement.EventData addRule_EventData;
+	BaseRuleElement.ReactionData addRule_ReactionData;
 
 	void Awake()
 	{
-		GetComponent<RuleGenerator>().OnGeneratedLevel += OnParsedRules;
+		GetComponent<RuleGenerator>().OnGeneratedLevel += OnGeneratedLevel;
 
 		markedButtonOriginStyle = CustomSkin.GetStyle("markedButtonOrigin");
 		markedButtonChildStyle = CustomSkin.GetStyle("markedButtonChild");
@@ -75,10 +92,26 @@ public class RuleGUI : MonoBehaviour
 		popupWindowStyle = CustomSkin.GetStyle("popupWindowStyle");
 
 		ruleLabelStyle = CustomSkin.GetStyle("ruleLabelStyle");
+		ruleEditableStyle = CustomSkin.GetStyle("ruleEditableStyle");
+		ruleEditableStyle.normal.textColor = Color.cyan;
+
+		ruleReactionStyle = CustomSkin.GetStyle("ruleReactionStyle");
+		ruleIconEditStyle = CustomSkin.GetStyle("editIconStyle");
+		ruleIconDelStyle = CustomSkin.GetStyle("deleteIconStyle");
+		ruleIconAddStyle = CustomSkin.GetStyle("addIconStyle");
 	}
 
-	void OnParsedRules(List<BaseRuleElement.ActorData> originalActorData, List<BaseRuleElement.EventData> originalEventData, List<BaseRuleElement.ReactionData> originalReactionData)
+	#region On Generated Level
+	void OnGeneratedLevel(
+		List<BaseRuleElement.ActorData> originalActorData, 
+		List<BaseRuleElement.EventData> originalEventData, 
+		List<BaseRuleElement.ReactionData> originalReactionData,
+		string filename)
 	{
+		if (isTesting) return; // dont overwrite testing data with data from file
+
+		saveRulesFilename = filename;
+
 		actorData.Clear();
 		eventData.Clear();
 		reactionData.Clear();
@@ -138,13 +171,15 @@ public class RuleGUI : MonoBehaviour
 			}
 		}
 	}
+	#endregion
 
+	#region OnGUI
 	void OnGUI()
 	{
 		GUI.skin = CustomSkin;
 		GUI.enabled = true;
 
-		if (showAlert)
+		if (guiState == RuleGUIState.ALERT)
 		{
 			GUILayout.Window(alertId, 
 				new Rect(Screen.width * 0.3f, Screen.height * 0.4f, Screen.width * .4f, Screen.height * .2f), 
@@ -152,9 +187,6 @@ public class RuleGUI : MonoBehaviour
 				alertTitle, 
 				popupWindowStyle);
 		}
-
-		if (showAlert || showRulesSaveDialogue)
-			GUI.enabled = false;
 
 		if (editMode)
 		{
@@ -173,11 +205,12 @@ public class RuleGUI : MonoBehaviour
 
 		GUILayout.EndArea();
 	}
+	#endregion
 
 	#region Alert Popup
 	void ShowAlertWindow(string title, string text, AlertCallback okCallback, AlertCallback cancelCallback)
 	{
-		showAlert = true;
+		guiState = RuleGUIState.ALERT;
 		alertTitle = title;
 		alertText = text;
 		alertOkCallback = okCallback;
@@ -200,7 +233,7 @@ public class RuleGUI : MonoBehaviour
 			alertText = "";
 			alertOkCallback = null;
 			alertCancelCallback = null;
-			showAlert = false;
+			guiState = RuleGUIState.NORMAL;
 		}
 		else if (GUILayout.Button("OK", GUILayout.Width(100)))
 		{
@@ -210,7 +243,7 @@ public class RuleGUI : MonoBehaviour
 			alertText = "";
 			alertOkCallback = null;
 			alertCancelCallback = null;
-			showAlert = false;
+			guiState = RuleGUIState.NORMAL;
 		}
 
 		GUILayout.EndHorizontal();
@@ -220,6 +253,7 @@ public class RuleGUI : MonoBehaviour
 	}
 	#endregion
 
+	#region Load Rules
 	void LoadRules()
 	{
 		if (ShowButtons && !loadMode && !editMode && GUI.Button(new Rect(0, Screen.height - 100, 100, 50), "Load Rules"))
@@ -236,8 +270,9 @@ public class RuleGUI : MonoBehaviour
 		for (int i = 0; i < Files.Length; i++)
 		{
 			string file = Path.GetFileNameWithoutExtension(Files[i]);
-			if (GUILayout.Button("Load " + file, GUILayout.Height(70)))
+			if (GUILayout.Button("Load " + file, GUILayout.Height(70), GUILayout.ExpandWidth(true)))
 			{
+				isTesting = false;
 				GetComponent<RuleGenerator>().LoadRules(file);
 				loadMode = false;
 			}
@@ -252,44 +287,77 @@ public class RuleGUI : MonoBehaviour
 
 		GUILayout.EndVertical();
 	}
+	#endregion
 
+	#region Edit Rules
 	void EditRules()
 	{
+		RuleGenerator ruleGenerator = GetComponent<RuleGenerator>();
 		if (ShowButtons && !editMode && !loadMode && actorData.Count > 0 && 
 			GUI.Button(new Rect(0, Screen.height - 50, 100, 50), "Edit Rules"))
 		{
 			editMode = true;
-			GetComponent<RuleGenerator>().PauseEventExecution();
+			saveRulesFilename = ruleGenerator.CurrentRuleFileName;
+			ruleGenerator.PauseEventExecution();
 		}
 
 		if (!editMode) return;
 
-		else if (GUI.Button(new Rect(0, Screen.height - 60, 50, 30), "Save"))
+		else if (GUI.Button(new Rect(0, Screen.height - 30, 100, 30), "Save Rules"))
 		{
 			// show pop-up asking for name. if same name as existing ruleset - overwrite
-			showRulesSaveDialogue = true;
+			guiState = RuleGUIState.SAVE;
 		}
-		else if (GUI.Button(new Rect(0, Screen.height - 30, 50, 30), "Quit without saving"))
+		else if (GUI.Button(new Rect(110, Screen.height - 30, 100, 30), "Test Changes"))
 		{
+			isTesting = true;
+
+			// hand over changed data to rulegenerator, but don't save
+			ruleGenerator.LoadRules(actorData, eventData, reactionData);
+
 			editMode = false;
-			currentActor = null;
-			showDetails = false;
-			GetComponent<RuleGenerator>().StartEventExecution();
+			ruleGenerator.StartEventExecution();
+		}
+		else if (GUI.Button(new Rect(220, Screen.height - 30, 100, 30), "Discard Changes"))
+		{
+			isTesting = false;
+
+			// delete rules, reload old rule file
+			ruleGenerator.LoadRules(ruleGenerator.CurrentRuleFileName);
+
+			editMode = false;
+			ruleGenerator.StartEventExecution();
 		}
 
-		//Version1GUI();
+		Rect addRuleWindowRect = new Rect(Screen.width * 0.1f, Screen.height * 0.1f, Screen.width * 0.8f, Screen.height * 0.5f);
 
-		//LowlevelRuleGUI();
-		
-		HighlevelRuleGUI();
+		switch(guiState)
+		{ 
+			case RuleGUIState.NORMAL:
+				HighlevelRuleGUI();
+				break;
+			case RuleGUIState.SAVE:
+				GUILayout.Window(ruleFileSavingDialogId,
+					new Rect(Screen.width * 0.3f, Screen.height * 0.1f, Screen.width * 0.4f, Screen.height * 0.2f),
+					SaveRulesDialogue,
+					"Save Rules",
+					popupWindowStyle);
+				break;
+			case RuleGUIState.ADDRULE_1:
+				GUILayout.Window(addRuleId,
+					addRuleWindowRect,
+					AddRule_ChooseEvent,
+					"Add Rule - Choose Event",
+					popupWindowStyle);
+				break;
+			case RuleGUIState.ADDRULE_2:
+				GUILayout.Window(addRuleId,
+					addRuleWindowRect,
+					AddRule_ChooseReaction,
+					"Add Rule - Choose Reaction",
+					popupWindowStyle);
+				break;
 
-		if (showRulesSaveDialogue)
-		{
-			GUILayout.Window(ruleFileSavingDialogId,
-				new Rect(Screen.width * 0.3f, Screen.height * 0.1f, Screen.width * 0.4f, Screen.height * 0.2f),
-				SaveRulesDialogue,
-				"Save Rules",
-				popupWindowStyle);
 		}
 	}
 
@@ -301,11 +369,16 @@ public class RuleGUI : MonoBehaviour
 		foreach (BaseRuleElement.EventData eData in eventData)
 		{
 			GUILayout.Space(10);
-			GUILayout.BeginHorizontal(areaBackgroundStyle);
+
+			GUILayout.BeginHorizontal(areaBackgroundStyle, GUILayout.ExpandWidth(false));
 
 			// display event
 			if (eData.OnShowGui != null)
-				eData.OnShowGui();
+			{
+				//GUILayout.BeginHorizontal(ruleEventStyle);
+				eData.OnShowGui(eData);
+				//GUILayout.EndHorizontal();
+			}
 
 			// show all reactions to this event
 			BaseRuleElement.ReactionData r;
@@ -313,23 +386,80 @@ public class RuleGUI : MonoBehaviour
 			{
 				List<int> rIds = eventReactionDict[eData.id];
 
+				GUILayout.BeginVertical(GUILayout.ExpandWidth(false));
+
 				if (rIds.Count > 0)
 				{
-					r = reactionData.Find(item => item.id == rIds[0]);
+					for (int i = 0; i < rIds.Count; i++)
+					{
+						r = reactionData.Find(item => item.id == rIds[i]);
 
-					if (r.OnShowGui != null)
-						r.OnShowGui();
+						GUILayout.BeginVertical();
+						if (r.OnShowGui != null)
+						{
+							GUILayout.BeginHorizontal(ruleReactionStyle, GUILayout.ExpandWidth(false));
+							r.OnShowGui(r);
+
+							GUILayout.FlexibleSpace();
+
+							if (GUILayout.Button("", ruleIconDelStyle))
+							{
+								eventReactionDict[r.eventId].Remove(r.id);
+								actorReactionDict[r.actorId].Remove(r.id);
+								reactionData.Remove(r);
+							}
+
+							GUILayout.EndHorizontal();
+							GUILayout.Space(2);
+						}
+
+						GUILayout.EndVertical();
+					}
 				}
 
-				// TODO
-				//if (rIds.Count > 1)
-				//{
-				//}
+				GUILayout.BeginHorizontal(ruleReactionStyle, GUILayout.ExpandWidth(false));
+				if (GUILayout.Button("Add Rule"))
+				{
+					LoadEventAndReactionTypes();
+					addRule_selectedEventId = eData.id;
+					addRule_selectedReactionTypes.Add(0);
+					guiState = RuleGUIState.ADDRULE_2; 
+				}
+				GUILayout.EndHorizontal();
+
+				GUILayout.EndVertical();
+			}
+			else
+			{
+				if (GUILayout.Button("Add Rule"))
+				{
+					LoadEventAndReactionTypes();
+					addRule_selectedEventId = eData.id;
+					addRule_selectedReactionTypes.Add(0);
+					guiState = RuleGUIState.ADDRULE_2;
+				}
 			}
 
+			if (GUILayout.Button("", ruleIconDelStyle))
+			{
+				// delete confirmation
+				ShowAlertWindow("Delete rule?", "Are you sure you want to delete this rule?", DeleteRule, DontDeleteRule);
+				ruleToDelete = eData;
+			}
 
 			GUILayout.EndHorizontal();
 		}
+
+		GUILayout.Space(10);
+
+		GUILayout.BeginHorizontal(areaBackgroundStyle, GUILayout.ExpandWidth(false));
+		if (GUILayout.Button("Add Rule"))
+		{
+			AddRule();
+		}
+		GUILayout.EndHorizontal();
+
+
 
 		HorizontalLine();
 
@@ -339,46 +469,256 @@ public class RuleGUI : MonoBehaviour
 			GUILayout.BeginHorizontal(areaBackgroundStyle);
 
 			if (aData.OnShowGui != null)
-				aData.OnShowGui();
+				aData.OnShowGui(aData);
 
 			GUILayout.EndHorizontal();
 		}
 
 		GUILayout.EndScrollView();
 	}
+	#endregion
 
-	void Version1GUI()
+	#region AddRule
+	// add new rule
+	void AddRule()
 	{
-		MainView();
-		ActorView();
+		if (guiState == RuleGUIState.NORMAL)
+			guiState = RuleGUIState.ADDRULE_1;
+
+		LoadEventAndReactionTypes();
 	}
 
-	void LowlevelRuleGUI()
+	void LoadEventAndReactionTypes(bool reload = false)
 	{
-		if (!showDetails)
+		if ((eventTypes.Count == 0 && reactionTypes.Count == 0) || reload)
 		{
-			GUILayout.BeginVertical(GUILayout.Height(Screen.height * 0.1f));
+			Type[] types = RuleParserLinq.GetTypesInCurrentAssembly();
+			foreach (Type t in types)
+			{
+				bool dontUse = false;
+				object[] attributes = t.GetCustomAttributes(true);
+				for (int i = 0; i < attributes.Length; i++)
+				{
+					if (attributes[i] is DontShowInRuleGUIAttribute)
+					{
+						dontUse = true;
+						break;
+					}
+				}
 
-			showOnlyRelevant = GUILayout.Toggle(showOnlyRelevant, "Show only related events/reactions");
+				if (dontUse) continue;
 
-			GUILayout.BeginHorizontal();
-			ScrollviewActors();
-			ScrollviewEvents();
-			ScrollviewReactions();
-			GUILayout.EndHorizontal();
+				if (!eventTypes.Contains(t) && t.IsSubclassOf(typeof(GameEvent)))
+				{
+					eventTypes.Add(t);
+				}
+				else if (!reactionTypes.Contains(t) && t.IsSubclassOf(typeof(Reaction)))
+				{
+					reactionTypes.Add(t);
+				}
+			}
 
-			GUILayout.EndVertical();
-		}
-		else
-		{
-			DetailWindow();
+			eventNames = eventTypes.ConvertAll(item => item.Name).ToArray();
+			reactionNames = reactionTypes.ConvertAll(item => item.Name).ToArray();
 		}
 	}
 
+	// choose event
+	void AddRule_ChooseEvent(int windowId) 
+	{
+		GUILayout.Label("Choose Event");
+
+		GUILayout.FlexibleSpace();
+
+		GUILayout.BeginHorizontal();
+		
+		addRule_selectedEventType = GUILayout.SelectionGrid(addRule_selectedEventType, 
+			eventNames, 3, selectionGridStyle);
+
+		GUILayout.EndHorizontal();
+
+		GUILayout.FlexibleSpace();
+
+		GUILayout.BeginHorizontal();
+		if (GUILayout.Button("Cancel", GUILayout.Height(70), GUILayout.Width(100)))
+		{
+			guiState = RuleGUIState.NORMAL;
+			currentSelectedReactionTypeIndex = 0;
+			addRule_selectedReactionTypes.Clear();
+			addRule_selectedEventType = 0;
+			addRule_selectedEventId = -1;
+		}
+
+		GUILayout.FlexibleSpace();
+
+		if (GUILayout.Button("Next", GUILayout.Height(70), GUILayout.Width(100)))
+		{
+			guiState = RuleGUIState.ADDRULE_2;
+			if (addRule_selectedReactionTypes.Count == 0)
+				addRule_selectedReactionTypes.Add(0);
+		}
+
+		GUILayout.EndHorizontal();
+	}
+
+	void AddRule_ChooseReaction(int windowId)
+	{
+		GUILayout.Label("Choose Reaction " + (currentSelectedReactionTypeIndex + 1));
+
+		GUILayout.FlexibleSpace();
+	
+		GUILayout.BeginHorizontal();
+
+		// if adding to an existing event
+		if (addRule_selectedEventId > -1)
+		{
+			// get index of event type name, set the right event type int
+			addRule_selectedEventType = eventTypes.FindIndex(item => item == eventData[addRule_selectedEventId].type);
+		}
+
+		int curSelReactionIndex = currentSelectedReactionTypeIndex;
+		addRule_selectedReactionTypes[curSelReactionIndex] = GUILayout.SelectionGrid(addRule_selectedReactionTypes[curSelReactionIndex],
+			reactionNames, 3, selectionGridStyle);
+
+		GUILayout.EndHorizontal();
+
+		GUILayout.FlexibleSpace();
+
+		GUILayout.BeginHorizontal();
+
+		if ((addRule_selectedEventId == -1 || currentSelectedReactionTypeIndex > 0) && GUILayout.Button("Back", GUILayout.Width(100), GUILayout.Height(70)))
+		{
+			if (currentSelectedReactionTypeIndex > 0) currentSelectedReactionTypeIndex--;
+			else guiState = RuleGUIState.ADDRULE_1;
+		}
+
+		GUILayout.FlexibleSpace();
+
+		if (addRule_selectedEventId > -1 && currentSelectedReactionTypeIndex < addRule_selectedReactionTypes.Count - 1)
+		{
+			if (GUILayout.Button("Next", GUILayout.Height(70), GUILayout.Width(100)))
+				currentSelectedReactionTypeIndex++;
+		}
+		else if (GUILayout.Button("Add another reaction", GUILayout.Height(70)))
+		{
+			currentSelectedReactionTypeIndex++;
+			addRule_selectedReactionTypes.Add(0);
+		}
+
+		GUILayout.Space(10);
+
+		string finishButtonText = "Add " + (addRule_selectedReactionTypes.Count) + " reaction(s)";
+		if (GUILayout.Button(finishButtonText, GUILayout.Width(100), GUILayout.Height(70)))
+		{
+			RuleGenerator generator = GetComponent<RuleGenerator>();
+
+			BaseRuleElement.EventData newEvent;
+			if (addRule_selectedEventId == -1)
+			{
+				newEvent = new BaseRuleElement.EventData()
+				{
+					type = RuleParserLinq.ReflectOverSeveralNamespaces(eventNames[addRule_selectedEventType], RuleParserLinq.ExtraNamespaces),
+					id = generator.GetEventId(),
+					actorId = 0 // HACK should be a global actor, not just actor 0
+				};
+
+				newEvent.label = newEvent.type.ToString();
+				newEvent.parameters = new List<BaseRuleElement.Param>();
+
+				eventData.Add(newEvent);
+
+				generator.AddEventToScene(newEvent);
+
+				// add to lookup dict
+				if (actorEventDict.ContainsKey(newEvent.actorId))
+				{
+					actorEventDict[newEvent.actorId].Add(newEvent.id);
+				}
+				else
+				{
+					actorEventDict.Add(newEvent.actorId, new List<int>() { newEvent.id });
+				}
+			}
+			else
+			{
+				// only adding new reaction, no event
+				newEvent = eventData[addRule_selectedEventId];
+			}
+
+			// add all new reactions
+			for (int i = 0; i < addRule_selectedReactionTypes.Count; i++)
+			{
+				BaseRuleElement.ReactionData newReaction = new BaseRuleElement.ReactionData()
+				{
+					type = RuleParserLinq.ReflectOverSeveralNamespaces(reactionNames[addRule_selectedReactionTypes[i]], RuleParserLinq.ExtraNamespaces),
+					id = generator.GetReactionId(),
+					actorId = 0, // HACK should be a global actor, not just actor 0
+					eventId = newEvent.id
+				};
+				newReaction.label = newReaction.type.ToString();
+				newReaction.parameters = new List<BaseRuleElement.Param>();
+
+				reactionData.Add(newReaction);
+
+				generator.AddReactionToScene(newReaction);
+
+
+				// add to lookup dicts
+				if (eventReactionDict.ContainsKey(newReaction.eventId))
+				{
+					eventReactionDict[newReaction.eventId].Add(newReaction.id);
+				}
+				else
+				{
+					eventReactionDict.Add(newReaction.eventId, new List<int>() { newReaction.id });
+				}
+
+				if (actorReactionDict.ContainsKey(newReaction.actorId))
+				{
+					actorReactionDict[newReaction.actorId].Add(newReaction.id);
+				}
+				else
+				{
+					actorReactionDict.Add(newReaction.actorId, new List<int>() { newReaction.id });
+				}
+			}
+
+			guiState = RuleGUIState.NORMAL;
+			currentSelectedReactionTypeIndex = 0;
+			addRule_selectedReactionTypes.Clear();
+			addRule_selectedEventType = 0;
+			addRule_selectedEventId = -1;
+		}
+
+		GUILayout.EndHorizontal();
+
+	}
+	#endregion
+
+	#region Deleting Rules
+	void DeleteRule()
+	{
+		// delete all reactions
+		List<int> rIds = eventReactionDict[ruleToDelete.id];
+
+		for (int i = 0; i < rIds.Count; i++)
+		{
+			reactionData.RemoveAt(reactionData.FindIndex(item => item.id == rIds[i]));
+		}
+
+		// delete the event
+		eventData.Remove(ruleToDelete);
+	}
+
+	void DontDeleteRule()
+	{
+		ruleToDelete = null;
+	}
+	#endregion
+
+	#region Save Rules
 	void SaveRulesDialogue(int windowId)
 	{
-		if (showAlert) GUI.enabled = false;
-
 		GUILayout.BeginVertical();
 		// choose name
 
@@ -440,19 +780,19 @@ public class RuleGUI : MonoBehaviour
 		// cancel
 		if (GUILayout.Button("Cancel", GUILayout.Width(100)))
 		{
-			showRulesSaveDialogue = false;
-			saveRulesFilename = "New Rules";
+			guiState = RuleGUIState.NORMAL;
+			saveRulesFilename = GetComponent<RuleGenerator>().CurrentRuleFileName;
 		}
 
 		GUILayout.EndHorizontal();
 
 		GUILayout.EndVertical();
-
-		if (showAlert) GUI.enabled = true;
 	}
 
 	void SaveRulesCallback()
 	{
+		isTesting = false;
+
 		List<BaseRuleElement.RuleData> rules = new List<BaseRuleElement.RuleData>();
 		rules.AddRange(actorData.ToArray());
 		rules.AddRange(eventData.ToArray());
@@ -461,266 +801,18 @@ public class RuleGUI : MonoBehaviour
 		g.SaveRules(saveRulesFilename, true, rules);
 		g.LoadRules(saveRulesFilename);
 
-		showRulesSaveDialogue = showDetails = showAlert = editMode = false;
-		markedActor = markedEvent = markedReaction = -1;
+		editMode = false;
 
 		GUI.enabled = true;
 	}
-
-	#region SecondVersion
-	void MainView()
-	{
-		if (currentActor != null) return;
-
-		editActorsScrollValue = GUILayout.BeginScrollView(editActorsScrollValue);
-
-		GUILayout.FlexibleSpace();
-		GUILayout.Label("Choose actor:");
-		GUILayout.BeginHorizontal(GUILayout.Height(Screen.height * 0.3f));
-		for (int i = 0; i < actorData.Count; i++)
-		{
-			// draw button
-			if (GUILayout.Button(actorData[i].label + "\n\t- " + actorData[i].type, GUILayout.Height(50)))
-			{
-				currentActor = actorData[i];
-			}
-		}
-		GUILayout.EndHorizontal();
-		GUILayout.FlexibleSpace();
-
-		GUILayout.EndScrollView();
-	}
-
-	Vector2 eventScrollValue = Vector2.zero;
-	void ActorView()
-	{
-		if (currentActor == null) return;
-
-		GUILayout.BeginHorizontal(GUILayout.Width(Screen.width * 0.3f));
-		GUILayout.Label(currentActor.label + "(" + currentActor.type + ")");
-		GUILayout.EndHorizontal();
-
-		GUILayout.BeginVertical(GUILayout.Width(Screen.width * 0.3f));
-		GUILayout.Label("Events: ");
-
-		eventScrollValue = GUILayout.BeginScrollView(eventScrollValue);
-
-		if (actorEventDict.ContainsKey(currentActor.id))
-		{
-			for (int i = 0; i < actorEventDict[currentActor.id].Count; i++)
-			{
-				BaseRuleElement.EventData eData = eventData[actorEventDict[currentActor.id][i]];
-				string buttonLabel = eData.label;
-				if (eData.parameters != null && eData.parameters.Count > 0)
-				{
-					buttonLabel += "\n\t- " + eData.parameters[0].name + ": " + eData.parameters[0].value;
-				}
-
-				if (GUILayout.Button(buttonLabel))
-				{
-
-				}
-			}
-		}
-		GUILayout.EndScrollView();
-
-		GUILayout.EndVertical();
-	}
 	#endregion
-
-	#region First Version
-
-	Vector2 editActorsScrollValue = Vector2.zero;
-	Vector2 editEventsScrollValue = Vector2.zero;
-	Vector2 editReactionsScrollValue = Vector2.zero;
-	void ScrollviewActors()
-	{
-		GUILayout.BeginVertical();
-		GUILayout.Label("Actors:");
-		editActorsScrollValue = GUILayout.BeginScrollView(editActorsScrollValue, GUILayout.Width(Screen.width * 0.3f), GUILayout.Height(Screen.height * 0.7f));
-
-		for (int i = 0; i < actorData.Count; i++)
-		{
-			BaseRuleElement.ActorData aData = actorData[i];
-
-			// choose right style for button
-			GUIStyle style = buttonStyle;
-			if (markedActor == aData.id)
-				style = markedButtonOriginStyle;
-			else if ((markedEvent > -1 && actorEventDict.ContainsKey(aData.id) &&
-				actorEventDict[aData.id].Contains(markedEvent)) ||
-				(markedReaction > -1 && actorReactionDict.ContainsKey(aData.id) &&
-				actorReactionDict[aData.id].Contains(markedReaction)))
-			{
-				style = markedButtonChildStyle;
-			}
-
-			// draw button
-			if (GUILayout.Button(actorData[i].label + "\n\t- " + actorData[i].type, style, GUILayout.Height(50)))
-			{
-				if (markedActor != actorData[i].id)
-					MarkActor(actorData[i]);
-				else
-					ShowDetails(actorData[i]); // open details window
-			}
-		}
-
-		GUILayout.EndScrollView();
-		GUILayout.EndVertical();
-	}
-
-	void ShowDetails(BaseRuleElement.ActorData actorData)
-	{
-		showDetails = true;
-		currentActor = actorData;
-	}
-
-	Vector2 parameterScrollPos = Vector2.zero;
-	Vector2 detailEventScrollPos = Vector2.zero;
-	Vector2 detailReactionScrollPos = Vector2.zero;
-	void DetailWindow()
-	{
-		GUILayout.BeginVertical();
-
-		GUILayout.Label(currentActor.label + " (" + currentActor.type + ")", GUILayout.Width(Screen.width * 0.3f));
-
-
-		GUILayout.BeginHorizontal();
-		if (GUILayout.Button("Back", GUILayout.Width(50), GUILayout.Height(30)))
-		{
-			showDetails = false;
-
-			vectorParamTemporaries.Clear();
-			markedActor = markedEvent = markedReaction = -1;
-		}
-
-		GUILayout.Label("Events");
-		GUILayout.Label("Reactions");
-		GUILayout.Label("Parameters");
-		GUILayout.EndHorizontal();
-
-		GUILayout.BeginHorizontal();
-
-		GUILayout.Space(50);
-
-		// events
-		detailEventScrollPos = GUILayout.BeginScrollView(detailEventScrollPos, GUILayout.Width(Screen.width * 0.3f));
-
-		foreach(BaseRuleElement.EventData e in eventData.FindAll(item => item.actorId == currentActor.id))
-		{
-			GUIStyle style = buttonStyle;
-			if (markedEvent == e.id)
-				style = markedButtonOriginStyle;
-			else if (markedReaction > -1 && eventReactionDict.ContainsKey(e.id) && eventReactionDict[e.id].Contains(markedReaction))
-			{
-				style = markedButtonChildStyle;
-			}
-
-			if (GUILayout.Button(e.label, style, GUILayout.Height(50)))
-			{
-				if (markedEvent != e.id)
-				{
-					markedReaction = -1;
-					markedEvent = e.id;
-				}
-				else
-				{
-					markedEvent = -1;
-				}
-			}
-		}
-		GUILayout.EndScrollView();
-
-		// reactions
-		detailReactionScrollPos = GUILayout.BeginScrollView(detailReactionScrollPos, GUILayout.Width(Screen.width * 0.3f));
-
-		foreach (BaseRuleElement.ReactionData r in reactionData.FindAll(item => item.actorId == currentActor.id))
-		{
-			GUIStyle style = buttonStyle;
-			if (markedReaction == r.id)
-				style = markedButtonOriginStyle;
-			else if (r.eventId == markedEvent)
-				style = markedButtonChildStyle;
-
-			if (GUILayout.Button(r.label, style, GUILayout.Height(50)))
-			{
-				if (markedReaction != r.id)
-				{
-					markedEvent = -1;
-					markedReaction = r.id;
-				}
-				else
-				{
-					markedReaction = -1;
-				}
-			}
-		}
-
-		GUILayout.EndScrollView();
-
-
-
-		// parameters
-		parameterScrollPos = GUILayout.BeginScrollView(parameterScrollPos, GUILayout.Width(Screen.width * 0.3f));
-
-
-		if (markedEvent == -1 && markedReaction == -1)
-		{
-			// extra parameters:
-			GUI.enabled = false;
-			ShowParameter("Id:", currentActor.id.ToString());
-			ShowParameter("Type:", currentActor.type.ToString());
-			GUI.enabled = true;
-
-			currentActor.label = ShowParameter("Label: ", currentActor.label);
-
-			HorizontalLine();
-
-			ShowParameters(currentActor.parameters);
-		}
-		else if (markedEvent > -1)
-		{
-			BaseRuleElement.EventData e = eventData.Find(item => item.id == markedEvent);
-			// extra parameters:
-			GUI.enabled = false;
-			ShowParameter("Id:", markedEvent.ToString());
-			ShowParameter("Type:", e.type.ToString());
-			GUI.enabled = true;
-
-			e.label = ShowParameter("Label: ", e.label);
-
-			HorizontalLine();
-
-			ShowParameters(e.parameters);
-		}
-		else if (markedReaction > -1)
-		{
-			BaseRuleElement.ReactionData r = reactionData.Find(item => item.id == markedReaction);
-			// extra parameters:
-			GUI.enabled = false;
-			ShowParameter("Id:", markedReaction.ToString());
-			ShowParameter("Type:", r.type.ToString());
-			GUI.enabled = true;
-
-			r.label = ShowParameter("Label: ", r.label);
-
-			HorizontalLine();
-
-			ShowParameters(r.parameters);
-		}
-
-		GUILayout.EndScrollView();
-
-		GUILayout.EndHorizontal();
-
-		GUILayout.EndVertical();
-	}
 
 	void HorizontalLine()
 	{
 		GUILayout.Box("", new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(1) });
 	}
 
+	#region Showing Parameters
 	void ShowParameters(List<BaseRuleElement.Param> parameters)
 	{
 		for (int i = 0; i < parameters.Count; i++)
@@ -868,6 +960,153 @@ public class RuleGUI : MonoBehaviour
 		return parameter;
 	}
 
+	//public Actor ShowParameter(Actor value, bool nonePossible = true)
+	//{
+	//	// get names
+	//	string[] names;
+	//	if (nonePossible)
+	//	{
+	//		names = new string[actorData.Count + 1];
+	//	}
+	//	else
+	//	{
+	//		names = new string[actorData.Count];
+	//	}
+
+	//	// fill up list
+	//	for (int i = 0; i < actorData.Count; i++)
+	//	{
+	//		names[i] = actorData[i].label;
+	//	}
+		
+	//	if (nonePossible)
+	//		names[names.Length - 1] = "None"; // add option to have no actor selected
+
+	//	// show selection grid
+	//	int selected = GUILayout.SelectionGrid(value.Id, names, 2, selectionGridStyle);
+
+	//	// feed back selected actor
+	//	if (selected == names.Length - 1) // chose "None"
+	//		value = null;
+	//	//else if (selected < names.Length - 1 && selected >= 0)
+	//	//	value = GetComponent<RuleGenerator>().GetActor(;
+
+	//	return value;
+	//}
+	
+	public static int ShowParameter(int value)
+	{
+		int result;
+		string v = GUILayout.TextField(value.ToString(), ruleEditableStyle);
+		if (v == "")
+			result = 0;
+		else
+			result = int.Parse(v);
+
+		return result;
+	}
+
+	public static float ShowParameter(float value)
+	{
+		string v = GUILayout.TextField(value.ToString(), ruleEditableStyle);
+		if (v == "")
+			value = 0;
+		else
+			value = float.Parse(v);
+
+		return value;
+	}
+
+	public static Vector3 ShowParameter(Vector3 value, string name)
+	{
+		string show;
+		if (vectorParamTemporaries.ContainsKey(name))
+		{
+			show = vectorParamTemporaries[name];
+		}
+		else
+		{
+			Vector3 vec = (Vector3)value;
+			show = vec.x + " " + vec.y + " " + vec.z;
+			vectorParamTemporaries.Add(name, show);
+		}
+
+		GUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
+
+		vectorParamTemporaries[name] = GUILayout.TextField(show, ruleEditableStyle, GUILayout.ExpandWidth(false));
+
+		if (GUILayout.Button("Set", GUILayout.Width(30), GUILayout.ExpandWidth(false)))
+		{
+			string[] s = vectorParamTemporaries[name].Split(' ');
+			float parseresult;
+			Vector3 vec = (Vector3)value;
+			int i;
+			for (i = 0; i < s.Length && i < 3; i++)
+			{
+				if (float.TryParse(s[i], out parseresult))
+				{
+					vec[i] = parseresult;
+				}
+			}
+			// handling any number of spaces in string
+			for (; i < 3; i++)
+			{
+				vec[i] = 0;
+			}
+			vectorParamTemporaries.Remove(name);
+			value = vec;
+		}
+
+		GUILayout.EndHorizontal();
+
+		return value;
+	}
+
+	public static bool ShowParameter(bool value)
+	{
+		return GUILayout.Toggle(value, "");
+	}
+
+	public static string ShowParameter(string value)
+	{
+		if (value == "")
+			return GUILayout.TextField("", GUILayout.Width(50));
+		return GUILayout.TextField(value, ruleEditableStyle); ;
+	}
+
+	public static List<string> ShowParameter(List<string> value)
+	{
+		List<int> delete = new List<int>();
+		GUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
+		for (int i = 0; i < value.Count; i++)
+		{
+			value[i] = ShowParameter(value[i]);
+
+			if (GUILayout.Button("", ruleIconDelStyle))
+			{
+				delete.Add(i);
+			}
+
+			if (i < value.Count - 1)
+				GUILayout.Label(",", ruleLabelStyle);
+		}
+
+		GUILayout.Space(10);
+
+		if (GUILayout.Button("", ruleIconAddStyle))
+		{
+			value.Add("");
+		}
+		GUILayout.EndHorizontal();
+
+		for (int i = 0; i < delete.Count; i++)
+		{
+			value.RemoveAt(delete[i]);
+		}
+
+		return value;
+	}
+
 	string ShowParameter(string label, string value)
 	{
 		GUILayout.BeginHorizontal();
@@ -877,120 +1116,5 @@ public class RuleGUI : MonoBehaviour
 
 		return result;
 	}
-
-
-	void ScrollviewEvents()
-	{
-		GUILayout.BeginVertical();
-		GUILayout.Label("Events: ");
-
-		// events
-		editEventsScrollValue = GUILayout.BeginScrollView(editEventsScrollValue, GUILayout.Width(Screen.width * 0.3f));
-
-		for (int i = 0; i < eventData.Count; i++)
-		{
-			BaseRuleElement.EventData eData = eventData[i];
-			// create label
-			string buttonLabel = eData.label;
-			if (eData.parameters != null && eData.parameters.Count > 0)
-			{
-				buttonLabel += "\n\t- " + eData.parameters[0].name + ": " + eData.parameters[0].value;
-			}
-
-			bool markedRelevant = false;
-
-			// choose style
-			GUIStyle style = buttonStyle;
-			if (markedEvent == eData.id)
-			{
-				style = markedButtonOriginStyle;
-				markedRelevant = true;
-			}
-			else if (markedActor == eData.actorId ||
-				(markedReaction > -1 && eventReactionDict.ContainsKey(eData.id) &&
-				eventReactionDict[eData.id].Contains(markedReaction)))
-			{
-				style = markedButtonChildStyle;
-				markedRelevant = true;
-			}
-
-			// draw button
-			if ((showOnlyRelevant && markedRelevant || !showOnlyRelevant) && GUILayout.Button(buttonLabel, style, GUILayout.Height(50)))
-			{
-				if (markedEvent != eData.id)
-					MarkEvent(eData);
-				//else
-				//	ShowDetails(eData);
-			}
-		}
-
-		GUILayout.EndScrollView();
-		GUILayout.EndVertical();
-	}
-
-	void ScrollviewReactions()
-	{
-		GUILayout.BeginVertical();
-		GUILayout.Label("Reactions:");
-
-		// reactions
-		editReactionsScrollValue = GUILayout.BeginScrollView(editReactionsScrollValue, GUILayout.Width(Screen.width * 0.3f));
-
-		for (int i = 0; i < reactionData.Count; i++)
-		{
-			BaseRuleElement.ReactionData rData = reactionData[i];
-
-			// create label
-			string buttonLabel = rData.label;
-			if (rData.parameters != null && rData.parameters.Count > 0)
-			{
-				buttonLabel += "\n\t- " + rData.parameters[0].name + ": " + rData.parameters[0].value;
-			}
-
-			bool markedRelevant = false;
-			// choose style
-			GUIStyle style = buttonStyle;
-			if (markedReaction == rData.id)
-			{
-				style = markedButtonOriginStyle;
-				markedRelevant = true;
-			}
-			else if (markedActor == rData.actorId || markedEvent == rData.eventId)
-			{
-				style = markedButtonChildStyle;
-				markedRelevant = true;
-			}
-
-			// draw button
-			if ((showOnlyRelevant && markedRelevant || !showOnlyRelevant) && GUILayout.Button(buttonLabel, style, GUILayout.Height(50)))
-			{
-				MarkReaction(rData);
-			}
-		}
-
-		GUILayout.EndScrollView();
-		GUILayout.EndVertical();
-	}
-
-	void MarkActor(BaseRuleElement.ActorData origin)
-	{
-		markedActor = origin.id;
-		markedEvent = -1;
-		markedReaction = -1;
-	}
-
-	void MarkEvent(BaseRuleElement.EventData origin)
-	{
-		markedEvent = origin.id;
-		markedActor = -1;
-		markedReaction = -1;
-	}
-
-	void MarkReaction(BaseRuleElement.ReactionData origin)
-	{
-		markedReaction = origin.id;
-		markedEvent = -1;
-		markedActor = -1;
-	}
-	#endregion
+#endregion
 }

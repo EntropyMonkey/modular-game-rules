@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[DontShowInRuleGUI]
 public class InputReceived : GameEvent
 {
 	public enum InputType { NONE = 0, HELD, PRESSED, RELEASED, CONTINUOUS }
@@ -24,7 +25,7 @@ public class InputReceived : GameEvent
 		else return this;
 	}
 
-	public override void ShowGui()
+	public override void ShowGui(RuleData ruleData)
 	{
 	}
 }

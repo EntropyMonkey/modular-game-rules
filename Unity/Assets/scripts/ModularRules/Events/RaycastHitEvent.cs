@@ -3,7 +3,7 @@ using System.Collections;
 
 public class RaycastHitEvent : GameEvent
 {
-	public override void ShowGui()
+	public override void ShowGui(RuleData ruleData)
 	{
 	}
 

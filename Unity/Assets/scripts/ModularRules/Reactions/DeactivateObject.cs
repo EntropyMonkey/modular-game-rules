@@ -10,6 +10,10 @@ public class DeactivateObject : Reaction
 
 	private bool deactivating = false;
 
+	private DropDown actorDropDown;
+
+	private RuleGenerator generator;
+
 	public override RuleData GetRuleInformation()
 	{
 		RuleData data = base.GetRuleInformation();
@@ -40,15 +44,36 @@ public class DeactivateObject : Reaction
 	{
 		base.Initialize(generator);
 
+		this.generator = generator;
+
 		if (ObjectToDeactivate == null)
 		{
 			ObjectToDeactivate = Reactor;
 		}
+
+		actorDropDown = new DropDown(System.Array.FindIndex<string>(generator.ActorNames, item => item == Reactor.Label), generator.ActorNames);
 	}
 
-	public override void ShowGui()
+	public override void ShowGui(RuleData ruleData)
 	{
 		GUILayout.Label("deactivate", RuleGUI.ruleLabelStyle);
+
+		int resultIndex = actorDropDown.Draw();
+		if (resultIndex > -1)
+		{
+			int resultId = generator.ActorData.Find(item => item.label == actorDropDown.Content[resultIndex].text).id;
+			(ruleData as ReactionData).actorId = resultId;
+			ChangeParameter("ObjectToDeactivate", (ruleData as ReactionData).parameters, resultId);
+			generator.ChangeActor(this, resultId);
+			ObjectToDeactivate = Reactor;
+		}
+
+		GUILayout.Label("after", RuleGUI.ruleLabelStyle);
+
+		Timeout = RuleGUI.ShowParameter(Timeout);
+		ChangeParameter("Timeout", (ruleData as ReactionData).parameters, Timeout);
+
+		GUILayout.Label("seconds", RuleGUI.ruleLabelStyle);
 	}
 
 	protected override void React(GameEventData eventData)

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class StandardActor : Actor
 {
@@ -8,8 +9,8 @@ public class StandardActor : Actor
 		UpdateEvents();
 	}
 
-	public override void ShowGui()
+	public override void ShowGui(RuleData ruleData)
 	{
-		GUILayout.Label("Showing a standard actor");
+		GUILayout.Label("Showing a standard actor", RuleGUI.ruleLabelStyle);
 	}
 }

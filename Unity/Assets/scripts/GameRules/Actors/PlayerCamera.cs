@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerCamera : Actor
 {
@@ -33,6 +34,8 @@ public class PlayerCamera : Actor
 	{
 		RuleData rule = base.GetRuleInformation();
 
+		(rule as ActorData).prefabName = "PlayerCamera";
+
 		if (rule.parameters == null) rule.parameters = new System.Collections.Generic.List<Param>();
 
 		rule.parameters.Add(new Param()
@@ -52,7 +55,7 @@ public class PlayerCamera : Actor
 		return rule;
 	}
 
-	public override void ShowGui()
+	public override void ShowGui(RuleData ruleData)
 	{
 		GUILayout.Label("Showing off a cam", RuleGUI.ruleLabelStyle);
 	}
