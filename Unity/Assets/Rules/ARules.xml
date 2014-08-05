@@ -8,7 +8,7 @@
     </actor>
     <actor>
       <id>2</id>
-      <type>LevelPatch</type>
+      <type>Level</type>
       <label>Patch1</label>
     </actor>
     <actor>

@@ -14,7 +14,7 @@ using UnityEditor;
 public class RuleGenerator : MonoBehaviour
 {
 	public static string Tag = "RuleGenerator";
-	public RuleGUI ruleGUI
+	public RuleGUI Gui
 	{
 		get;
 		private set;
@@ -39,10 +39,8 @@ public class RuleGenerator : MonoBehaviour
 	public List<BaseRuleElement.EventData> EventData = new List<BaseRuleElement.EventData>();
 	public List<BaseRuleElement.ReactionData> ReactionData = new List<BaseRuleElement.ReactionData>();
 
-	public string[] ActorNames;
-
 	// contains all placeholders for actors in the scene, in order of their Id
-	List<PlaceholderElement> placeholders;
+	//List<PlaceholderElement> placeholders;
 
 	// keeping track of generated elements
 	List<Actor> genActors = new List<Actor>();
@@ -57,7 +55,7 @@ public class RuleGenerator : MonoBehaviour
 		if ((ruleParser = gameObject.GetComponent<RuleParserLinq>()) == null)
 			ruleParser = gameObject.AddComponent<RuleParserLinq>();
 
-		ruleGUI = FindObjectOfType<RuleGUI>();
+		Gui = FindObjectOfType<RuleGUI>();
 	}
 
 	void Update()
@@ -69,7 +67,7 @@ public class RuleGenerator : MonoBehaviour
 
 		if (Directory.Exists(filepath))
 		{
-			ruleGUI.Files = Directory.GetFiles(filepath, "*.xml");
+			Gui.Files = Directory.GetFiles(filepath, "*.xml");
 		}
 		else
 		{
@@ -84,6 +82,8 @@ public class RuleGenerator : MonoBehaviour
 		{
 			a.PauseEvents();
 		}
+
+		GlobalActor.Instance.PauseEvents();
 	}
 
 	public void StartEventExecution()
@@ -92,6 +92,8 @@ public class RuleGenerator : MonoBehaviour
 		{
 			a.ExecuteEvents();
 		}
+
+		GlobalActor.Instance.ExecuteEvents();
 	}
 	#endregion
 
@@ -143,7 +145,25 @@ public class RuleGenerator : MonoBehaviour
 
 	public int GetActorId()
 	{
-		return GetId(genActors.ToArray());
+		int result = -1;
+
+		int[] ids = new int[genActors.Count + ActorData.Count]; // can contain duplicates, but doesn't matter
+		for (int i = 0; i < genActors.Count + ActorData.Count; i++)
+		{
+			if (i < genActors.Count)
+			{
+				ids[i] = genActors[i].Id;
+			}
+			else
+			{
+				ids[i] = ActorData[i - genActors.Count].id;
+			}
+		}
+
+		Array.Sort<int>(ids);
+		result = ids[ids.Length - 1] + 1;
+
+		return result;
 	}
 
 	int GetId(BaseRuleElement[] genElements)
@@ -177,42 +197,38 @@ public class RuleGenerator : MonoBehaviour
 
 	public void AddActorToScene(BaseRuleElement.ActorData data)
 	{
-		PlaceholderElement placeholder = placeholders.Find(item => item.Id == data.id);
-		if (placeholder != null)
-		{
 #if DEBUG
-			Debug.Log("Adding actor " + data.id + ", " + data.type);
+		Debug.Log("Adding actor " + data.id + ", " + data.type);
 #endif
-			Actor a = genActors.Find(item => item.Id == data.id);
-			if (a != null)
-			{
-				UpdateActor(data, a);
-			}
-			else
-			{
-				GameObject pGo = placeholder.gameObject;
-
-				// create new actor
-				Actor actor = pGo.AddComponent(data.type) as Actor;
-				actor.Id = data.id;
-				actor.Label = data.label;
-
-				data.OnShowGui = actor.ShowGui;
-
-				RegisterRuleElement(actor);
-
-				SetParameters(actor, data);
-
-				// not needed right now
-				//SetComponentParameters(actor, data);
-
-				// deactivate placeholder
-				placeholder.enabled = false;
-			}
+		Actor a = genActors.Find(item => item.Id == data.id);
+		if (a != null)
+		{
+			UpdateActor(data, a);
 		}
 		else
 		{
-			Debug.LogError("There is no placeholder for actor " + data.id + " in the scene.");
+			GameObject prefabGo = Resources.Load(data.prefab) as GameObject;
+			if (prefabGo == null)
+				prefabGo = Resources.Load("FallbackPrefab") as GameObject;
+
+			GameObject actorGo = Instantiate(prefabGo, Vector3.zero, Quaternion.identity) as GameObject;
+			
+			actorGo.name = data.label;
+			actorGo.transform.position = Vector3.zero;
+
+			// create new actor
+			Actor actor = actorGo.AddComponent(data.type) as Actor;
+			actor.Id = data.id;
+			actor.Label = data.label;
+
+			data.OnShowGui = actor.ShowGui;
+
+			RegisterRuleElement(actor);
+
+			SetParameters(actor, data);
+
+			// not needed right now
+			//SetComponentParameters(actor, data);
 		}
 	}
 
@@ -221,8 +237,8 @@ public class RuleGenerator : MonoBehaviour
 #if DEBUG
 		Debug.Log("Adding event " + data.label + "(" + data.id + ")" + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
 #endif
-		// actor should exist by now - if it doesn't, don't create any related actions or events
-		Actor actor = genActors.Find(item => item.Id == data.actorId);
+
+		Actor actor = GetActor(data.actorId);
 
 		if (actor != null)
 		{
@@ -265,7 +281,7 @@ public class RuleGenerator : MonoBehaviour
 		Debug.Log("Adding reaction " + data.label + "(" + data.id + ")" + " to actor " + data.actorId + ". Setting " + data.parameters.Count + " parameters.");
 #endif
 		// actor should exist by now - if it doesn't, don't create or update any related actions or events
-		Actor actor = genActors.Find(item => item.Id == data.actorId);
+		Actor actor = GetActor(data.actorId);
 
 		if (actor != null)
 		{
@@ -337,26 +353,26 @@ public class RuleGenerator : MonoBehaviour
 		}
 	}
 
-	private void SetComponentParameters<T, U>(T gObject, U data)
-		where T : Actor
-		where U : BaseRuleElement.ActorData
-	{
-		foreach (BaseRuleElement.ComponentData componentData in data.components)
-		{
-			// check if component was added
-			Component component = gObject.GetComponent(componentData.type);
-			if (component != null)
-			{
-				// if so, set parameters
-				SetParameters(component, componentData);
-			}
-			else
-			{
-				// if not, log warning about trying to set parameters for ghost component
-				Debug.LogWarning("Actor (" + data.id + "): trying to set parameter for component (" + componentData.type + ") which doesn't exist.");
-			}
-		}
-	}
+	//private void SetComponentParameters<T, U>(T gObject, U data)
+	//	where T : Actor
+	//	where U : BaseRuleElement.ActorData
+	//{
+	//	foreach (BaseRuleElement.ComponentData componentData in data.components)
+	//	{
+	//		// check if component was added
+	//		Component component = gObject.GetComponent(componentData.type);
+	//		if (component != null)
+	//		{
+	//			// if so, set parameters
+	//			SetParameters(component, componentData);
+	//		}
+	//		else
+	//		{
+	//			// if not, log warning about trying to set parameters for ghost component
+	//			Debug.LogWarning("Actor (" + data.id + "): trying to set parameter for component (" + componentData.type + ") which doesn't exist.");
+	//		}
+	//	}
+	//}
 	#endregion
 
 	#endregion
@@ -386,6 +402,7 @@ public class RuleGenerator : MonoBehaviour
 		else
 		{
 			actor.Label = actorData.label;
+			actorData.OnShowGui = actor.ShowGui;
 
 			// update parameters
 			SetParameters(actor, actorData);
@@ -424,6 +441,8 @@ public class RuleGenerator : MonoBehaviour
 		{
 			gameEvent.Label = eventData.label;
 
+			eventData.OnShowGui = gameEvent.ShowGui;
+
 			Debug.Log("updating params..");
 			for (int i = 0; i < eventData.parameters.Count; i++)
 				Debug.Log("value: " + eventData.parameters[i].value);
@@ -435,7 +454,7 @@ public class RuleGenerator : MonoBehaviour
 			Actor oldActor = gameEvent.Actor;
 
 			// add event to new actor
-			genActors.Find(item => item.Id == eventData.actorId).AddEvent(gameEvent);
+			GetActor(eventData.actorId).AddEvent(gameEvent);
 				
 			if (oldActor != gameEvent.Actor)
 				oldActor.RemoveEvent(gameEvent);
@@ -469,12 +488,14 @@ public class RuleGenerator : MonoBehaviour
 		{
 			reaction.Label = reactionData.label;
 
+			reactionData.OnShowGui = reaction.ShowGui;
+
 			// set parameters
 			SetParameters(reaction, reactionData);
 
 			// set actor reference
 			Actor oldActor = reaction.Reactor;
-			genActors.Find(item => item.Id == reactionData.actorId).AddReaction(reaction);
+			GetActor(reactionData.actorId).AddReaction(reaction);
 			oldActor.RemoveReaction(reaction);
 
 			// set event reference
@@ -495,7 +516,7 @@ public class RuleGenerator : MonoBehaviour
 		{
 			gameEvent.Reset();
 			gameEvent.Actor.RemoveEvent(gameEvent);
-			Actor newActor = genActors.Find(item => item.Id == newActorId);
+			Actor newActor = GetActor(newActorId);
 			if (newActor)
 			{
 				newActor.AddEvent(gameEvent);
@@ -510,7 +531,7 @@ public class RuleGenerator : MonoBehaviour
 		{
 			reaction.Reset();
 			reaction.Reactor.RemoveReaction(reaction);
-			Actor newActor = genActors.Find(item => item.Id == newActorId);
+			Actor newActor = GetActor(newActorId);
 			if (newActor)
 			{
 				newActor.AddReaction(reaction);
@@ -554,24 +575,10 @@ public class RuleGenerator : MonoBehaviour
 
 	public void RegisterRuleElement(Actor actor)
 	{
-		if (!genActors.Find(item => item.Id == actor.Id))
+		if (!GetActor(actor.Id))
 		{
-			// check if actor id already exists - in created actors AND placeholders
-			Actor[] fakeActors = new Actor[genActors.Count + placeholders.Count];
-			genActors.CopyTo(fakeActors);
-			GameObject fakeObject = new GameObject("fakeActorsTemp");
-
-			// create fake Actors for Id handling from placeholders
-			for (int i = genActors.Count; i < fakeActors.Length; i++ )
-			{
-				fakeActors[i] = fakeObject.AddComponent<StandardActor>();
-				fakeActors[i].Id = placeholders[i - genActors.Count].Id;
-			}
-
-			if (actor.Id == -1)
-				actor.Id = GetId(fakeActors);
-
-			Destroy(fakeObject);
+			if (actor.Id == -1) // TODO use actordata AND genActors for id generation
+				actor.Id = GetId(genActors.ToArray());
 				
 			genActors.Add(actor);
 		}
@@ -629,67 +636,26 @@ public class RuleGenerator : MonoBehaviour
 		foreach (BaseRuleElement element in unusedElements)
 		{
 			element.Reset();
-			if (element as Actor == null)
+
+			if (element as GameEvent)
 			{
-				if (element as GameEvent)
-				{
-					genEvents.Remove(element as GameEvent);
-				}
-				else if (element as Reaction) genReactions.Remove(element as Reaction);
-#if DEBUG
-				Debug.Log("Destroyed unused element: " + element.name + " (" + element.Id + ")");
-#endif
-				Destroy(element.gameObject);
+				genEvents.Remove(element as GameEvent);
 			}
-			else
+			else if (element as Reaction)
+			{
+				genReactions.Remove(element as Reaction);
+			}
+			else if (element as Actor)
 			{
 				genActors.Remove(element as Actor);
-#if DEBUG
-				Debug.Log("Destroy unused actor: " + element.name + " (" + element.Id + ")");
-#endif
-				Destroy(element);
 			}
+#if DEBUG
+			Debug.Log("Destroyed unused element: " + element.name + " (" + element.Id + ") " + element.GetType());
+#endif
+			Destroy(element.gameObject);
 		}
 
 		unusedElements.Clear();
-	}
-	#endregion
-
-	#region Finding generation placeholders in scene
-	private class GenerationElementComparer : IComparer<PlaceholderElement>
-	{
-		public int Compare(PlaceholderElement x, PlaceholderElement y)
-		{
-			if (x == null || y == null || x == y) return 0;
-
-			if (x.Id > y.Id) return 1;
-			else if (x.Id < y.Id) return -1;
-			else
-			{
-				Debug.LogError("Two actors have the same id (" + x.Id + "-" + x.name + ":" + y.Id + "-" + y.name + ").");
-				return 0;
-			}
-		}
-	}
-
-	void FindGenerationPlaceholdersInScene()
-	{
-		if (placeholders == null) placeholders = new List<PlaceholderElement>();
-		else placeholders.Clear();
-
-		placeholders.AddRange(FindObjectsOfType<PlaceholderElement>());
-		GenerationElementComparer gec = new GenerationElementComparer();
-		placeholders.Sort(gec); // sort according to ids, starting with 0, assuming there are no left-over ids
-
-#if DEBUG
-		{
-			Debug.Log("Found generation placeholders in scene: " + placeholders.Count);
-			for (int i = 0; i < placeholders.Count; i++)
-			{
-				Debug.Log(i + " - " + placeholders[i].name + " - " + placeholders[i].Id);
-			}
-		}
-#endif
 	}
 	#endregion
 
@@ -699,9 +665,6 @@ public class RuleGenerator : MonoBehaviour
 		Debug.LogWarning("Generating level rules from " + filename + ".xml ...");
 
 		CurrentRuleFileName = filename;
-
-		// find all active placeholders for actors in the scene
-		FindGenerationPlaceholdersInScene();
 
 		// clear previously parsed rule data lists
 		ClearData();
@@ -741,6 +704,9 @@ public class RuleGenerator : MonoBehaviour
 		List<BaseRuleElement.EventData> eventData, 
 		List<BaseRuleElement.ReactionData> reactionData)
 	{
+		GlobalActor.Instance.Initialize(this);
+		Counter.ResetCounters();
+
 		// store all base rule elements in a list, to keep track of which ones were used, which ones weren't
 		PopulateUnusedElementsList();
 
@@ -752,12 +718,6 @@ public class RuleGenerator : MonoBehaviour
 
 		// delete all base rule elements which haven't been updated/created
 		DeleteUnusedElements();
-
-		ActorNames = new string[actorData.Count];
-		for (int i = 0; i < actorData.Count; i++)
-		{
-			ActorNames[i] = actorData[i].label;
-		}
 
 		// fire event
 		if (OnGeneratedLevel != null)
@@ -825,7 +785,17 @@ public class RuleGenerator : MonoBehaviour
 	#region Accessors for generated elements
 	public Actor GetActor(int id)
 	{
-		return genActors.Find(item => item.Id == id);
+		Actor actor = null;
+		if (id == -1)
+		{
+			actor = GlobalActor.Instance;
+		}
+		else
+		{
+			actor = genActors.Find(item => item.Id == id);
+		}
+
+		return actor;
 	}
 
 	public GameEvent GetEvent(int id)

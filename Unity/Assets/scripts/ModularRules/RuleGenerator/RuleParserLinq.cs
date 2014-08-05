@@ -42,22 +42,25 @@ public class RuleParserLinq : MonoBehaviour
 
 			currentActor.label = xActor.Element("label").Value;
 
+			if (xActor.Element("prefab") != null)
+				currentActor.prefab = xActor.Element("prefab").Value;
+
 			currentActor.type = ReflectOverSeveralNamespaces(xActor.Element("type").Value, ExtraNamespaces);
 
 			currentActor.parameters = ParseParameters(xActor);
 
 			// parse component parameters
-			currentActor.components = new List<BaseRuleElement.ComponentData>();
-			foreach (XElement xComponent in xActor.Elements("component"))
-			{
-				BaseRuleElement.ComponentData currentComponent = new BaseRuleElement.ComponentData()
-				{
-					type = ReflectOverSeveralNamespaces(xComponent.Element("type").Value, ExtraNamespaces)
-				};
+			//currentActor.components = new List<BaseRuleElement.ComponentData>();
+			//foreach (XElement xComponent in xActor.Elements("component"))
+			//{
+			//	BaseRuleElement.ComponentData currentComponent = new BaseRuleElement.ComponentData()
+			//	{
+			//		type = ReflectOverSeveralNamespaces(xComponent.Element("type").Value, ExtraNamespaces)
+			//	};
 
-				currentComponent.parameters = ParseParameters(xComponent);
-				currentActor.components.Add(currentComponent);
-			}
+			//	currentComponent.parameters = ParseParameters(xComponent);
+			//	currentActor.components.Add(currentComponent);
+			//}
 
 			generator.AddRuleData(currentActor.DeepCopy());
 		}
@@ -241,10 +244,11 @@ public class RuleParserLinq : MonoBehaviour
 					xActor.Add(new XElement("id") { Value = "" + ruleData.id });
 					xActor.Add(new XElement("type") { Value = GetTypeStringWithoutNamespaces(actorData.type) });
 					xActor.Add(new XElement("label") { Value = actorData.label });
+					xActor.Add(new XElement("prefab") { Value = actorData.prefab });
 
 					AddParameters(xActor, actorData.parameters);
 
-					AddComponents(xActor, actorData.components);
+					//AddComponents(xActor, actorData.components);
 
 					xActors.Add(xActor);
 				}
@@ -293,7 +297,7 @@ public class RuleParserLinq : MonoBehaviour
 
 		if (result.Contains("["))
 		{
-
+			// TODO cleanup type for lists
 		}
 		else if (result.Contains("."))
 		{
@@ -306,20 +310,20 @@ public class RuleParserLinq : MonoBehaviour
 	}
 
 	// unused
-	void AddComponents(XElement element, List<BaseRuleElement.ComponentData> components)
-	{
-		if (components == null) return;
+	//void AddComponents(XElement element, List<BaseRuleElement.ComponentData> components)
+	//{
+	//	if (components == null) return;
 
-		foreach (BaseRuleElement.ComponentData component in components)
-		{
-			XElement xComp = new XElement("component");
-			xComp.Add(new XElement("type") { Value = GetTypeStringWithoutNamespaces(component.type) });
+	//	foreach (BaseRuleElement.ComponentData component in components)
+	//	{
+	//		XElement xComp = new XElement("component");
+	//		xComp.Add(new XElement("type") { Value = GetTypeStringWithoutNamespaces(component.type) });
 
-			AddParameters(xComp, component.parameters);
+	//		AddParameters(xComp, component.parameters);
 
-			element.Add(xComp);
-		}
-	}
+	//		element.Add(xComp);
+	//	}
+	//}
 
 	void AddParameters(XElement element, List<BaseRuleElement.Param> parameters)
 	{
@@ -341,11 +345,14 @@ public class RuleParserLinq : MonoBehaviour
 			else if (param.type == typeof(List<string>))
 			{
 				string result = "";
-				foreach (string s in (List<string>)param.value)
+				List<string> list = ((List<string>)param.value);
+				for (int i = 0; i < list.Count; i++)
 				{
-					result += s + " ";
+					if (i < list.Count - 1)
+						result += list[i] + " ";
+					else
+						result += list[i];
 				}
-				result.Remove(result.Length - 2, 1); // remove last space
 
 				xParam.Add(new XElement("value") { Value = result });
 			}
