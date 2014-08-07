@@ -133,58 +133,76 @@ public class RuleGenerator : MonoBehaviour
 	#endregion
 
 	#region ID Handling
+
+	public int GetActorId()
+	{
+		return GetId(genActors, ActorData);
+	}
+
 	public int GetEventId()
 	{
-		return GetId(genEvents.ToArray());
+		return GetId(genEvents, EventData);
 	}
 
 	public int GetReactionId()
 	{
-		return GetId(genReactions.ToArray());
+		return GetId(genReactions, ReactionData);
 	}
 
-	public int GetActorId()
+	public int GetId<T, U>(List<T> genElements, List<U> data) 
+		where U : BaseRuleElement.RuleData 
+		where T : BaseRuleElement
 	{
-		int result = -1;
-
-		int[] ids = new int[genActors.Count + ActorData.Count]; // can contain duplicates, but doesn't matter
-		for (int i = 0; i < genActors.Count + ActorData.Count; i++)
+		int[] ids = new int[genElements.Count + data.Count]; // could contain duplicates => shouldn't be a problem
+		for (int i = 0; i < genElements.Count + data.Count; i++)
 		{
-			if (i < genActors.Count)
+			if (i < genElements.Count)
 			{
-				ids[i] = genActors[i].Id;
+				ids[i] = genElements[i].Id;
 			}
 			else
 			{
-				ids[i] = ActorData[i - genActors.Count].id;
+				ids[i] = data[i - genElements.Count].id;
 			}
 		}
 
 		Array.Sort<int>(ids);
-		result = ids[ids.Length - 1] + 1;
 
-		return result;
+		return GetNextFreeId(ids);
 	}
 
-	int GetId(BaseRuleElement[] genElements)
+	int GetNextFreeId(int[] ids)
 	{
 		int highestId = 0;
 		int scndHighestId = 0;
-		for (int i = 0; i < genElements.Length; i++)
+		for (int i = 0; i < ids.Length; i++)
 		{
-			if (genElements[i].Id > highestId) // keep track of highest id (so far)
+			if (ids[i] > highestId)
 			{
 				scndHighestId = highestId;
-				highestId = genElements[i].Id;
+				highestId = ids[i];
 			}
 		}
 
-		if (highestId - scndHighestId > 1) // if there's an unused id between two others, use it, stop the loop
-		{
+		if (highestId - scndHighestId > 1)
 			return scndHighestId + 1;
-		}
 
 		return highestId + 1;
+	}
+
+	public bool ActorIdExists(int id)
+	{
+		return IdExists(genActors.ToArray(), id);
+	}
+
+	public bool EventIdExists(int id)
+	{
+		return IdExists(genEvents.ToArray(), id);
+	}
+
+	public bool ReactionIdExists(int id)
+	{
+		return IdExists(genReactions.ToArray(), id);
 	}
 
 	bool IdExists(BaseRuleElement[] genElements, int id)
@@ -578,7 +596,7 @@ public class RuleGenerator : MonoBehaviour
 		if (!GetActor(actor.Id))
 		{
 			if (actor.Id == -1) // TODO use actordata AND genActors for id generation
-				actor.Id = GetId(genActors.ToArray());
+				actor.Id = GetId(genActors, ActorData);
 				
 			genActors.Add(actor);
 		}
@@ -589,7 +607,7 @@ public class RuleGenerator : MonoBehaviour
 		if (!genEvents.Find(item => item.Id == gameEvent.Id))
 		{
 			if (gameEvent.Id == -1)
-				gameEvent.Id = GetId(genEvents.ToArray());
+				gameEvent.Id = GetId(genEvents, EventData);
 
 			genEvents.Add(gameEvent);
 		}
@@ -600,7 +618,7 @@ public class RuleGenerator : MonoBehaviour
 		if (!genReactions.Find(item => item.Id == reaction.Id))
 		{
 			if (reaction.Id == -1)
-				reaction.Id = GetId(genReactions.ToArray());
+				reaction.Id = GetId(genReactions, ReactionData);
 
 			genReactions.Add(reaction);
 
