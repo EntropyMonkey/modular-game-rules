@@ -111,26 +111,7 @@ public class SpawnObject : Reaction
 			{
 				spawnedObject.transform.rotation = Quaternion.Euler(0, Random.Range(0, 3) * 90, 0);
 			}
-
-			// register spawned object in rule generator
-			Actor element = spawnedObject.GetComponent(typeof(Actor)) as Actor;
-			if (element != null)
-			{
-
-				element.Id = -1;
-				element.DontDeleteOnLoad = false;
-				element.WasSpawned = true;
-
-				// can't do that, since this instance is of type BaseRuleElement and will not call derived Initialize methods
-				element.Initialize(Reactor.RuleGenerator);
-#if DEBUG
-				Debug.Log("Spawning object " + element + ", id: " + element.Id);
-#endif
-
-				// instead get method by using reflection. in THEORY
-				//MethodInfo initMethod = element.GetType().GetMethod("Initialize");
-				//initMethod.Invoke(System.Convert.ChangeType(element, element.GetType()), new object[] { Reactor.RuleGenerator });
-			}
+			spawnedObject.tag = "SpawnedObject";
 
 			// handle deactivation of this reaction
 			if (DeactivateAfterSpawning)

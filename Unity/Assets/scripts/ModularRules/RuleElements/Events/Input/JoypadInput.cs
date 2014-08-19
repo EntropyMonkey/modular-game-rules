@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+[DontShowInRuleGUI]
 public class JoypadInput : InputReceived
 {
 	public class JoypadData : InputData

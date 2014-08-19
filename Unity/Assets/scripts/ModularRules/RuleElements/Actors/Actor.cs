@@ -63,6 +63,24 @@ public abstract class Actor : BaseRuleElement
 		}
 	}
 
+	private string currentPrefab;
+	public string CurrentPrefab
+	{
+		get
+		{
+			return currentPrefab;
+		}
+		set
+		{
+			if (value != currentPrefab)
+			{
+				OldPrefab = currentPrefab;
+				currentPrefab = value;
+			}
+		}
+	}
+	public string OldPrefab = "";
+
 	[HideInInspector]
 	public bool WasSpawned = false; // treat spawned actors differently - no storing in the rule files f.ex.
 
@@ -195,7 +213,9 @@ public abstract class Actor : BaseRuleElement
 		}
 	}
 
-	public override void Reset()
+	public virtual void Respawn() {}
+
+	public override void ResetGenerationData()
 	{
 		// destroy all events and reactions belonging to this actor
 		if (events != null)
@@ -221,7 +241,7 @@ public abstract class Actor : BaseRuleElement
 			Destroy(Reactions);
 		}
 
-		base.Reset();
+		base.ResetGenerationData();
 	}
 
 	public override RuleData GetRuleInformation()
@@ -231,7 +251,7 @@ public abstract class Actor : BaseRuleElement
 			id = Id, 
 			type = this.GetType(), 
 			label = gameObject.name = Label,
- 			prefab = "",
+ 			prefab = CurrentPrefab,
 			OnShowGui = ShowGui 
 		};
 	}
@@ -279,7 +299,13 @@ public abstract class Actor : BaseRuleElement
 		// prefab
 		GUILayout.BeginHorizontal();
 		GUILayout.Label("Prefab", RuleGUI.ruleLabelStyle);
-		(ruleData as ActorData).prefab = RuleGUI.ShowParameter((ruleData as ActorData).prefab);
+		string temp = RuleGUI.ShowParameter(CurrentPrefab);
+		if (temp != CurrentPrefab)
+		{
+			OldPrefab = CurrentPrefab;
+			CurrentPrefab = temp;
+		}
+		(ruleData as ActorData).prefab = CurrentPrefab;
 		GUILayout.EndHorizontal();
 
 		GUILayout.EndVertical();

@@ -12,9 +12,9 @@ public class Checkpoint : MonoBehaviour
 	public static string Tag = "Checkpoint";
 	private static int nextFreeId = 0;
 
-	public bool Start = false;
 	public string TargetTag = Player.Tag;
-	public float CheckpointSize = 2;
+	public float CheckpointRadius = 2;
+	public Color CheckpointColor;
 
 	private GameObject target;
 
@@ -25,13 +25,13 @@ public class Checkpoint : MonoBehaviour
 
 	void OnDrawGizmos()
 	{
-		Gizmos.color = Color.cyan;
-		Gizmos.DrawSphere(transform.position, CheckpointSize);
+		Gizmos.color = CheckpointColor;
+		Gizmos.DrawSphere(transform.position, CheckpointRadius);
 	}
 
 	public bool IsActiveAt(Vector3 otherPosition)
 	{
-		if (Vector3.Distance(otherPosition, transform.position) < CheckpointSize)
+		if (Vector3.Distance(otherPosition, transform.position) < CheckpointRadius)
 			return true;
 		else
 			return false;

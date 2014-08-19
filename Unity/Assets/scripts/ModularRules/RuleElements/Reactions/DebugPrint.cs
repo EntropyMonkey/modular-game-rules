@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[DontShowInRuleGUI]
 public class DebugPrint : Reaction
 {
 	public string logText = "";

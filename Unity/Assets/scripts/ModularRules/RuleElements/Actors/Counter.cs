@@ -4,11 +4,12 @@ using System.Collections.Generic;
 
 public class Counter : Actor
 {
-	public int value = 0;
+	public float value = 0;
 
 	public int StartValue = 0;
 	public int MaxValue = 100;
 	public int MinValue = 0;
+	public bool ShowInGame = false;
 
 	// TODO move to a manager
 	private static List<Counter> counters = new List<Counter>();
@@ -23,7 +24,18 @@ public class Counter : Actor
 		counters.Clear();
 	}
 
-	public int Value
+	public static void ShowCountersInGame()
+	{
+		foreach (Counter c in counters)
+		{
+			if (c.ShowInGame)
+			{
+				c.ShowInGameGui();
+			}
+		}
+	}
+
+	public float Value
 	{
 		get
 		{
@@ -58,6 +70,13 @@ public class Counter : Actor
 				value = MinValue
 			});
 
+		rule.parameters.Add(new Param()
+			{
+				name = "ShowInGame",
+				type = ShowInGame.GetType(),
+				value = ShowInGame
+			});
+
 		return rule;
 	}
 
@@ -70,10 +89,7 @@ public class Counter : Actor
 		// column 2
 		GUILayout.BeginVertical();
 
-		// no prefab
-
 		// parameters
-
 		GUILayout.BeginHorizontal();
 		GUILayout.Label("Start Value", RuleGUI.smallLabelStyle);
 		StartValue = RuleGUI.ShowParameter(StartValue);
@@ -98,7 +114,34 @@ public class Counter : Actor
 
 		GUILayout.EndVertical();
 
+		RuleGUI.VerticalLine();
+
+		GUILayout.BeginVertical();
+
+		GUILayout.BeginHorizontal();
+		GUILayout.Label("Show in game?", RuleGUI.ruleLabelStyle);
+		ShowInGame = RuleGUI.ShowParameter(ShowInGame);
+		ChangeParameter("ShowInGame", data.parameters, ShowInGame);
+		GUILayout.EndHorizontal();
+
+		GUILayout.EndVertical();
+
 		GUILayout.FlexibleSpace();
+	}
+
+	public virtual void ShowInGameGui()
+	{
+		GUILayout.BeginVertical();
+		GUILayout.Space(5);
+
+		GUILayout.BeginHorizontal(RuleGUI.areaBackgroundStyle);
+		GUILayout.Space(5);
+		GUILayout.Label(Label + ": " + Mathf.Floor(Value) + " / " + MaxValue, RuleGUI.smallLabelStyle);
+		GUILayout.Space(5);
+		GUILayout.EndHorizontal();
+
+		GUILayout.Space(5);
+		GUILayout.EndVertical();
 	}
 
 	public override void Initialize(RuleGenerator generator)
@@ -124,10 +167,10 @@ public class Counter : Actor
 		}
 	}
 
-	public void ChangeBy(int value)
+	public void ChangeBy(float value)
 	{
 		this.value += value;
-		if (value > MaxValue) this.value = MaxValue;
-		if (value < MinValue) this.value = MinValue;
+		if (this.value > MaxValue) this.value = MaxValue;
+		if (this.value < MinValue) this.value = MinValue;
 	}
 }

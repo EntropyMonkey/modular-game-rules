@@ -15,8 +15,10 @@ public class MoveObject : Reaction
 	public bool RotateWithMovement = true;
 	public float RotationSpeed;
 
-	private DropDown actorDropDown;
+	private ActorDropDown actorDropDown;
 	private DropDown moveDirectionDropdown;
+	private DropDown relativeToDropdown;
+	private ActorDropDown relativeActorDropDown;
 
 	RuleGenerator generator;
 
@@ -39,6 +41,14 @@ public class MoveObject : Reaction
 			ref generator.Gui.OnAddedActor, ref generator.Gui.OnRenamedActor, ref generator.Gui.OnDeletedActor);
 
 		moveDirectionDropdown = new DropDown((int)MoveDirection, System.Enum.GetNames(typeof(Direction)));
+		relativeToDropdown = new DropDown((int)DirectionRelativeTo, System.Enum.GetNames(typeof(RelativeTo)));
+
+		relativeActorDropDown = new ActorDropDown(
+			ActorDirectionIsRelativeTo != null ?
+				System.Array.FindIndex(actors, item => item == ActorDirectionIsRelativeTo.Label) :
+				0,
+			actors,
+			ref generator.Gui.OnAddedActor, ref generator.Gui.OnRenamedActor, ref generator.Gui.OnDeletedActor);
 	}
 
 	void OnEnable()
@@ -110,10 +120,27 @@ public class MoveObject : Reaction
 		int resultIndex = actorDropDown.Draw();
 		if (resultIndex > -1)
 		{
-			int resultId = generator.Gui.GetActorByLabel(actorDropDown.Content[resultIndex].text).id;
+			int resultId = generator.Gui.GetActorDataByLabel(actorDropDown.Content[resultIndex].text).id;
 			generator.ChangeActor(this, resultId);
 			(ruleData as ReactionData).actorId = resultId;
 		}
+
+		GUILayout.Label("relative to", RuleGUI.ruleLabelStyle);
+		DirectionRelativeTo = (RelativeTo)relativeToDropdown.Draw();
+		ChangeParameter("DirectionRelativeTo", (ruleData as ReactionData).parameters, DirectionRelativeTo);
+
+		if (DirectionRelativeTo == RelativeTo.ACTOR)
+		{
+			resultIndex = relativeActorDropDown.Draw();
+			if (resultIndex > -1)
+			{
+				int resultId = generator.Gui.GetActorDataByLabel(relativeActorDropDown.Content[resultIndex].text).id;
+				ActorDirectionIsRelativeTo = generator.GetActor(resultId);
+				ChangeParameter("ActorDirectionIsRelativeTo", (ruleData as ReactionData).parameters, ActorDirectionIsRelativeTo);
+			}
+		}
+
+		GUILayout.Label("in direction: ", RuleGUI.ruleLabelStyle);
 
 		MoveDirection = (Direction)moveDirectionDropdown.Draw();
 		ChangeParameter("MoveDirection", (ruleData as ReactionData).parameters, MoveDirection);
@@ -123,17 +150,16 @@ public class MoveObject : Reaction
 		MoveSpeed = RuleGUI.ShowParameter((float)MoveSpeed);
 		ChangeParameter("MoveSpeed", (ruleData as ReactionData).parameters, MoveSpeed);
 
-		GUILayout.Label("units", RuleGUI.ruleLabelStyle);
+		GUILayout.Label("units.", RuleGUI.ruleLabelStyle);
 	}
 
 	protected override void React(GameEventData eventData)
 	{
-		if (eventData == null ||
-			(DirectionRelativeTo == RelativeTo.ACTOR && ActorDirectionIsRelativeTo == null)) 
+		if (DirectionRelativeTo == RelativeTo.ACTOR && ActorDirectionIsRelativeTo == null)
 			return;
 
 		float v;
-		if (eventData.Get(EventDataKeys.InputData) != null)
+		if (eventData != null && eventData.Get(EventDataKeys.InputData) != null)
 		{
 			v = ((InputReceived.InputData)eventData.Get(EventDataKeys.InputData).data).inputValue;
 		}
@@ -145,34 +171,65 @@ public class MoveObject : Reaction
 			relevantTransform = ActorDirectionIsRelativeTo.transform;
 		else if (DirectionRelativeTo == RelativeTo.SELF)
 			relevantTransform = transform;
-		else
+		else // world
 			relevantTransform = new GameObject("origin").transform;
 
 		Vector3 dir = Vector3.zero;
-		switch (MoveDirection)
+		if (DirectionRelativeTo != RelativeTo.ACTOR)
 		{
-			case Direction.FORWARD:
-				dir = relevantTransform.forward;
-				dir.y = 0;
-				break;
-			case Direction.BACKWARD:
-				dir = -relevantTransform.forward;
-				dir.y = 0;
-				break;
-			case Direction.LEFT:
-				dir = -relevantTransform.right;
-				dir.y = 0;
-				break;
-			case Direction.RIGHT:
-				dir = relevantTransform.right;
-				dir.y = 0;
-				break;
-			case Direction.UP:
-				dir = relevantTransform.up;
-				break;
-			case Direction.DOWN:
-				dir = -relevantTransform.up;
-				break;
+			switch (MoveDirection)
+			{
+				case Direction.FORWARD:
+					dir = relevantTransform.forward;
+					dir.y = 0;
+					break;
+				case Direction.BACKWARD:
+					dir = -relevantTransform.forward;
+					dir.y = 0;
+					break;
+				case Direction.LEFT:
+					dir = -relevantTransform.right;
+					dir.y = 0;
+					break;
+				case Direction.RIGHT:
+					dir = relevantTransform.right;
+					dir.y = 0;
+					break;
+				case Direction.UP:
+					dir = relevantTransform.up;
+					break;
+				case Direction.DOWN:
+					dir = -relevantTransform.up;
+					break;
+			}
+		}
+		else
+		{
+			dir = (relevantTransform.position - transform.position).normalized;
+			switch (MoveDirection)
+			{
+				case Direction.FORWARD:
+					dir.y = 0;
+					break;
+				case Direction.BACKWARD:
+					dir = -dir;
+					dir.y = 0;
+					break;
+				case Direction.LEFT:
+					dir = -relevantTransform.right;
+					dir.y = 0;
+					break;
+				case Direction.RIGHT:
+					dir = relevantTransform.right;
+					dir.y = 0;
+					break;
+				case Direction.UP:
+					dir = relevantTransform.up;
+					break;
+				case Direction.DOWN:
+					dir = -relevantTransform.up;
+					break;
+			}
 		}
 
 		Reactor.rigidbody.AddForce(dir * v * MoveSpeed);
@@ -187,6 +244,5 @@ public class MoveObject : Reaction
 			horizontalVelocity.y = 0;
 			Reactor.transform.forward = Vector3.Lerp(Reactor.transform.forward, horizontalVelocity, RotationSpeed * Time.deltaTime);
 		}
-	//	Reactor.transform.Rotate(Vector3.up, 1 * (MoveDirection == Direction.LEFT ? -1 : MoveDirection == Direction.RIGHT ? 1 : 0));
 	}
 }

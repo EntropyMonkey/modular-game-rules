@@ -11,20 +11,6 @@ public class Level : Actor
 		tag = Tag;
 	}
 
-	public override BaseRuleElement.RuleData GetRuleInformation()
-	{
-		BaseRuleElement.ActorData actorData = base.GetRuleInformation() as BaseRuleElement.ActorData;
-
-		actorData.prefab = "Level1";
-
-		return actorData;
-	}
-
-	public override void ShowGui(RuleData ruleData)
-	{
-		base.ShowGui(ruleData);
-	}
-
 	void Update()
 	{
 		UpdateEvents();

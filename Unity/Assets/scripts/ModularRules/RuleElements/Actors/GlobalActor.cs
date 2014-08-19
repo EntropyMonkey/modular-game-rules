@@ -55,6 +55,11 @@ public class GlobalActor : Actor
 		Id = 1000;
 	}
 
+	void Update()
+	{
+		UpdateEvents();
+	}
+
 	public override void ShowGui(BaseRuleElement.RuleData ruleData)
 	{
 	}

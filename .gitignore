@@ -8,3 +8,5 @@
 *.sln
 *.suo
 Unity/Builds/
+Unity/Assets/scripts/Analytics/MailConst.cs
+Unity/Assets/scripts/Analytics/MailConst.cs.meta

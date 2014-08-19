@@ -55,13 +55,15 @@ public class RuleGenerator : MonoBehaviour
 		if ((ruleParser = gameObject.GetComponent<RuleParserLinq>()) == null)
 			ruleParser = gameObject.AddComponent<RuleParserLinq>();
 
+		gameObject.AddComponent<Analytics>();
+
 		Gui = FindObjectOfType<RuleGUI>();
 	}
 
 	void Update()
 	{
 		if (Input.GetKey(KeyCode.Escape))
-			Application.Quit();
+			Gui.RespawnActors();
 
 		string filepath = Application.dataPath + @"/Rules/";
 
@@ -238,6 +240,7 @@ public class RuleGenerator : MonoBehaviour
 			Actor actor = actorGo.AddComponent(data.type) as Actor;
 			actor.Id = data.id;
 			actor.Label = data.label;
+			actor.CurrentPrefab = data.prefab;
 
 			data.OnShowGui = actor.ShowGui;
 
@@ -356,12 +359,17 @@ public class RuleGenerator : MonoBehaviour
 				continue;
 			}
 
-			// different handling for object references
-			if (parameter.type.IsSubclassOf(typeof(Actor)) || parameter.type.IsAssignableFrom(typeof(Actor))
-				|| (parameter.value is int && pFieldInfo.FieldType.IsAssignableFrom(typeof(Actor))))
+			// different handling for  actor references/int-actor combinations
+			if (parameter.value is int && 
+				(pFieldInfo.FieldType.IsAssignableFrom(typeof(Actor)) || pFieldInfo.FieldType.IsSubclassOf(typeof(Actor))))
 			{
 				if ((int)parameter.value < genActors.Count && (int)parameter.value >= 0)
 					pFieldInfo.SetValue(gObject, genActors.Find(item => item.Id == (int)parameter.value));
+			}
+			else if ((parameter.type.IsSubclassOf(typeof(Actor)) || parameter.type.IsAssignableFrom(typeof(Actor)))
+				&& !(parameter.value is int))
+			{
+				Debug.LogError("Don't store anything other than ids in Actor type parameters.");
 			}
 			// set all other values
 			else
@@ -400,9 +408,9 @@ public class RuleGenerator : MonoBehaviour
 	{
 		// check if matching id actor has same type
 		// if different type, change it. Self-destroy old one, create new actor.
-		if (actor != null && actor.GetType() != actorData.type)
+		if (actor != null && (actor.GetType() != actorData.type || actor.OldPrefab != actorData.prefab))
 		{
-			actor.Reset();
+			actor.ResetGenerationData();
 
 			// remove from lists
 			genActors.Remove(actor);
@@ -413,7 +421,7 @@ public class RuleGenerator : MonoBehaviour
 			Debug.LogWarning("Updating actor (" + actor.Id + "), new type: " + actorData.type);
 #endif
 
-			Destroy(actor);
+			Destroy(actor.gameObject);
 
 			AddActorToScene(actorData);
 		}
@@ -439,7 +447,7 @@ public class RuleGenerator : MonoBehaviour
 		{
 			// if it's not the same type, tell old event to self-destroy
 
-			gameEvent.Reset();
+			gameEvent.ResetGenerationData();
 
 			// cleaning up lists
 			genEvents.Remove(gameEvent);
@@ -450,7 +458,7 @@ public class RuleGenerator : MonoBehaviour
 #endif
 
 			// delete old event
-			Destroy(gameEvent);
+			Destroy(gameEvent.gameObject);
 
 			// create new event from data
 			AddEventToScene(eventData);
@@ -486,7 +494,7 @@ public class RuleGenerator : MonoBehaviour
 		if (reaction.GetType() != reactionData.type)
 		{
 			// if it's not the same, tell the old reaction to reset and clean up
-			reaction.Reset();
+			reaction.ResetGenerationData();
 
 			// clean up lists
 			genReactions.Remove(reaction);
@@ -497,7 +505,7 @@ public class RuleGenerator : MonoBehaviour
 #endif
 
 			// destroy reaction
-			Destroy(reaction);
+			Destroy(reaction.gameObject);
 
 			// create new reaction from scratch
 			AddReactionToScene(reactionData);
@@ -532,7 +540,7 @@ public class RuleGenerator : MonoBehaviour
 	{
 		if (gameEvent.Actor.Id != newActorId)
 		{
-			gameEvent.Reset();
+			gameEvent.ResetGenerationData();
 			gameEvent.Actor.RemoveEvent(gameEvent);
 			Actor newActor = GetActor(newActorId);
 			if (newActor)
@@ -547,7 +555,7 @@ public class RuleGenerator : MonoBehaviour
 	{
 		if (reaction.Reactor.Id != newActorId)
 		{
-			reaction.Reset();
+			reaction.ResetGenerationData();
 			reaction.Reactor.RemoveReaction(reaction);
 			Actor newActor = GetActor(newActorId);
 			if (newActor)
@@ -653,7 +661,7 @@ public class RuleGenerator : MonoBehaviour
 	{
 		foreach (BaseRuleElement element in unusedElements)
 		{
-			element.Reset();
+			element.ResetGenerationData();
 
 			if (element as GameEvent)
 			{
@@ -668,7 +676,7 @@ public class RuleGenerator : MonoBehaviour
 				genActors.Remove(element as Actor);
 			}
 #if DEBUG
-			Debug.Log("Destroyed unused element: " + element.name + " (" + element.Id + ") " + element.GetType());
+			Debug.Log("Destroyed unused element: " + element.name + " (" + element.Id + ") ");
 #endif
 			Destroy(element.gameObject);
 		}
@@ -678,6 +686,11 @@ public class RuleGenerator : MonoBehaviour
 	#endregion
 
 	#region Loading Rules
+	public void Reload()
+	{
+		LoadRules(ActorData, EventData, ReactionData);
+	}
+
 	public void LoadRules(string filename)
 	{
 		Debug.LogWarning("Generating level rules from " + filename + ".xml ...");
@@ -696,6 +709,8 @@ public class RuleGenerator : MonoBehaviour
 		// initialize elements. order of initializing is important (first actors, then events, then reactions)
 		InitializeRuleElements();
 
+		Analytics.LogEvent(Analytics.dataEvent, Analytics.load_rules, CurrentRuleFileName);
+
 		Debug.LogWarning("Completed generating level.");
 	}
 
@@ -707,13 +722,9 @@ public class RuleGenerator : MonoBehaviour
 
 		GenerateLevelFromData(actorData, eventData, reactionData);
 
-		//ClearData();
-
-		//ActorData.AddRange(actorData);
-		//EventData.AddRange(eventData);
-		//ReactionData.AddRange(reactionData);
-
 		InitializeRuleElements();
+
+		Analytics.LogEvent(Analytics.dataEvent, Analytics.load_rules, "from data");
 
 		Debug.LogWarning("Completed generating level.");
 	}
@@ -740,10 +751,17 @@ public class RuleGenerator : MonoBehaviour
 		// fire event
 		if (OnGeneratedLevel != null)
 			OnGeneratedLevel(actorData, eventData, reactionData, CurrentRuleFileName);
+
+		Analytics.LogEvent(Analytics.dataEvent, Analytics.load_level, CurrentRuleFileName);
 	}
 
 	void GenerateActorsFromData(List<BaseRuleElement.ActorData> actorData)
 	{
+		actorData.Sort(delegate(BaseRuleElement.ActorData a, BaseRuleElement.ActorData b)
+		{
+			if (a.type.IsAssignableFrom(typeof(Level))) return -1;
+			else return 0;
+		});
 		// generate actors
 		for (int i = 0; i < actorData.Count; i++)
 		{
@@ -796,7 +814,29 @@ public class RuleGenerator : MonoBehaviour
 
 		ruleParser.SaveRules(rules, filename, overwrite);
 
+		Analytics.LogEvent(Analytics.dataEvent, Analytics.save_rules, filename);
+
 		Debug.LogWarning("Completed saving rules.");
+	}
+	#endregion
+
+	#region Delete Rule File
+	public void DeleteFile(string file)
+	{
+		string path = Application.dataPath + @"/Rules/" + file + ".xml";
+		if (File.Exists(path))
+		{
+			try
+			{
+				File.Delete(path);
+				Analytics.LogEvent(Analytics.dataEvent, Analytics.delete_rules, file);
+			}
+			catch(System.IO.IOException e)
+			{
+				Gui.ShowAlertWindow("Error deleting " + file, "Couldn't delete file: " + e.Message, null, null);
+			}
+		}
+
 	}
 	#endregion
 

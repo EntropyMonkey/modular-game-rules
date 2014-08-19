@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public class GameEventData
+public sealed class GameEventData
 {
 	/// <summary>
 	/// A list with differently typed data pieces

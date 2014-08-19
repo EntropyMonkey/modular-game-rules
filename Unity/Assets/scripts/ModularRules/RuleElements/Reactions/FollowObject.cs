@@ -9,7 +9,7 @@ public class FollowObject : Reaction
 	public GameObject FixedToObject = null;
 	public Vector3 Offset = Vector3.zero;
 
-	public bool StayBehindObject = true;
+	public bool StayBehindObject = false;
 
 	private Transform targetTransform;
 
@@ -88,7 +88,7 @@ public class FollowObject : Reaction
 		int resultIndex = actorDropDown.Draw();
 		if (resultIndex > -1)
 		{
-			int resultId = generator.Gui.GetActorByLabel(actorDropDown.Content[resultIndex].text).id;
+			int resultId = generator.Gui.GetActorDataByLabel(actorDropDown.Content[resultIndex].text).id;
 			(ruleData as ReactionData).actorId = resultId;
 			generator.ChangeActor(this, resultId);
 		}
@@ -96,12 +96,17 @@ public class FollowObject : Reaction
 		GUILayout.Label("follows with an offset of", RuleGUI.ruleLabelStyle);
 
 		Offset = RuleGUI.ShowParameter(Offset, "followOffset" + Reactor.Id);
-		ChangeParameter("Offset", (ruleData as ReactionData).parameters, Offset);
+		ChangeParameter("Offset", ruleData.parameters, Offset);
 
 		GUILayout.Label("and a speed of", RuleGUI.ruleLabelStyle);
 
 		FollowSpeed = RuleGUI.ShowParameter(FollowSpeed);
-		ChangeParameter("FollowSpeed", (ruleData as ReactionData).parameters, FollowSpeed);
+		ChangeParameter("FollowSpeed", ruleData.parameters, FollowSpeed);
+
+		GUILayout.Label("Always stay behind the target?", RuleGUI.ruleLabelStyle);
+		StayBehindObject = RuleGUI.ShowParameter(StayBehindObject);
+
+		ChangeParameter("StayBehindObject", ruleData.parameters, StayBehindObject);
 	}
 
 	void OnEnable()
@@ -116,11 +121,15 @@ public class FollowObject : Reaction
 
 	protected override void React(GameEventData eventData)
 	{
-		GameObject target = eventData.Get(EventDataKeys.TargetObject).data as GameObject;
-
-		if (target != null)
+		DataPiece targetObject = eventData.Get(EventDataKeys.TargetObject);
+		if (targetObject != null)
 		{
-			targetTransform = target.transform;
+			GameObject target = targetObject.data as GameObject;
+
+			if (target != null)
+			{
+				targetTransform = target.transform;
+			}
 		}
 	}
 
@@ -130,14 +139,29 @@ public class FollowObject : Reaction
 		{
 			if (!StayBehindObject)
 			{
-				Reactor.transform.position = Vector3.Lerp(Reactor.transform.position, targetTransform.position + Offset, Time.deltaTime * FollowSpeed);
+				if (Reactor.rigidbody != null)
+					Reactor.rigidbody.AddForce(((targetTransform.position + Offset) - Reactor.transform.position).normalized * FollowSpeed);
+				else
+					Reactor.transform.position = Vector3.Lerp(Reactor.transform.position, targetTransform.position + Offset, Time.deltaTime * FollowSpeed);
 			}
 			else
 			{
-				Reactor.transform.position = Vector3.Lerp(
-					Reactor.transform.position, 
-					targetTransform.position + targetTransform.forward * Offset.z + targetTransform.right * Offset.x + targetTransform.up * Offset.y, 
-					Time.deltaTime * FollowSpeed);
+				if (Reactor.rigidbody != null)
+				{
+					Reactor.rigidbody.AddForce(
+						((targetTransform.position + 
+							targetTransform.forward * Offset.z + 
+							targetTransform.right * Offset.x + 
+							targetTransform.up * Offset.y) - 
+							Reactor.transform.position).normalized * FollowSpeed);
+				}
+				else
+				{
+					Reactor.transform.position = Vector3.Lerp(
+						Reactor.transform.position,
+						targetTransform.position + targetTransform.forward * Offset.z + targetTransform.right * Offset.x + targetTransform.up * Offset.y,
+						Time.deltaTime * FollowSpeed);
+				}
 			}
 
 			//Reactor.transform.rotation = Quaternion.Lerp(

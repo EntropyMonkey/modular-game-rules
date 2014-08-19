@@ -15,18 +15,32 @@ public class Player : Actor
 
 	private PlayerState currentState;
 
-	private List<Checkpoint> checkpoints = new List<Checkpoint>();
+	private Checkpoint[] checkpoints;
 	private int currentCheckpoint = -1;
 
 	void Start()
 	{
 		tag = Tag;
-		currentState = PlayerState.RESPAWNING;
 	}
 
-	public override void Reset()
+	public override void Initialize(RuleGenerator generator)
 	{
-		base.Reset();
+		base.Initialize(generator);
+
+		generator.OnGeneratedLevel += delegate(List<BaseRuleElement.ActorData> actorData,
+			List<BaseRuleElement.EventData> eventData,
+			List<BaseRuleElement.ReactionData> reactionData,
+			string filename)
+		{
+			checkpoints = null;
+			currentState = PlayerState.RESPAWNING;
+		};
+
+	}
+
+	public override void ResetGenerationData()
+	{
+		base.ResetGenerationData();
 
 		currentState = PlayerState.RESPAWNING;
 		currentCheckpoint = -1;
@@ -114,22 +128,27 @@ public class Player : Actor
 		}
 	}
 
-	void Respawn(bool atStart = false)
+	public override void Respawn()
 	{
-		GameObject[] checkpoints = GameObject.FindGameObjectsWithTag(Checkpoint.Tag);
-		this.checkpoints.Clear();
+		GameObject[] allCheckpoints = GameObject.FindGameObjectsWithTag(Checkpoint.Tag);
 		// find starting checkpoint
 
-		for (int i = 0; i < checkpoints.Length; i++)
+		List<Checkpoint> points = new List<Checkpoint>();
+		for (int i = 0; i < allCheckpoints.Length; i++)
 		{
-			Checkpoint p = checkpoints[i].GetComponent<Checkpoint>();
-			if (p != null && p.TargetTag == Tag)
+			Checkpoint p = allCheckpoints[i].GetComponent<Checkpoint>();
+			if (p.TargetTag == Tag)
 			{
-				this.checkpoints.Add(p);
-				if (((atStart || currentCheckpoint == -1) && p.Start) || p.Id == currentCheckpoint)
-					transform.position = p.transform.position;
+				points.Add(p);
 			}
 		}
+
+		checkpoints = points.ToArray();
+
+		if (currentCheckpoint == -1)
+			currentCheckpoint = Random.Range(0, points.Count - 1);
+
+		transform.position = checkpoints[currentCheckpoint].transform.position;
 
 		currentState = PlayerState.NORMAL;
 	}
@@ -156,11 +175,11 @@ public class Player : Actor
 			rigidbody.AddForce(Vector3.down * Gravity);
 		}
 
-		for (int i = 0; i < checkpoints.Count; i++)
+		for (int i = 0; i < checkpoints.Length; i++)
 		{
 			if (checkpoints[i] != null && checkpoints[i].IsActiveAt(transform.position))
 			{
-				currentCheckpoint = checkpoints[i].Id;
+				currentCheckpoint = i;
 				break;
 			}
 		}

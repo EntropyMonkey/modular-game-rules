@@ -11,7 +11,7 @@ public class RuleGUI : MonoBehaviour
 {
 //	public RuleGenerator ruleGenerator;
 
-	private enum RuleGUIState { NORMAL, SAVE, ALERT, ADDRULE_1, ADDRULE_2, ADDACTOR };
+	private enum RuleGUIState { BEGIN, INGAME, RULES, SAVE, LOAD, ALERT, ADDRULE_1, ADDRULE_2, ADDACTOR };
 
 	public delegate void ActorChanged(string[] newContent, BaseRuleElement.ActorData actor);
 	public delegate void ActorRenamed(string[] newContent, BaseRuleElement.ActorData actor, string oldName);
@@ -27,8 +27,6 @@ public class RuleGUI : MonoBehaviour
 			return actorData.ConvertAll(item => item.label).ToArray();
 		}
 	}
-
-	public bool ShowButtons = true;
 
 	public string[] Files;
 
@@ -50,15 +48,28 @@ public class RuleGUI : MonoBehaviour
 	public static GUIStyle ruleIconDelStyle;
 	public static GUIStyle ruleIconAddStyle;
 
-	bool editMode = false;
-	bool loadMode = false;
-	bool isTesting = false;
+	private bool isTesting = false;
 
-	private RuleGUIState guiState;
+	private RuleGUIState LastGuiState { get; set; }
+	private RuleGUIState guiState = RuleGUIState.BEGIN;
+	private RuleGUIState GuiState
+	{
+		set
+		{
+			LastGuiState = guiState;
+			guiState = value;
+		}
+		get
+		{
+			return guiState;
+		}
+	}
 
-	//bool showOnlyRelevant = true;
+	string testerCode = "";
+	float lastNameChangeTimestamp = 0;
 
 	string saveRulesFilename = "New Rules";
+	string fileToDelete = "";
 
 	const int ruleFileSavingDialogId = 0;
 	const int alertId = 1;
@@ -66,9 +77,12 @@ public class RuleGUI : MonoBehaviour
 
 	string alertTitle;
 	string alertText;
-	delegate void AlertCallback();
+	public delegate void AlertCallback();
 	AlertCallback alertOkCallback;
 	AlertCallback alertCancelCallback;
+
+	private struct Message { public string text; public float timeout; }
+	List<Message> messages = new List<Message>();
 
 	Dictionary<int, List<int>> eventReactionDict = new Dictionary<int,List<int>>();
 	Dictionary<int, List<int>> actorEventDict = new Dictionary<int, List<int>>();
@@ -97,6 +111,14 @@ public class RuleGUI : MonoBehaviour
 	void Awake()
 	{
 		GetComponent<RuleGenerator>().OnGeneratedLevel += OnGeneratedLevel;
+		OnRenamedActor += delegate(string[] newContent, BaseRuleElement.ActorData actor, string oldName)
+		{
+			if (lastNameChangeTimestamp - Time.time < 5)
+			{
+				Analytics.LogEvent(Analytics.ruleEvent, Analytics.change_name, oldName + " > " + actor.label);
+			}
+			lastNameChangeTimestamp = Time.time;
+		};
 
 		markedButtonOriginStyle = CustomSkin.GetStyle("markedButtonOrigin");
 		markedButtonChildStyle = CustomSkin.GetStyle("markedButtonChild");
@@ -194,7 +216,15 @@ public class RuleGUI : MonoBehaviour
 		GUI.skin = CustomSkin;
 		GUI.enabled = true;
 
-		if (guiState == RuleGUIState.ALERT)
+		if (GuiState == RuleGUIState.BEGIN)
+		{
+			GUILayout.Window(alertId,
+				new Rect(Screen.width * 0.3f, Screen.height * 0.4f, Screen.width * .4f, Screen.height * .2f),
+				EnterPersonalCodeWindow,
+				"Begin Test",
+				popupWindowStyle);
+		}
+		else if (GuiState == RuleGUIState.ALERT)
 		{
 			GUILayout.Window(alertId, 
 				new Rect(Screen.width * 0.3f, Screen.height * 0.4f, Screen.width * .4f, Screen.height * .2f), 
@@ -203,7 +233,7 @@ public class RuleGUI : MonoBehaviour
 				popupWindowStyle);
 		}
 
-		if (editMode)
+		if (GuiState == RuleGUIState.RULES)
 		{
 			GUILayout.BeginArea(new Rect(0, 0, Screen.width, Screen.height), areaBackgroundStyle);
 		}
@@ -212,20 +242,103 @@ public class RuleGUI : MonoBehaviour
 
 		GUILayout.BeginHorizontal();
 
+		if (GuiState == RuleGUIState.INGAME)
+		{
+			GUILayout.FlexibleSpace();
+			Counter.ShowCountersInGame();
+			ShowMessages();
+		}
+
 		EditRules();
 
 		LoadRules();
 
 		GUILayout.EndHorizontal();
 
+		GUILayout.FlexibleSpace();
+
+		GUILayout.BeginHorizontal();
+		GUILayout.FlexibleSpace();
+
+		if (Analytics.Running && Analytics.LastTask + 1 < 4)
+		{
+			if (Analytics.CurrentTask == 0 && GUILayout.Button("Start Task " + (Analytics.LastTask + 1), GUILayout.Height(50), GUILayout.Width(100)) )
+			{
+				Analytics.StartTask(Analytics.LastTask + 1);
+			}
+			else if (Analytics.CurrentTask != 0 && GUILayout.Button("End Task " + Analytics.CurrentTask, GUILayout.Height(50), GUILayout.Width(100)))
+			{
+				Analytics.EndTask();
+			}
+
+			GUILayout.Space(5);
+		}
+
+		if (Analytics.LastTask + 1 >= 4)
+		{
+			GUILayout.Label("No more tasks!");
+		}
+
+		if (GUILayout.Button("Quit", GUILayout.Height(50), GUILayout.Width(100)))
+		{
+			Analytics.EndSession();
+			Application.Quit();
+		}
+		GUILayout.EndHorizontal();
+
 		GUILayout.EndArea();
 	}
 	#endregion
 
-	#region Alert Popup
-	void ShowAlertWindow(string title, string text, AlertCallback okCallback, AlertCallback cancelCallback)
+	#region Enter Code
+	void EnterPersonalCodeWindow(int windowId)
 	{
-		guiState = RuleGUIState.ALERT;
+		GUILayout.BeginVertical();
+
+		GUILayout.BeginHorizontal();
+		GUILayout.FlexibleSpace();
+
+		GUILayout.Label("Please enter the code from your email:", smallLabelStyle);
+
+		GUILayout.FlexibleSpace();
+		GUILayout.EndHorizontal();
+
+		GUILayout.FlexibleSpace();
+
+		GUILayout.BeginHorizontal();
+		GUILayout.FlexibleSpace();
+
+		testerCode = ShowParameter(testerCode);
+
+		GUILayout.FlexibleSpace();
+		GUILayout.EndHorizontal();
+
+		GUILayout.FlexibleSpace();
+
+		GUILayout.BeginHorizontal();
+		GUILayout.FlexibleSpace();
+
+		if (testerCode != "" && testerCode.Length == 4 && GUILayout.Button("Start Testing", GUILayout.Height(50)))
+		{
+			GuiState = RuleGUIState.INGAME;
+
+			Analytics.StartSession(testerCode);
+
+			GetComponent<RuleGenerator>().LoadRules("rules_0");
+		}
+
+		GUILayout.FlexibleSpace();
+		GUILayout.EndHorizontal();
+
+		GUILayout.EndVertical();
+	}
+
+	#endregion
+
+	#region Alert Popup
+	public void ShowAlertWindow(string title, string text, AlertCallback okCallback, AlertCallback cancelCallback)
+	{
+		GuiState = RuleGUIState.ALERT;
 		alertTitle = title;
 		alertText = text;
 		alertOkCallback = okCallback;
@@ -247,10 +360,11 @@ public class RuleGUI : MonoBehaviour
 		{
 			if (alertCancelCallback != null)
 				alertCancelCallback();
+			else
+				GuiState = LastGuiState;
 			alertText = "";
 			alertOkCallback = null;
 			alertCancelCallback = null;
-			guiState = RuleGUIState.NORMAL;
 		}
 
 		GUILayout.FlexibleSpace();
@@ -259,11 +373,12 @@ public class RuleGUI : MonoBehaviour
 		{
 			if (alertOkCallback != null)
 				alertOkCallback();
+			else
+				GuiState = LastGuiState;
 
 			alertText = "";
 			alertOkCallback = null;
 			alertCancelCallback = null;
-			guiState = RuleGUIState.NORMAL;
 		}
 
 		GUILayout.EndHorizontal();
@@ -273,15 +388,43 @@ public class RuleGUI : MonoBehaviour
 	}
 	#endregion
 
+	#region Ingame Message
+	public void ShowMessage(string message, int seconds)
+	{
+		messages.Add(new Message { text = message, timeout = seconds });
+	}
+
+	private void ShowMessages()
+	{
+		GUILayout.BeginArea(new Rect(Screen.width * 0.3f, Screen.height * 0.2f, Screen.width * 0.7f, Screen.height * 0.7f));
+
+		List<Message> newMessages = new List<Message>();
+		for (int i = 0; i < messages.Count; i++)
+		{
+			Message m = messages[i];
+			GUILayout.Label(m.text, ruleLabelStyle);
+			m.timeout -= Time.deltaTime;
+			if (m.timeout > 0)
+			{
+				newMessages.Add(m);
+			}
+		}
+		messages.Clear();
+		newMessages.ForEach(item => messages.Add(item));
+
+		GUILayout.EndArea();
+	}
+	#endregion
+
 	#region Load Rules
 	void LoadRules()
 	{
-		if (ShowButtons && !loadMode && !editMode && GUI.Button(new Rect(0, Screen.height - 100, 100, 50), "Load Rules"))
+		if (GuiState == RuleGUIState.INGAME && GUI.Button(new Rect(0, Screen.height - 105, 100, 50), "Re/Load Rules"))
 		{
-			loadMode = true;
+			GuiState = RuleGUIState.LOAD;
 		}
 
-		if (!loadMode) return;
+		if (GuiState != RuleGUIState.LOAD) return;
 
 		GUILayout.BeginVertical(GUILayout.Width(Screen.width * 0.3f));
 
@@ -289,23 +432,53 @@ public class RuleGUI : MonoBehaviour
 
 		for (int i = 0; i < Files.Length; i++)
 		{
+			GUILayout.BeginHorizontal(GUILayout.Height(70));
 			string file = Path.GetFileNameWithoutExtension(Files[i]);
-			if (GUILayout.Button("Load " + file, GUILayout.Height(70), GUILayout.ExpandWidth(true)))
+			if (GUILayout.Button("Load " + file, GUILayout.Height(50), GUILayout.ExpandWidth(true)))
 			{
 				isTesting = false;
 				GetComponent<RuleGenerator>().LoadRules(file);
-				loadMode = false;
+
+				GuiState = RuleGUIState.INGAME;
 			}
+			GUILayout.BeginVertical();
+			GUILayout.FlexibleSpace();
+			if (GUILayout.Button("", ruleIconDelStyle))
+			{
+				fileToDelete = file;
+				ShowAlertWindow("Delete File?", "Sure you want to delete " + file + "?", deleteRuleFile, cancelDeleteRuleFile);
+			}
+			GUILayout.FlexibleSpace();
+			GUILayout.Space(5);
+			GUILayout.EndVertical();
+			GUILayout.EndHorizontal();
 		}
 
 		GUILayout.EndScrollView();
 
-		if (GUILayout.Button("Cancel"))
+		if (GUILayout.Button("Cancel", GUILayout.Height(70), GUILayout.Width(100)))
 		{
-			loadMode = false;
+			GuiState = RuleGUIState.INGAME;
 		}
 
 		GUILayout.EndVertical();
+	}
+	#endregion
+
+	#region DeleteFileCallbacks
+	void deleteRuleFile()
+	{
+		if (fileToDelete != "")
+		{
+			GetComponent<RuleGenerator>().DeleteFile(fileToDelete);
+		}
+		GuiState = RuleGUIState.INGAME;
+	}
+
+	void cancelDeleteRuleFile()
+	{
+		GuiState = RuleGUIState.INGAME;
+		fileToDelete = "";
 	}
 	#endregion
 
@@ -313,47 +486,59 @@ public class RuleGUI : MonoBehaviour
 	void EditRules()
 	{
 		RuleGenerator ruleGenerator = GetComponent<RuleGenerator>();
-		if (ShowButtons && !editMode && !loadMode && actorData.Count > 0 && 
+
+		if (GuiState == RuleGUIState.INGAME && actorData.Count > 0 && 
 			GUI.Button(new Rect(0, Screen.height - 50, 100, 50), "Edit Rules"))
 		{
-			editMode = true;
+			GuiState = RuleGUIState.RULES;
 			saveRulesFilename = ruleGenerator.CurrentRuleFileName;
 			ruleGenerator.PauseEventExecution();
+			Analytics.LogEvent(Analytics.gameEvent, Analytics.edit_rules, "");
+		}
+		if (GuiState == RuleGUIState.INGAME && actorData.Count > 0 &&
+			GUI.Button(new Rect(105, Screen.height - 50, 100, 50), "Respawn Actors"))
+		{
+			RespawnActors();
 		}
 
-		if (!editMode) return;
-
-		else if (GUI.Button(new Rect(0, Screen.height - 30, 100, 30), "Save Rules"))
+		if (GuiState == RuleGUIState.RULES)
 		{
-			// show pop-up asking for name. if same name as existing ruleset - overwrite
-			guiState = RuleGUIState.SAVE;
-		}
-		else if (GUI.Button(new Rect(110, Screen.height - 30, 100, 30), "Test Changes"))
-		{
-			isTesting = true;
+			if (GUI.Button(new Rect(0, Screen.height - 30, 100, 30), "Save Rules"))
+			{
+				// show pop-up asking for name. if same name as existing ruleset - overwrite
+				GuiState = RuleGUIState.SAVE;
+			}
+			else if (GUI.Button(new Rect(110, Screen.height - 30, 100, 30), "Test Changes"))
+			{
+				isTesting = true;
 
-			// hand over changed data to rulegenerator, but don't save
-			ruleGenerator.LoadRules(actorData, eventData, reactionData);
+				// hand over changed data to rulegenerator, but don't save
+				ruleGenerator.LoadRules(actorData, eventData, reactionData);
 
-			editMode = false;
-			ruleGenerator.StartEventExecution();
-		}
-		else if (GUI.Button(new Rect(220, Screen.height - 30, 100, 30), "Discard Changes"))
-		{
-			isTesting = false;
+				GuiState = RuleGUIState.INGAME;
+				ruleGenerator.StartEventExecution();
 
-			// delete rules, reload old rule file
-			ruleGenerator.LoadRules(ruleGenerator.CurrentRuleFileName);
+				Analytics.LogEvent(Analytics.gameEvent, Analytics.test_game, "");
+			}
+			else if (GUI.Button(new Rect(220, Screen.height - 30, 100, 30), "Discard Changes"))
+			{
+				isTesting = false;
 
-			editMode = false;
-			ruleGenerator.StartEventExecution();
+				// delete rules, reload old rule file
+				ruleGenerator.LoadRules(ruleGenerator.CurrentRuleFileName);
+
+				GuiState = RuleGUIState.INGAME;
+				ruleGenerator.StartEventExecution();
+
+				Analytics.LogEvent(Analytics.gameEvent, Analytics.discard_changes, "");
+			}
 		}
 
 		Rect addRuleWindowRect = new Rect(Screen.width * 0.1f, Screen.height * 0.1f, Screen.width * 0.8f, Screen.height * 0.5f);
 
-		switch(guiState)
+		switch(GuiState)
 		{ 
-			case RuleGUIState.NORMAL:
+			case RuleGUIState.RULES:
 				HighlevelRuleGUI();
 				break;
 			case RuleGUIState.SAVE:
@@ -391,7 +576,9 @@ public class RuleGUI : MonoBehaviour
 	Vector2 rulesScrollPos = Vector2.zero;
 	void HighlevelRuleGUI()
 	{
-		rulesScrollPos = GUILayout.BeginScrollView(rulesScrollPos, GUILayout.Height(Screen.height * 0.85f));
+		rulesScrollPos = GUILayout.BeginScrollView(rulesScrollPos, GUILayout.MaxHeight(Screen.height * 0.8f));
+
+		GUILayout.Label("Rules:");
 
 		foreach (BaseRuleElement.EventData eData in eventData)
 		{
@@ -431,9 +618,7 @@ public class RuleGUI : MonoBehaviour
 
 							if (GUILayout.Button("", ruleIconDelStyle))
 							{
-								eventReactionDict[r.eventId].Remove(r.id);
-								actorReactionDict[r.actorId].Remove(r.id);
-								reactionData.Remove(r);
+								DeleteReaction(r);
 							}
 
 							GUILayout.EndHorizontal();
@@ -450,7 +635,7 @@ public class RuleGUI : MonoBehaviour
 					LoadEventAndReactionTypes();
 					addRule_selectedEventId = eData.id;
 					addRule_selectedReactionTypes.Add(0);
-					guiState = RuleGUIState.ADDRULE_2; 
+					GuiState = RuleGUIState.ADDRULE_2; 
 				}
 				GUILayout.EndHorizontal();
 
@@ -463,7 +648,7 @@ public class RuleGUI : MonoBehaviour
 					LoadEventAndReactionTypes();
 					addRule_selectedEventId = eData.id;
 					addRule_selectedReactionTypes.Add(0);
-					guiState = RuleGUIState.ADDRULE_2;
+					GuiState = RuleGUIState.ADDRULE_2;
 				}
 
 				GUILayout.FlexibleSpace();
@@ -491,6 +676,8 @@ public class RuleGUI : MonoBehaviour
 
 
 		HorizontalLine();
+
+		GUILayout.Label("Actors:");
 
 		foreach (BaseRuleElement.ActorData aData in actorData)
 		{
@@ -523,12 +710,21 @@ public class RuleGUI : MonoBehaviour
 	}
 	#endregion
 
+	#region Respawn
+	public void RespawnActors()
+	{
+		Actor[] actors = FindObjectsOfType(typeof(Actor)) as Actor[];
+		foreach (Actor a in actors)
+			a.Respawn();
+	}
+	#endregion
+
 	#region Add Rule
 	// add new rule
 	void AddRule()
 	{
-		if (guiState == RuleGUIState.NORMAL)
-			guiState = RuleGUIState.ADDRULE_1;
+		if (GuiState == RuleGUIState.RULES)
+			GuiState = RuleGUIState.ADDRULE_1;
 
 		LoadEventAndReactionTypes();
 	}
@@ -587,7 +783,7 @@ public class RuleGUI : MonoBehaviour
 		GUILayout.BeginHorizontal();
 		if (GUILayout.Button("Cancel", GUILayout.Height(70), GUILayout.Width(100)))
 		{
-			guiState = RuleGUIState.NORMAL;
+			GuiState = RuleGUIState.RULES;
 			currentSelectedReactionTypeIndex = 0;
 			addRule_selectedReactionTypes.Clear();
 			addRule_selectedEventType = 0;
@@ -598,7 +794,7 @@ public class RuleGUI : MonoBehaviour
 
 		if (GUILayout.Button("Next", GUILayout.Height(70), GUILayout.Width(100)))
 		{
-			guiState = RuleGUIState.ADDRULE_2;
+			GuiState = RuleGUIState.ADDRULE_2;
 			if (addRule_selectedReactionTypes.Count == 0)
 				addRule_selectedReactionTypes.Add(0);
 		}
@@ -615,7 +811,7 @@ public class RuleGUI : MonoBehaviour
 		GUILayout.BeginHorizontal();
 
 		// if adding to an existing event
-		if (addRule_selectedEventId > -1)
+		if (addRule_selectedEventId > -1 && addRule_selectedEventId < eventData.Count)
 		{
 			// get index of event type name, set the right event type int
 			addRule_selectedEventType = eventTypes.FindIndex(item => item == eventData[addRule_selectedEventId].type);
@@ -633,7 +829,7 @@ public class RuleGUI : MonoBehaviour
 
 		if (GUILayout.Button("Cancel", GUILayout.Height(70), GUILayout.Width(100)))
 		{
-			guiState = RuleGUIState.NORMAL;
+			GuiState = RuleGUIState.RULES;
 			currentSelectedReactionTypeIndex = 0;
 			addRule_selectedReactionTypes.Clear();
 			addRule_selectedEventType = 0;
@@ -645,7 +841,7 @@ public class RuleGUI : MonoBehaviour
 		if ((addRule_selectedEventId == -1 || currentSelectedReactionTypeIndex > 0) && GUILayout.Button("Back", GUILayout.Width(100), GUILayout.Height(70)))
 		{
 			if (currentSelectedReactionTypeIndex > 0) currentSelectedReactionTypeIndex--;
-			else guiState = RuleGUIState.ADDRULE_1;
+			else GuiState = RuleGUIState.ADDRULE_1;
 		}
 
 		GUILayout.FlexibleSpace();
@@ -694,6 +890,8 @@ public class RuleGUI : MonoBehaviour
 				{
 					actorEventDict.Add(newEvent.actorId, new List<int>() { newEvent.id });
 				}
+
+				Analytics.LogEvent(Analytics.ruleEvent, Analytics.add_event, newEvent.label);
 			}
 			else
 			{
@@ -737,9 +935,11 @@ public class RuleGUI : MonoBehaviour
 				{
 					actorReactionDict.Add(newReaction.actorId, new List<int>() { newReaction.id });
 				}
+
+				Analytics.LogEvent(Analytics.ruleEvent, Analytics.add_reaction, newReaction.label);
 			}
 
-			guiState = RuleGUIState.NORMAL;
+			GuiState = RuleGUIState.RULES;
 			currentSelectedReactionTypeIndex = 0;
 			addRule_selectedReactionTypes.Clear();
 			addRule_selectedEventType = 0;
@@ -754,8 +954,8 @@ public class RuleGUI : MonoBehaviour
 	#region AddActor
 	void AddActor()
 	{
-		if (guiState == RuleGUIState.NORMAL)
-			guiState = RuleGUIState.ADDACTOR;
+		if (GuiState == RuleGUIState.RULES)
+			GuiState = RuleGUIState.ADDACTOR;
 
 		LoadActorTypes(true);
 	}
@@ -812,7 +1012,7 @@ public class RuleGUI : MonoBehaviour
 
 		if (GUILayout.Button("Cancel", GUILayout.Height(70), GUILayout.Width(100)))
 		{
-			guiState = RuleGUIState.NORMAL;
+			GuiState = RuleGUIState.RULES;
 			addActor_selectedNameIndex = 0;
 		}
 		GUILayout.FlexibleSpace();
@@ -834,10 +1034,12 @@ public class RuleGUI : MonoBehaviour
 			generator.AddActorToScene(newActor);
 			generator.GetActor(newActor.id).Initialize(generator);
 
+			Analytics.LogEvent(Analytics.ruleEvent, Analytics.add_actor, newActor.label);
+
 			if (OnAddedActor != null)
 				OnAddedActor(ActorNames, newActor);
 
-			guiState = RuleGUIState.NORMAL;
+			GuiState = RuleGUIState.RULES;
 			addActor_selectedNameIndex = 0;
 		}
 
@@ -863,20 +1065,38 @@ public class RuleGUI : MonoBehaviour
 	void DeleteRule()
 	{
 		// delete all reactions
-		List<int> rIds = eventReactionDict[ruleToDelete.id];
 
-		for (int i = 0; i < rIds.Count; i++)
+		if (eventReactionDict.ContainsKey(ruleToDelete.id))
 		{
-			reactionData.RemoveAt(reactionData.FindIndex(item => item.id == rIds[i]));
+			List<int> rIds = eventReactionDict[ruleToDelete.id];
+
+			for (int i = 0; i < rIds.Count; i++)
+			{
+				reactionData.RemoveAt(reactionData.FindIndex(item => item.id == rIds[i]));
+			}
 		}
 
 		// delete the event
 		eventData.Remove(ruleToDelete);
+
+		GuiState = RuleGUIState.RULES;
+
+		Analytics.LogEvent(Analytics.ruleEvent, Analytics.delete_rule, ruleToDelete.label);
 	}
 
 	void DontDeleteRule()
 	{
+		GuiState = RuleGUIState.RULES;
 		ruleToDelete = null;
+	}
+
+	void DeleteReaction(BaseRuleElement.ReactionData reaction)
+	{
+		eventReactionDict[reaction.eventId].Remove(reaction.id);
+		actorReactionDict[reaction.actorId].Remove(reaction.id);
+		reactionData.Remove(reaction);
+
+		Analytics.LogEvent(Analytics.ruleEvent, Analytics.delete_reaction, reaction.label);
 	}
 
 	// only deletes actor from current gui data set
@@ -908,12 +1128,17 @@ public class RuleGUI : MonoBehaviour
 		// delete actor from data
 		actorData.Remove(actorToDelete);
 
+		GuiState = RuleGUIState.RULES;
+
+		Analytics.LogEvent(Analytics.ruleEvent, Analytics.delete_actor, actorToDelete.label);
+
 		if (OnDeletedActor != null)
 			OnDeletedActor(actorData.ConvertAll(item => item.label).ToArray(), actorToDelete);
 	}
 
 	void DontDeleteActor()
 	{
+		GuiState = RuleGUIState.RULES;
 		actorToDelete = null;
 	}
 	#endregion
@@ -969,7 +1194,7 @@ public class RuleGUI : MonoBehaviour
 		// cancel
 		if (GUILayout.Button("Cancel", GUILayout.Width(100), GUILayout.Height(70)))
 		{
-			guiState = RuleGUIState.NORMAL;
+			GuiState = RuleGUIState.RULES;
 			saveRulesFilename = GetComponent<RuleGenerator>().CurrentRuleFileName;
 		}
 
@@ -982,11 +1207,13 @@ public class RuleGUI : MonoBehaviour
 			// if same name as other ruleset - ask whether to overwrite or not
 			if (File.Exists(filepath))
 			{
+				GuiState = RuleGUIState.RULES; // HACK to go back to rules view after done
 				ShowAlertWindow("Overwriting..", "Overwrite existing file '" + saveRulesFilename + ".xml'?", SaveRulesCallback, null);
 			}
 			else
 			// just save it
 			{
+				GuiState = RuleGUIState.RULES; // HACK to go back to rules view after done
 				ShowAlertWindow("Saving..", "Save rules to '" + saveRulesFilename + ".xml'?", SaveRulesCallback, null);
 			}
 		}
@@ -1008,7 +1235,7 @@ public class RuleGUI : MonoBehaviour
 		g.SaveRules(saveRulesFilename, true, rules);
 		g.LoadRules(saveRulesFilename);
 
-		editMode = false;
+		GuiState = RuleGUIState.INGAME;
 
 		g.StartEventExecution();
 
@@ -1255,9 +1482,9 @@ public class RuleGUI : MonoBehaviour
 
 	public static string ShowParameter(string value)
 	{
-		if (value == "")
+		if (value == "" || value == null)
 			return GUILayout.TextField("", GUILayout.Width(50));
-		return GUILayout.TextField(value, ruleEditableStyle); ;
+		return GUILayout.TextField(value, ruleEditableStyle);
 	}
 
 	public static List<string> ShowParameter(List<string> value)
@@ -1305,12 +1532,12 @@ public class RuleGUI : MonoBehaviour
 #endregion
 
 	#region Data Accessors
-	public BaseRuleElement.ActorData GetActorById(int id)
+	public BaseRuleElement.ActorData GetActorDataById(int id)
 	{
 		return actorData.Find(item => item.id == id);
 	}
 
-	public BaseRuleElement.ActorData GetActorByLabel(string label)
+	public BaseRuleElement.ActorData GetActorDataByLabel(string label)
 	{
 		return actorData.Find(item => item.label == label);
 	}

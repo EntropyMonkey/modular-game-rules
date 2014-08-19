@@ -6,11 +6,15 @@ public class PlayerCamera : Actor
 {
 	public static string Tag = "PlayerCamera";
 
-	public float ViewportWidth = 0.5f;
+	public float ViewportWidth = 1f;
+	public float ViewportHeight = 1f;
 	public float ViewportXPos;
+	public float ViewportYPos;
 
 	private string viewportXPosString = "";
+	private string viewportYPosString = "";
 	private string viewportWidthString = "";
+	private string viewportHeightString = "";
 
 	void Start()
 	{
@@ -33,7 +37,9 @@ public class PlayerCamera : Actor
 		}
 
 		viewportXPosString = ViewportXPos.ToString();
+		viewportYPosString = ViewportYPos.ToString();
 		viewportWidthString = ViewportWidth.ToString();
+		viewportHeightString = ViewportHeight.ToString();
 	}
 
 	public override RuleData GetRuleInformation()
@@ -52,11 +58,25 @@ public class PlayerCamera : Actor
 			});
 
 		rule.parameters.Add(new Param()
+		{
+			name = "ViewportHeight",
+			type = ViewportHeight.GetType(),
+			value = ViewportHeight
+		});
+
+		rule.parameters.Add(new Param()
 			{
 				name = "ViewportXPos",
 				type = ViewportXPos.GetType(),
 				value = ViewportXPos
 			});
+
+		rule.parameters.Add(new Param()
+		{
+			name = "ViewportYPos",
+			type = ViewportYPos.GetType(),
+			value = ViewportYPos
+		});
 
 		return rule;
 	}
@@ -83,12 +103,32 @@ public class PlayerCamera : Actor
 		GUILayout.EndHorizontal();
 
 		GUILayout.BeginHorizontal();
-		GUILayout.Label("Viewport X Position (0..1)", RuleGUI.ruleLabelStyle);
+		GUILayout.Label("Viewport Height (0..1)", RuleGUI.ruleLabelStyle);
+		viewportHeightString = RuleGUI.ShowParameter(viewportHeightString);
+		if (GUILayout.Button("Set", RuleGUI.buttonStyle))
+		{
+			ViewportHeight = float.Parse(viewportHeightString);
+			ChangeParameter("ViewportHeight", ruleData.parameters, ViewportHeight);
+		}
+		GUILayout.EndHorizontal();
+
+		GUILayout.BeginHorizontal();
+		GUILayout.Label("Horizontal Viewport Position (0..1)", RuleGUI.ruleLabelStyle);
 		viewportXPosString = RuleGUI.ShowParameter(viewportXPosString);
 		if (GUILayout.Button("Set", RuleGUI.buttonStyle))
 		{
 			ViewportXPos = float.Parse(viewportXPosString);
 			ChangeParameter("ViewportXPos", ruleData.parameters, ViewportXPos);
+		}
+		GUILayout.EndHorizontal();
+
+		GUILayout.BeginHorizontal();
+		GUILayout.Label("Vertical Viewport Position (0..1)", RuleGUI.ruleLabelStyle);
+		viewportYPosString = RuleGUI.ShowParameter(viewportYPosString);
+		if (GUILayout.Button("Set", RuleGUI.buttonStyle))
+		{
+			ViewportYPos = float.Parse(viewportYPosString);
+			ChangeParameter("ViewportYPos", ruleData.parameters, ViewportYPos);
 		}
 		GUILayout.EndHorizontal();
 

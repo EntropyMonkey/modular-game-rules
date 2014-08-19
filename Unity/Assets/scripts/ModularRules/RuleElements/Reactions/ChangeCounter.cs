@@ -5,6 +5,7 @@ using System;
 public class ChangeCounter : Reaction
 {
 	public int ChangeBy = -1;
+	public int PerSeconds = 1;
 	public string CounterName = "";
 
 	private Counter counter;
@@ -45,6 +46,13 @@ public class ChangeCounter : Reaction
 
 		rule.parameters.Add(new Param()
 			{
+				name = "PerSeconds",
+				type = PerSeconds.GetType(),
+				value = PerSeconds
+			});
+
+		rule.parameters.Add(new Param()
+			{
 				name = "CounterName",
 				type = CounterName.GetType(),
 				value = CounterName
@@ -65,13 +73,29 @@ public class ChangeCounter : Reaction
 
 		ChangeBy = RuleGUI.ShowParameter(ChangeBy);
 		ChangeParameter("ChangeBy", (ruleData as ReactionData).parameters, ChangeBy);
+
+		GUILayout.Label("every", RuleGUI.ruleLabelStyle);
+
+		PerSeconds = RuleGUI.ShowParameter(PerSeconds);
+		ChangeParameter("PerSeconds", (ruleData as ReactionData).parameters, PerSeconds);
+
+		GUILayout.Label("second(s).", RuleGUI.ruleLabelStyle);
 	}
 
 	protected override void React(GameEventData eventData)
 	{
+
 		if (counter != null)
 		{
-			counter.ChangeBy(ChangeBy);
+			float s = PerSeconds;
+			if (PerSeconds == 0)
+				s = 0.1f;
+			counter.ChangeBy(ChangeBy * Time.deltaTime / s);
+		}
+		else
+		{
+			// hack as workaround for possibly wrong initialization order
+			counter = Counter.Get(CounterName);
 		}
 	}
 }

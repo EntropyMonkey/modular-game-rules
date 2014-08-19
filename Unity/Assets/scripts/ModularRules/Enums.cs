@@ -10,3 +10,5 @@ public enum RelativeTo { WORLD = 0, ACTOR, SELF }
 public enum CollisionPhase { ENTER, STAY, EXIT, ANY }
 
 public enum Comparison { GREATER, EQUAL, LESS }
+
+public enum GameEnd { WIN, LOSE, DRAW }

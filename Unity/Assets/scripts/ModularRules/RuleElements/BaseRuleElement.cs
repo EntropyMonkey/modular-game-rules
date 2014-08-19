@@ -138,11 +138,7 @@ public abstract class BaseRuleElement : MonoBehaviour
 	/// <summary>
 	/// Called when the component needs to be reset
 	/// </summary>
-	public virtual void Reset()
-	{
-	}
-
-	public virtual void OnActorNameChanged(int id, string oldName, string newName)
+	public virtual void ResetGenerationData()
 	{
 	}
 
@@ -168,6 +164,10 @@ public abstract class BaseRuleElement : MonoBehaviour
 			{
 				param.value = ((Actor)Convert.ChangeType((object)newValue, typeof(Actor))).Id;
 			}
+			else if (newValue.GetType().IsSubclassOf(typeof(Actor)))
+			{
+				param.value = newValue as Actor;
+			}
 			else
 			{
 				param.value = newValue;
@@ -178,6 +178,7 @@ public abstract class BaseRuleElement : MonoBehaviour
 		else // update existing parameter
 		{
 			param = parameters[index];
+			object oldValue = param.value;
 
 			if (param.type != newValue.GetType() && !param.type.IsEnum && !newValue.GetType().IsAssignableFrom(typeof(Actor)))
 			{
@@ -205,6 +206,11 @@ public abstract class BaseRuleElement : MonoBehaviour
 			parameters.RemoveAt(index);
 
 			param.value = newValue;
+
+			if (param.type != typeof(string) && !oldValue.Equals(newValue))
+			{
+				Analytics.LogEvent(Analytics.ruleEvent, Analytics.change_param, param.name + " " + param.type);
+			}
 		}
 
 		parameters.Add(param);

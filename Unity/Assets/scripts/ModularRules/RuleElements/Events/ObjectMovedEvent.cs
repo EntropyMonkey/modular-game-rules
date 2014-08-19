@@ -35,7 +35,7 @@ public class ObjectMovedEvent : GameEvent
 		int resultIndex = actorDropDown.Draw();
 		if (resultIndex > -1)
 		{
-			int resultId = generator.Gui.GetActorByLabel(actorDropDown.Content[resultIndex].text).id;
+			int resultId = generator.Gui.GetActorDataByLabel(actorDropDown.Content[resultIndex].text).id;
 			(ruleData as EventData).actorId = resultId;
 			generator.ChangeActor(this, resultId);
 		}

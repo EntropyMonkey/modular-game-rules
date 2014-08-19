@@ -4,10 +4,13 @@ using System.Collections.Generic;
 
 public class CheckpointActor : Actor
 {
+	private enum State { RESPAWNING, NORMAL }
+
 	public string Tag;
 	public bool UseGravity;
 
-	private List<Checkpoint> checkpoints = new List<Checkpoint>();
+	private State currentState = State.RESPAWNING;
+	private Checkpoint[] checkpoints;
 	private int currentCheckpoint = -1;
 
 	public override BaseRuleElement.RuleData GetRuleInformation()
@@ -35,50 +38,81 @@ public class CheckpointActor : Actor
 			gameObject.AddComponent<Rigidbody>();
 
 		rigidbody.useGravity = UseGravity;
+		rigidbody.freezeRotation = true;
+
+		generator.OnGeneratedLevel += delegate(List<BaseRuleElement.ActorData> actorData,
+			List<BaseRuleElement.EventData> eventData,
+			List<BaseRuleElement.ReactionData> reactionData,
+			string filename)
+		{
+			currentState = State.RESPAWNING;
+			checkpoints = null;
+		};
 	}
 
 	void Start()
 	{
 		tag = Tag;
-
-		Respawn(true);
 	}
 
-	public override void Reset()
+	public override void ResetGenerationData()
 	{
-		base.Reset();
+		base.ResetGenerationData();
 
 		currentCheckpoint = -1;
-		Respawn(true);
+		currentState = State.RESPAWNING;
 	}
 
-	void Respawn(bool atStart = false)
+	public override void Respawn()
 	{
-		GameObject[] checkpoints = GameObject.FindGameObjectsWithTag(Checkpoint.Tag);
+		GameObject[] allCheckpoints = GameObject.FindGameObjectsWithTag(Checkpoint.Tag);
 		// find starting checkpoint
 
-		for (int i = 0; i < checkpoints.Length; i++)
+		List<Checkpoint> points = new List<Checkpoint>();
+		for (int i = 0; i < allCheckpoints.Length; i++)
 		{
-			Checkpoint p = checkpoints[i].GetComponent<Checkpoint>();
+			Checkpoint p = allCheckpoints[i].GetComponent<Checkpoint>();
 			if (p.TargetTag == Tag)
 			{
-				this.checkpoints.Add(p);
-				if (((atStart || currentCheckpoint == -1) && p.Start) || p.Id == currentCheckpoint)
-					transform.position = p.transform.position;
+				points.Add(p);
 			}
 		}
+
+		checkpoints = points.ToArray();
+
+		if (currentCheckpoint == -1)
+			currentCheckpoint = Random.Range(0, checkpoints.Length - 1);
+
+		transform.position = checkpoints[currentCheckpoint].transform.position;
+		currentState = State.NORMAL;
 	}
 
 	void Update()
 	{
+		switch (currentState)
+		{
+			case State.RESPAWNING:
+				Respawn();
+				break;
+			case State.NORMAL:
+				UpdateNormalState();
+				break;
+		}
+	}
+
+	void UpdateNormalState()
+	{
 		UpdateEvents();
 
-		for (int i = 0; i < checkpoints.Count; i++)
+		if (checkpoints != null)
 		{
-			if (checkpoints[i] != null && checkpoints[i].IsActiveAt(transform.position))
+			for (int i = 0; i < checkpoints.Length; i++)
 			{
-				currentCheckpoint = checkpoints[i].Id;
-				break;
+				if (checkpoints[i] != null && checkpoints[i].IsActiveAt(transform.position))
+				{
+					currentCheckpoint = i;
+					break;
+				}
 			}
 		}
 	}

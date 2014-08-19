@@ -2,6 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public abstract class GameEvent : BaseRuleElement
 {
@@ -73,7 +76,13 @@ public abstract class GameEvent : BaseRuleElement
 		for (int i = 0; i < triggeredReactions.Count; i++ )
 		{
 			if (triggeredReactions[i] != null)
+			{
+#if UNITY_EDITOR
+				EditorGUIUtility.PingObject(Actor.gameObject);
+				EditorGUIUtility.PingObject(gameObject);
+#endif
 				triggeredReactions[i].Execute(data);
+			}
 		}
 
 		return true;

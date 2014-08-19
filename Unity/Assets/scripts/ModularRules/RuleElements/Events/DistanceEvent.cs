@@ -63,6 +63,11 @@ public class DistanceEvent : GameEvent
 			System.Array.FindIndex(actors, item => item == Actor.Label), actors,
 			ref generator.Gui.OnAddedActor, ref generator.Gui.OnRenamedActor, ref generator.Gui.OnDeletedActor);
 
+		if (WatchedObject == null)
+		{
+			WatchedObject = generator.GetActor(0);
+		}
+
 		watchedActorDropDown = new ActorDropDown(
 			System.Array.FindIndex(actors, item => item == WatchedObject.Label), actors,
 			ref generator.Gui.OnAddedActor, ref generator.Gui.OnRenamedActor, ref generator.Gui.OnDeletedActor);
@@ -79,7 +84,7 @@ public class DistanceEvent : GameEvent
 		int resultIndex = actorDropDown.Draw();
 		if (resultIndex > -1)
 		{
-			int resultId = generator.Gui.GetActorByLabel(actorDropDown.Content[resultIndex].text).id;
+			int resultId = generator.Gui.GetActorDataByLabel(actorDropDown.Content[resultIndex].text).id;
 
 			(ruleData as EventData).actorId = resultId;
 			generator.ChangeActor(this, resultId);
@@ -90,9 +95,9 @@ public class DistanceEvent : GameEvent
 		resultIndex = watchedActorDropDown.Draw();
 		if (resultIndex > -1)
 		{
-			int resultId = generator.Gui.GetActorByLabel(watchedActorDropDown.Content[resultIndex].text).id;
+			int resultId = generator.Gui.GetActorDataByLabel(watchedActorDropDown.Content[resultIndex].text).id;
 
-			ChangeParameter("WatchedObject", (ruleData as EventData).parameters, WatchedObject);
+			ChangeParameter("WatchedObject", ruleData.parameters, WatchedObject);
 			WatchedObject = generator.GetActor(resultId);
 		}
 
@@ -102,11 +107,11 @@ public class DistanceEvent : GameEvent
 		if (resultIndex > -1)
 		{
 			TriggerWhenDistance = (Comparison)resultIndex;
-			ChangeParameter("TriggerWhenDistance", (ruleData as EventData).parameters, TriggerWhenDistance);
+			ChangeParameter("TriggerWhenDistance", ruleData.parameters, TriggerWhenDistance);
 		}
 
 		TriggerDistance = RuleGUI.ShowParameter(TriggerDistance);
-		ChangeParameter("TriggerDistance", (ruleData as EventData).parameters, TriggerDistance);
+		ChangeParameter("TriggerDistance", ruleData.parameters, TriggerDistance);
 	}
 
 	public override GameEvent UpdateEvent()
@@ -118,17 +123,29 @@ public class DistanceEvent : GameEvent
 		if (TriggerWhenDistance == Comparison.EQUAL &&
 			Mathf.Abs(distance - TriggerDistance) < threshold)
 		{
-			Trigger(GameEventData.Empty);
+			Trigger(GameEventData.Empty
+				.Add(new DataPiece(EventDataKeys.TargetObject)
+				{
+					data = WatchedObject.gameObject
+				}));
 		}
 		else if (TriggerWhenDistance == Comparison.LESS &&
 			distance < TriggerDistance)
 		{
-			Trigger(GameEventData.Empty);
+			Trigger(GameEventData.Empty
+				.Add(new DataPiece(EventDataKeys.TargetObject)
+				{
+					data = WatchedObject.gameObject
+				}));
 		}
 		else if (TriggerWhenDistance == Comparison.GREATER &&
 			distance > TriggerDistance)
 		{
-			Trigger(GameEventData.Empty);
+			Trigger(GameEventData.Empty
+				.Add(new DataPiece(EventDataKeys.TargetObject)
+				{
+					data = WatchedObject.gameObject
+				}));
 		}
 
 		return this;
