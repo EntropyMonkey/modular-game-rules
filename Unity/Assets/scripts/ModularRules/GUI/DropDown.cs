@@ -12,14 +12,14 @@ public class DropDown
 		private set;
 	}
 
-	float width;
+	float minWidth;
 	float minHeight;
 
 	bool extended = false;
 
 	Vector2 keyScrollPos = Vector2.zero;
 
-	public DropDown(int selected, string[] content, float width = 100, float minHeight = 100)
+	public DropDown(int selected, string[] content, float minWidth = 100, float minHeight = 100)
 	{
 		Selected = selected;
 		Content = new GUIContent[content.Length];
@@ -28,7 +28,7 @@ public class DropDown
 			Content[i] = new GUIContent(content[i]);
 		}
 
-		this.width = width;
+		this.minWidth = minWidth;
 		this.minHeight = minHeight;
 	}
 
@@ -47,8 +47,8 @@ public class DropDown
 		int result = -1;
 		if (extended)
 		{
-			keyScrollPos = GUILayout.BeginScrollView(keyScrollPos, GUILayout.MinHeight(minHeight), GUILayout.Width(width));
-			
+			keyScrollPos = GUILayout.BeginScrollView(keyScrollPos, GUILayout.MinHeight(minHeight), GUILayout.MinWidth(minWidth));
+
 			result = GUILayout.SelectionGrid(Selected, Content, 1);
 
 			GUILayout.EndScrollView();

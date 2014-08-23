@@ -16,7 +16,7 @@ public class DeactivateObject : Reaction
 	private ActorDropDown actorDropDown;
 	private DropDown targetObjectDropDown;
 
-	public TargetObject targetObject;
+	public TargetObject TargetObj;
 
 	private RuleGenerator generator;
 
@@ -38,9 +38,9 @@ public class DeactivateObject : Reaction
 
 		data.parameters.Add(new Param()
 			{
-				name = "targetObject",
-				type = targetObject.GetType(),
-				value = targetObject
+				name = "TargetObj",
+				type = TargetObj.GetType(),
+				value = TargetObj
 			});
 
 		data.parameters.Add(new Param()
@@ -70,7 +70,7 @@ public class DeactivateObject : Reaction
 			ref generator.Gui.OnAddedActor, ref generator.Gui.OnRenamedActor, ref generator.Gui.OnDeletedActor);
 
 		targetObjectDropDown = new DropDown(
-			(int)targetObject,
+			(int)TargetObj,
 			System.Enum.GetNames(typeof(TargetObject)));
 
 	}
@@ -89,12 +89,14 @@ public class DeactivateObject : Reaction
 	{
 		GUILayout.Label("deactivate", RuleGUI.ruleLabelStyle);
 
-		targetObject = (TargetObject)targetObjectDropDown.Draw();
-
-		if (targetObject == TargetObject.EVENT_TARGET)
+		int index = targetObjectDropDown.Draw();
+		if (index > -1)
 		{
+			TargetObj = (TargetObject)index;
+			ChangeParameter("TargetObj", ruleData.parameters, TargetObj);
 		}
-		else
+
+		if (TargetObj == TargetObject.ACTOR)
 		{
 			int resultIndex = actorDropDown.Draw();
 			if (resultIndex > -1)
@@ -117,8 +119,14 @@ public class DeactivateObject : Reaction
 
 	protected override void React(GameEventData eventData)
 	{
-		if (targetObject == TargetObject.EVENT_TARGET)
-			gameObjectToDeactivate = eventData.Get(EventDataKeys.TargetObject).data as GameObject;
+		if (TargetObj == TargetObject.EVENT_TARGET)
+		{
+			DataPiece o = eventData.Get(EventDataKeys.TargetObject);
+			if (o != null && o.data as GameObject)
+			{
+				gameObjectToDeactivate = o.data as GameObject;
+			}
+		}
 		else
 			gameObjectToDeactivate = ObjectToDeactivate.gameObject;
 
@@ -130,7 +138,8 @@ public class DeactivateObject : Reaction
 	IEnumerator DeactivateAfter(float t)
 	{
 		yield return new WaitForSeconds(t);
-		gameObjectToDeactivate.SetActive(false);
+		if (gameObjectToDeactivate != null)
+			gameObjectToDeactivate.SetActive(false);
 		deactivating = false;
 	}
 }

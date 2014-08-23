@@ -42,6 +42,7 @@ public class RuleGUI : MonoBehaviour
 
 	public static GUIStyle ruleLabelStyle;
 	public static GUIStyle ruleEditableStyle;
+	public static GUIStyle ruleToggleStyle;
 	public static GUIStyle ruleReactionStyle;
 
 	public static GUIStyle ruleIconEditStyle;
@@ -131,6 +132,7 @@ public class RuleGUI : MonoBehaviour
 		ruleLabelStyle = CustomSkin.GetStyle("ruleLabelStyle");
 		ruleEditableStyle = CustomSkin.GetStyle("ruleEditableStyle");
 		ruleEditableStyle.normal.textColor = Color.cyan;
+		ruleToggleStyle = CustomSkin.GetStyle("ruleToggleStyle");
 
 		ruleReactionStyle = CustomSkin.GetStyle("ruleReactionStyle");
 		ruleIconEditStyle = CustomSkin.GetStyle("editIconStyle");
@@ -166,6 +168,12 @@ public class RuleGUI : MonoBehaviour
 		{
 			reactionData.Add(originalReactionData[i].DeepCopy());
 		}
+
+		// sort events
+		eventData.Sort(new BaseRuleElement.OrderComparer<BaseRuleElement.EventData>());
+
+		// sort actors
+		actorData.Sort(new BaseRuleElement.OrderComparer<BaseRuleElement.ActorData>());
 
 		// events/reactions and actors/reactions
 		eventReactionDict.Clear();
@@ -503,6 +511,8 @@ public class RuleGUI : MonoBehaviour
 
 		if (GuiState == RuleGUIState.RULES)
 		{
+			PlayerCamera.SetViewportsToRecalculateOnLoad();
+
 			if (GUI.Button(new Rect(0, Screen.height - 30, 100, 30), "Save Rules"))
 			{
 				// show pop-up asking for name. if same name as existing ruleset - overwrite
@@ -511,11 +521,11 @@ public class RuleGUI : MonoBehaviour
 			else if (GUI.Button(new Rect(110, Screen.height - 30, 100, 30), "Test Changes"))
 			{
 				isTesting = true;
+				GuiState = RuleGUIState.INGAME;
 
 				// hand over changed data to rulegenerator, but don't save
 				ruleGenerator.LoadRules(actorData, eventData, reactionData);
 
-				GuiState = RuleGUIState.INGAME;
 				ruleGenerator.StartEventExecution();
 
 				Analytics.LogEvent(Analytics.gameEvent, Analytics.test_game, "");
@@ -524,10 +534,11 @@ public class RuleGUI : MonoBehaviour
 			{
 				isTesting = false;
 
+				GuiState = RuleGUIState.INGAME;
+
 				// delete rules, reload old rule file
 				ruleGenerator.LoadRules(ruleGenerator.CurrentRuleFileName);
 
-				GuiState = RuleGUIState.INGAME;
 				ruleGenerator.StartEventExecution();
 
 				Analytics.LogEvent(Analytics.gameEvent, Analytics.discard_changes, "");
@@ -614,12 +625,11 @@ public class RuleGUI : MonoBehaviour
 							GUILayout.BeginHorizontal(ruleReactionStyle, GUILayout.ExpandWidth(false));
 							r.OnShowGui(r);
 
-							GUILayout.FlexibleSpace();
-
 							if (GUILayout.Button("", ruleIconDelStyle))
 							{
 								DeleteReaction(r);
 							}
+							GUILayout.FlexibleSpace();
 
 							GUILayout.EndHorizontal();
 							GUILayout.Space(2);
@@ -713,8 +723,8 @@ public class RuleGUI : MonoBehaviour
 	#region Respawn
 	public void RespawnActors()
 	{
-		Actor[] actors = FindObjectsOfType(typeof(Actor)) as Actor[];
-		foreach (Actor a in actors)
+
+		foreach (Actor a in GetComponent<RuleGenerator>().GetGenActors())
 			a.Respawn();
 	}
 	#endregion
@@ -879,6 +889,9 @@ public class RuleGUI : MonoBehaviour
 
 				eventData.Add(newEvent);
 
+				// sort evetn data
+				eventData.Sort(new BaseRuleElement.OrderComparer<BaseRuleElement.EventData>());
+
 				generator.AddEventToScene(newEvent);
 
 				// add to lookup dict
@@ -1038,6 +1051,9 @@ public class RuleGUI : MonoBehaviour
 
 			if (OnAddedActor != null)
 				OnAddedActor(ActorNames, newActor);
+
+			// sort actor data
+			actorData.Sort(new BaseRuleElement.OrderComparer<BaseRuleElement.ActorData>());
 
 			GuiState = RuleGUIState.RULES;
 			addActor_selectedNameIndex = 0;
@@ -1477,7 +1493,7 @@ public class RuleGUI : MonoBehaviour
 
 	public static bool ShowParameter(bool value)
 	{
-		return GUILayout.Toggle(value, "");
+		return GUILayout.Toggle(value, "", ruleToggleStyle);
 	}
 
 	public static string ShowParameter(string value)

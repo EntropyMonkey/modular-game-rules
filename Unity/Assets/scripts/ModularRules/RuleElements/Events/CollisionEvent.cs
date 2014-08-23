@@ -8,7 +8,7 @@ public class CollisionEvent : GameEvent
 	public string CollideWithTag;
 	public Actor CollideWithActor;
 
-	public static List<string> PossibleCollisionTags = new List<string>() { Player.Tag, Level.Tag, "SpawnedObject" };
+	public static List<string> PossibleCollisionTags = new List<string>() { Player.Tag, Level.Tag, "NPC", "Fruit", "Danger", "Collectible" };
 
 	public CollisionPhase TriggerOn = CollisionPhase.ANY;
 
@@ -319,7 +319,7 @@ public class CollisionEvent : GameEvent
 	#region OnTrigger
 	void OnTriggerEnter(Collider other)
 	{
-		Actor a = collider.GetComponent(typeof(Actor)) as Actor;
+		Actor a = other.GetComponent(typeof(Actor)) as Actor;
 		if (((CollideWithActor != null && a != null && a.Id == CollideWithActor.Id) ||
 			other.collider.tag == CollideWithTag) &&
 			(TriggerOn == CollisionPhase.ENTER || TriggerOn == CollisionPhase.ANY))
@@ -338,7 +338,7 @@ public class CollisionEvent : GameEvent
 
 	void OnTriggerStay(Collider other)
 	{
-		Actor a = collider.GetComponent(typeof(Actor)) as Actor;
+		Actor a = other.GetComponent(typeof(Actor)) as Actor;
 		if (((CollideWithActor != null && a != null && a.Id == CollideWithActor.Id) ||
 			other.collider.tag == CollideWithTag) &&
 			(TriggerOn == CollisionPhase.STAY || TriggerOn == CollisionPhase.ANY))
@@ -357,7 +357,7 @@ public class CollisionEvent : GameEvent
 
 	void OnTriggerExit(Collider other)
 	{
-		Actor a = collider.GetComponent(typeof(Actor)) as Actor;
+		Actor a = other.GetComponent(typeof(Actor)) as Actor;
 		if (((CollideWithActor != null && a != null && a.Id == CollideWithActor.Id) ||
 			other.collider.tag == CollideWithTag) &&
 			(TriggerOn == CollisionPhase.EXIT || TriggerOn == CollisionPhase.ANY))

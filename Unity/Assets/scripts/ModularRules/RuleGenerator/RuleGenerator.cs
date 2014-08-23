@@ -227,12 +227,8 @@ public class RuleGenerator : MonoBehaviour
 		}
 		else
 		{
-			GameObject prefabGo = Resources.Load(data.prefab) as GameObject;
-			if (prefabGo == null)
-				prefabGo = Resources.Load("FallbackPrefab") as GameObject;
+			GameObject actorGo = LoadPrefab(data.prefab);
 
-			GameObject actorGo = Instantiate(prefabGo, Vector3.zero, Quaternion.identity) as GameObject;
-			
 			actorGo.name = data.label;
 			actorGo.transform.position = Vector3.zero;
 
@@ -408,15 +404,13 @@ public class RuleGenerator : MonoBehaviour
 	{
 		// check if matching id actor has same type
 		// if different type, change it. Self-destroy old one, create new actor.
-		if (actor != null && (actor.GetType() != actorData.type || actor.OldPrefab != actorData.prefab))
+		if (actor != null && (actor.GetType() != actorData.type))
 		{
 			actor.ResetGenerationData();
 
 			// remove from lists
 			genActors.Remove(actor);
 			unusedElements.Remove(actor);
-
-
 #if DEBUG
 			Debug.LogWarning("Updating actor (" + actor.Id + "), new type: " + actorData.type);
 #endif
@@ -427,6 +421,23 @@ public class RuleGenerator : MonoBehaviour
 		}
 		else
 		{
+			// remove from unused list (would be deleted after generation otherwise)
+			unusedElements.Remove(actor);
+
+			if (actor.OldPrefab != actorData.prefab)
+			{
+				GameObject oldGo = actor.gameObject;
+				GameObject newGO = LoadPrefab(actorData.prefab);
+
+				genActors.Remove(actor);
+				actor = newGO.AddComponent(actor.GetType()) as Actor;
+				actor.Id = actorData.id;
+				actor.CurrentPrefab = actorData.prefab;
+				genActors.Add(actor);
+
+				DestroyImmediate(oldGo);
+			}
+
 			actor.Label = actorData.label;
 			actorData.OnShowGui = actor.ShowGui;
 
@@ -434,9 +445,6 @@ public class RuleGenerator : MonoBehaviour
 			SetParameters(actor, actorData);
 
 			//SetComponentParameters(oldActor, actorData);
-
-			// element was processed, remove from unused list (would be deleted otherwise)
-			unusedElements.Remove(actor);
 		}
 	}
 
@@ -661,6 +669,8 @@ public class RuleGenerator : MonoBehaviour
 	{
 		foreach (BaseRuleElement element in unusedElements)
 		{
+			if (element == null) continue;
+
 			element.ResetGenerationData();
 
 			if (element as GameEvent)
@@ -683,6 +693,26 @@ public class RuleGenerator : MonoBehaviour
 
 		unusedElements.Clear();
 	}
+	#endregion
+
+	#region Load Prefab
+	private GameObject LoadPrefab(string prefab)
+	{
+		GameObject result;
+		if (prefab != "" && prefab != "None")
+		{
+			GameObject prefabGo = Resources.Load(prefab) as GameObject;
+			if (prefabGo == null)
+				prefabGo = Resources.Load("FallbackPrefab") as GameObject;
+			result = Instantiate(prefabGo, Vector3.zero, Quaternion.identity) as GameObject;
+		}
+		else
+		{
+			result = new GameObject();
+		}
+		return result;
+	}
+
 	#endregion
 
 	#region Loading Rules
@@ -841,6 +871,11 @@ public class RuleGenerator : MonoBehaviour
 	#endregion
 
 	#region Accessors for generated elements
+	public Actor[] GetGenActors()
+	{
+		return genActors.ToArray();
+	}
+
 	public Actor GetActor(int id)
 	{
 		Actor actor = null;

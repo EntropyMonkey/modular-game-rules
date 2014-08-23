@@ -55,6 +55,8 @@ public class Analytics : MonoBehaviour
 	public const string end_task = "end_task";
 	public const string task_duration = "task_duration";
 
+	public const string exception_thrown = "exception_thrown";
+
 	private static List<string> localLog;
 
 	private static float time;
@@ -76,20 +78,37 @@ public class Analytics : MonoBehaviour
 		}
 	}
 
+	void OnEnable()
+	{
+		Application.RegisterLogCallback(HandleLogEntry);
+	}
+
+	void OnDisable()
+	{
+		Application.RegisterLogCallback(null);
+	}
+
+	void HandleLogEntry(string logEntry, string stackTrace, LogType logType)
+	{
+		switch (logType)
+		{
+			case LogType.Exception:
+				LogEvent(errorEvent, exception_thrown, logEntry);
+				break;
+		}
+	}
+
 	void Update()
 	{
 		if (localLog != null && Running)
 			time += Time.deltaTime;
-
-		if (CurrentTask != 0)
-			currentTaskTime += Time.deltaTime;
 	}
 
 	public static void StartTask(int number)
 	{
 		CurrentTask = number;
 
-		currentTaskTime = 0;
+		currentTaskTime = Time.time;
 
 		LogEvent(testEvent, start_task, number.ToString());
 	}
@@ -97,7 +116,7 @@ public class Analytics : MonoBehaviour
 	public static void EndTask()
 	{
 		LogEvent(testEvent, end_task, CurrentTask.ToString());
-		LogEvent(testEvent, task_duration, currentTaskTime.ToString());
+		LogEvent(testEvent, task_duration, (Time.time - currentTaskTime).ToString());
 		LastTask = CurrentTask;
 		CurrentTask = 0;
 	}

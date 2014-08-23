@@ -2,56 +2,10 @@
 <rules>
   <actors>
     <actor>
-      <id>3</id>
-      <type>CheckpointActor</type>
-      <label>Hopper</label>
-      <prefab>Player</prefab>
-      <param name="Tag">
-        <type>String</type>
-        <value>Hopper</value>
-      </param>
-      <param name="UseGravity">
-        <type>Boolean</type>
-        <value>True</value>
-      </param>
-    </actor>
-    <actor>
       <id>2</id>
       <type>Level</type>
       <label>Level</label>
       <prefab>MountainLevel</prefab>
-    </actor>
-    <actor>
-      <id>1</id>
-      <type>PlayerCamera</type>
-      <label>Player1Camera</label>
-      <prefab>PlayerCamera</prefab>
-      <param name="ViewportWidth">
-        <type>Single</type>
-        <value>1</value>
-      </param>
-      <param name="ViewportXPos">
-        <type>Single</type>
-        <value>0</value>
-      </param>
-    </actor>
-    <actor>
-      <id>0</id>
-      <type>Player</type>
-      <label>Player1</label>
-      <prefab>Player</prefab>
-      <param name="HorizontalMaxSpeed">
-        <type>Single</type>
-        <value>10</value>
-      </param>
-      <param name="VerticalMaxSpeed">
-        <type>Single</type>
-        <value>10</value>
-      </param>
-      <param name="Gravity">
-        <type>Single</type>
-        <value>3</value>
-      </param>
     </actor>
     <actor>
       <id>4</id>
@@ -75,6 +29,52 @@
         <value>True</value>
       </param>
     </actor>
+    <actor>
+      <id>3</id>
+      <type>NPC</type>
+      <label>NPC</label>
+      <prefab>Dinosaur</prefab>
+      <param name="Tag">
+        <type>String</type>
+        <value>NPC</value>
+      </param>
+      <param name="UseGravity">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </actor>
+    <actor>
+      <id>0</id>
+      <type>Player</type>
+      <label>Player1</label>
+      <prefab>Duck</prefab>
+      <param name="HorizontalMaxSpeed">
+        <type>Single</type>
+        <value>10</value>
+      </param>
+      <param name="VerticalMaxSpeed">
+        <type>Single</type>
+        <value>10</value>
+      </param>
+      <param name="Gravity">
+        <type>Single</type>
+        <value>3</value>
+      </param>
+    </actor>
+    <actor>
+      <id>1</id>
+      <type>PlayerCamera</type>
+      <label>Player1Camera</label>
+      <prefab>PlayerCamera</prefab>
+      <param name="ViewportWidth">
+        <type>Single</type>
+        <value>1</value>
+      </param>
+      <param name="ViewportXPos">
+        <type>Single</type>
+        <value>0</value>
+      </param>
+    </actor>
   </actors>
   <events>
     <event>
@@ -96,36 +96,6 @@
       <type>ObjectMovedEvent</type>
       <label>ObjectMovedEvent</label>
       <actorId>0</actorId>
-    </event>
-    <event>
-      <id>3</id>
-      <type>KeyboardInput</type>
-      <label>KeyboardInput</label>
-      <actorId>0</actorId>
-      <param name="InputKey">
-        <type>KeyCode</type>
-        <value>100</value>
-      </param>
-    </event>
-    <event>
-      <id>2</id>
-      <type>KeyboardInput</type>
-      <label>KeyboardInput</label>
-      <actorId>0</actorId>
-      <param name="InputKey">
-        <type>KeyCode</type>
-        <value>115</value>
-      </param>
-    </event>
-    <event>
-      <id>1</id>
-      <type>KeyboardInput</type>
-      <label>KeyboardInput</label>
-      <actorId>0</actorId>
-      <param name="InputKey">
-        <type>KeyCode</type>
-        <value>119</value>
-      </param>
     </event>
     <event>
       <id>0</id>
@@ -157,6 +127,36 @@
         <value>274</value>
       </param>
     </event>
+    <event>
+      <id>3</id>
+      <type>KeyboardInput</type>
+      <label>KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>100</value>
+      </param>
+    </event>
+    <event>
+      <id>2</id>
+      <type>KeyboardInput</type>
+      <label>KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>115</value>
+      </param>
+    </event>
+    <event>
+      <id>1</id>
+      <type>KeyboardInput</type>
+      <label>KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>119</value>
+      </param>
+    </event>
   </events>
   <reactions>
     <reaction>
@@ -183,7 +183,7 @@
       </param>
       <param name="MoveSpeed">
         <type>Single</type>
-        <value>100</value>
+        <value>1000</value>
       </param>
     </reaction>
     <reaction>
@@ -354,6 +354,10 @@
         <type>Int32</type>
         <value>1</value>
       </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>0</value>
+      </param>
       <param name="PerSeconds">
         <type>Int32</type>
         <value>1</value>
@@ -376,6 +380,10 @@
       <param name="Distance">
         <type>Single</type>
         <value>3</value>
+      </param>
+      <param name="StartVelocity">
+        <type>Vector3</type>
+        <value>0 0 0</value>
       </param>
     </reaction>
   </reactions>

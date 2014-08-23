@@ -4,6 +4,7 @@ using System.Collections;
 /// <summary>
 /// The rotation follows a relative movement value
 /// </summary>
+[DontShowInRuleGUI]
 public class RotationFollowMouse : Reaction
 {
 	public float Sensitivity = 10;

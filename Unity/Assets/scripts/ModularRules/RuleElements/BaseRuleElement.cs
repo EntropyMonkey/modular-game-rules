@@ -21,10 +21,8 @@ public abstract class BaseRuleElement : MonoBehaviour
 		public ShowGuiDelegate OnShowGui;
 	};
 
-	public class ActorData : RuleData, IDeepCopy<ActorData>
+	public class ActorData : RuleData, IDeepCopy<ActorData>, IMapTypeToOrder<ActorData>
 	{
-		//public List<ComponentData> components;
-
 		public string prefab;
 
 		public ActorData DeepCopy()
@@ -36,16 +34,30 @@ public abstract class BaseRuleElement : MonoBehaviour
 			result.type = type;
 			result.OnShowGui = OnShowGui;
 			result.parameters = DeepCopyParams(parameters);
-			//result.components = components;
 
 			return result;
 		}
+		
+		enum ActorOrder { PLAYER = 0, PLAYER_CAMERA, NPC, COUNTER, LEVEL, OTHER }
+
+		public int MapTypeToOrder(ActorData actor)
+		{
+			int r = (int)ActorOrder.OTHER;
+
+			if (actor.type == typeof(Player))
+				r = (int)ActorOrder.PLAYER;
+			else if (actor.type == typeof(PlayerCamera))
+				r = (int)ActorOrder.PLAYER_CAMERA;
+			else if (actor.type == typeof(NPC))
+				r = (int)ActorOrder.NPC;
+			else if (actor.type == typeof(Counter))
+				r = (int)ActorOrder.COUNTER;
+			else if (actor.type == typeof(Level))
+				r = (int)ActorOrder.LEVEL;
+
+			return r;
+		}
 	};
-
-	//public class ComponentData : RuleData
-	//{
-
-	//}
 
 	// parameter for events or reactions
 	public struct Param
@@ -55,7 +67,7 @@ public abstract class BaseRuleElement : MonoBehaviour
 		public object value;
 	};
 
-	public class EventData : RuleData, IDeepCopy<EventData>
+	public class EventData : RuleData, IDeepCopy<EventData>, IMapTypeToOrder<EventData>
 	{
 		public int actorId;
 
@@ -73,13 +85,33 @@ public abstract class BaseRuleElement : MonoBehaviour
 			return result;
 		}
 
+		enum EventOrder { INPUT = 0, COUNTER, COLLISION, DISTANCE, OBJECT_MOVED, OTHER }
+
+		public int MapTypeToOrder(EventData eventt)
+		{
+			int r = (int)EventOrder.OTHER;
+
+			if (eventt.type == typeof(InputReceived))
+				r = (int)EventOrder.INPUT;
+			else if (eventt.type == typeof(CounterEvent))
+				r = (int)EventOrder.COUNTER;
+			else if (eventt.type == typeof(CollisionEvent))
+				r = (int)EventOrder.COLLISION;
+			else if (eventt.type == typeof(DistanceEvent))
+				r = (int)EventOrder.DISTANCE;
+			else if (eventt.type == typeof(ObjectMovedEvent))
+				r = (int)EventOrder.OBJECT_MOVED;
+
+			return r;
+		}
 	};
 
-	public class ReactionData : EventData, IDeepCopy<ReactionData>
+	public class ReactionData : RuleData, IDeepCopy<ReactionData>
 	{
+		public int actorId;
 		public int eventId;
 
-		public new ReactionData DeepCopy()
+		public ReactionData DeepCopy()
 		{
 			ReactionData result = new ReactionData();
 
@@ -105,6 +137,45 @@ public abstract class BaseRuleElement : MonoBehaviour
 
 		return newList;
 	}
+	
+	#region Comparer
+	public interface IMapTypeToOrder<T>
+	{
+		int MapTypeToOrder(T e);
+	}
+
+	public class OrderComparer<T> : IComparer<T> where T : IMapTypeToOrder<T>
+	{
+		protected readonly Func<T, T, int> func;
+		public OrderComparer(Func<T, T, int> comparerFunc)
+		{
+			this.func = comparerFunc;
+		}
+
+		public OrderComparer()
+		{
+			this.func = (e1, e2) =>
+				{
+					int result = 0;
+
+					int e1o = e1.MapTypeToOrder(e1);
+					int e2o = e2.MapTypeToOrder(e2);
+
+					if (e1o > e2o)
+						return 1;
+					else if (e1o < e2o)
+						return -1;
+
+					return result;
+				};
+		}
+
+		public int Compare(T x, T y)
+		{
+			return this.func(x, y);
+		}
+	}
+	#endregion
 
 	//		[HideInInspector]
 	public int Id = -1;

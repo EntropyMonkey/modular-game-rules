@@ -130,7 +130,10 @@ public class Player : Actor
 
 	public override void Respawn()
 	{
+		gameObject.SetActive(true);
+
 		GameObject[] allCheckpoints = GameObject.FindGameObjectsWithTag(Checkpoint.Tag);
+
 		// find starting checkpoint
 
 		List<Checkpoint> points = new List<Checkpoint>();
@@ -145,8 +148,8 @@ public class Player : Actor
 
 		checkpoints = points.ToArray();
 
-		if (currentCheckpoint == -1)
-			currentCheckpoint = Random.Range(0, points.Count - 1);
+		if (currentCheckpoint == -1 || currentCheckpoint >= checkpoints.Length)
+			currentCheckpoint = Mathf.Max(0, Random.Range(0, points.Count - 1));
 
 		transform.position = checkpoints[currentCheckpoint].transform.position;
 

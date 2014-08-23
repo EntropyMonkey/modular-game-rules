@@ -8,6 +8,8 @@ public abstract class Actor : BaseRuleElement
 
 	protected List<Reaction> reactions;
 
+
+	#region Pause
 	private bool pausedEvents = false;
 	protected bool Paused
 	{
@@ -16,7 +18,9 @@ public abstract class Actor : BaseRuleElement
 			return pausedEvents;
 		}
 	}
+	#endregion
 
+	#region EventsGO
 	private GameObject eventsGO;
 	public GameObject Events
 	{
@@ -39,7 +43,9 @@ public abstract class Actor : BaseRuleElement
 			return eventsGO;
 		}
 	}
+	#endregion
 
+	#region ReactionsGO
 	private GameObject reactionsGO;
 	public GameObject Reactions
 	{
@@ -62,7 +68,9 @@ public abstract class Actor : BaseRuleElement
 			return reactionsGO;
 		}
 	}
+	#endregion
 
+	#region Prefabs
 	private string currentPrefab;
 	public string CurrentPrefab
 	{
@@ -80,6 +88,15 @@ public abstract class Actor : BaseRuleElement
 		}
 	}
 	public string OldPrefab = "";
+
+	protected string[] possiblePrefabs = new string[] { "None", "Albatros", "Ananas", "Banana", 
+		"Bear Brown", "Bear Gray", "Bomb", "Cherry", "DarkFighter", "Dinosaur", "Duck", 
+		"FeisarShip", "Gunman", "Monster", "Orange" };
+
+	protected DropDown prefabDropDown;
+
+	protected bool ShowPrefabsInGUI = true;
+	#endregion
 
 	[HideInInspector]
 	public bool WasSpawned = false; // treat spawned actors differently - no storing in the rule files f.ex.
@@ -106,6 +123,18 @@ public abstract class Actor : BaseRuleElement
 		// get all reactions
 		ScanReactions();
 		InitializeReactions();
+
+		OldPrefab = CurrentPrefab;
+
+		int selected;
+		if (CurrentPrefab == "")
+			selected = 0;
+		else
+		{
+			selected = System.Array.FindIndex(possiblePrefabs, item => item == CurrentPrefab);
+		}
+
+		prefabDropDown = new DropDown(selected, possiblePrefabs, 200);
 	}
 
 	public void ScanEvents()
@@ -292,23 +321,30 @@ public abstract class Actor : BaseRuleElement
 		GUILayout.EndVertical();
 
 		// column 2
-		RuleGUI.VerticalLine();
-
-		GUILayout.BeginVertical();
-
-		// prefab
-		GUILayout.BeginHorizontal();
-		GUILayout.Label("Prefab", RuleGUI.ruleLabelStyle);
-		string temp = RuleGUI.ShowParameter(CurrentPrefab);
-		if (temp != CurrentPrefab)
+		if (ShowPrefabsInGUI)
 		{
-			OldPrefab = CurrentPrefab;
-			CurrentPrefab = temp;
-		}
-		(ruleData as ActorData).prefab = CurrentPrefab;
-		GUILayout.EndHorizontal();
+			RuleGUI.VerticalLine();
 
-		GUILayout.EndVertical();
+			GUILayout.BeginVertical();
+
+			// prefab
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Prefab", RuleGUI.ruleLabelStyle);
+			int index = prefabDropDown.Draw();
+			if (index > -1)
+			{
+				string temp = prefabDropDown.Content[index].text;
+				if (temp != CurrentPrefab)
+				{
+					OldPrefab = CurrentPrefab;
+					CurrentPrefab = temp;
+				}
+				(ruleData as ActorData).prefab = CurrentPrefab;
+			}
+			GUILayout.EndHorizontal();
+
+			GUILayout.EndVertical();
+		}
 	}
 
 	public void PauseEvents()

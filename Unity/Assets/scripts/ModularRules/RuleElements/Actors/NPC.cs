@@ -2,11 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class CheckpointActor : Actor
+public class NPC : Actor
 {
 	private enum State { RESPAWNING, NORMAL }
 
-	public string Tag;
+	public string Tag = "NPC";
 	public bool UseGravity;
 
 	private State currentState = State.RESPAWNING;
@@ -48,6 +48,8 @@ public class CheckpointActor : Actor
 			currentState = State.RESPAWNING;
 			checkpoints = null;
 		};
+
+		tag = Tag;
 	}
 
 	void Start()
@@ -65,6 +67,8 @@ public class CheckpointActor : Actor
 
 	public override void Respawn()
 	{
+		gameObject.SetActive(true);
+
 		GameObject[] allCheckpoints = GameObject.FindGameObjectsWithTag(Checkpoint.Tag);
 		// find starting checkpoint
 
@@ -78,12 +82,23 @@ public class CheckpointActor : Actor
 			}
 		}
 
-		checkpoints = points.ToArray();
+		checkpoints = new Checkpoint[points.Count];
+		points.CopyTo(checkpoints);
 
-		if (currentCheckpoint == -1)
-			currentCheckpoint = Random.Range(0, checkpoints.Length - 1);
+		if (currentCheckpoint == -1 || currentCheckpoint >= checkpoints.Length)
+		{
+			currentCheckpoint = Mathf.Max(0, Random.Range(0, checkpoints.Length - 1));
+		}
 
-		transform.position = checkpoints[currentCheckpoint].transform.position;
+		if (points.Count == 0)
+		{
+			transform.position = allCheckpoints[0].transform.position;
+			Debug.LogError("No checkpoints for the tag \"" + Tag + "\" in level.");
+		}
+		else
+		{
+			transform.position = checkpoints[currentCheckpoint].transform.position;
+		}
 		currentState = State.NORMAL;
 	}
 
