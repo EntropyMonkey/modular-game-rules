@@ -226,11 +226,26 @@ public class RuleGUI : MonoBehaviour
 
 		if (GuiState == RuleGUIState.BEGIN)
 		{
+			GUILayout.BeginArea(new Rect(0, 0, Screen.width, Screen.height), areaBackgroundStyle);
+
+			GUILayout.BeginVertical();
+			GUILayout.Label("Modular Game Rules - Puzzle a Game");
+			GUILayout.Space(50);
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+			GUILayout.Label("Thanks for participating!", smallLabelStyle);
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.EndVertical();
+			GUILayout.EndArea();
+
 			GUILayout.Window(alertId,
-				new Rect(Screen.width * 0.3f, Screen.height * 0.4f, Screen.width * .4f, Screen.height * .2f),
-				EnterPersonalCodeWindow,
-				"Begin Test",
-				popupWindowStyle);
+			 new Rect(Screen.width * 0.3f, Screen.height * 0.4f, Screen.width * .4f, Screen.height * .2f),
+			 EnterPersonalCodeWindow,
+			 "Begin Test",
+			 popupWindowStyle);
 		}
 		else if (GuiState == RuleGUIState.ALERT)
 		{

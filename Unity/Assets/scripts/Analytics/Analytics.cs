@@ -178,51 +178,51 @@ public class Analytics : MonoBehaviour
 	}
 
 	// freezes unity editor!
-	static void SendMail(string logfilePath, string subject, string recipient = MailConst.Username, string body = "")
-	{
-		SmtpClient smtpClient = new SmtpClient();
-		NetworkCredential basicCredentials = new NetworkCredential(MailConst.Username, MailConst.Password);
-		MailMessage message = new MailMessage();
+	//static void SendMail(string logfilePath, string subject, string recipient = MailConst.Username, string body = "")
+	//{
+	//	SmtpClient smtpClient = new SmtpClient();
+	//	NetworkCredential basicCredentials = new NetworkCredential(MailConst.Username, MailConst.Password);
+	//	MailMessage message = new MailMessage();
 
-		Debug.Log(1);
-		Debug.Break();
+	//	Debug.Log(1);
+	//	Debug.Break();
 
-		smtpClient.Host = MailConst.SmtpServer;
-		smtpClient.UseDefaultCredentials = false;
-		smtpClient.Credentials = basicCredentials as ICredentialsByHost;
-		smtpClient.Timeout = 100;
-		smtpClient.EnableSsl = true;
-		smtpClient.Port = 465;
+	//	//smtpClient.Host = MailConst.SmtpServer;
+	//	smtpClient.UseDefaultCredentials = false;
+	//	smtpClient.Credentials = basicCredentials as ICredentialsByHost;
+	//	smtpClient.Timeout = 100;
+	//	smtpClient.EnableSsl = true;
+	//	smtpClient.Port = 465;
 
-		Debug.Log(2);
-		Debug.Break();
+	//	Debug.Log(2);
+	//	Debug.Break();
 
-		message.From = new MailAddress(MailConst.Username);
-		message.Subject = subject;
-		message.IsBodyHtml = false;
-		message.Body = body;
-		message.To.Add(recipient);
+	//	//message.From = new MailAddress(MailConst.Username);
+	//	message.Subject = subject;
+	//	message.IsBodyHtml = false;
+	//	message.Body = body;
+	//	message.To.Add(recipient);
 
-		Debug.Log(3);
-		Debug.Break();
+	//	Debug.Log(3);
+	//	Debug.Break();
 
-		if (logfilePath != "")
-		{
-			message.Attachments.Add(new Attachment(logfilePath));
-		}
+	//	if (logfilePath != "")
+	//	{
+	//		message.Attachments.Add(new Attachment(logfilePath));
+	//	}
 
-		Debug.Log(4);
-		Debug.Break();
+	//	Debug.Log(4);
+	//	Debug.Break();
 
-		try
-		{
-			smtpClient.Send(message);
-			LogEvent(testEvent, send_mail, "");
-		}
-		catch (Exception e)
-		{
-			LogEvent(errorEvent, send_mail, e.Message);
-			Debug.LogError(e.InnerException + " " + e.Message);
-		}
-	}
+	//	try
+	//	{
+	//		smtpClient.Send(message);
+	//		LogEvent(testEvent, send_mail, "");
+	//	}
+	//	catch (Exception e)
+	//	{
+	//		LogEvent(errorEvent, send_mail, e.Message);
+	//		Debug.LogError(e.InnerException + " " + e.Message);
+	//	}
+	//}
 }

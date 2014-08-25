@@ -1,9 +1,10 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\ModularRules\RuleGenerator\RuleGenerator.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\scripts\Analytics\Analytics.cs">
     <Files>
-      <File FileName="Assets\scripts\ModularRules\RuleGenerator\RuleGenerator.cs" Line="176" Column="30" />
-      <File FileName="Assets\guitester.cs" Line="1" Column="1" />
+      <File FileName="Assets\scripts\ModularRules\RuleElements\Actors\PlayerCamera.cs" Line="1" Column="1" />
+      <File FileName="Assets\scripts\ModularRules\RuleGenerator\RuleGenerator.cs" Line="1" Column="1" />
+      <File FileName="Assets\scripts\Analytics\Analytics.cs" Line="186" Column="3" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
