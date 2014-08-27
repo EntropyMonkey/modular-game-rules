@@ -2,52 +2,10 @@
 <rules>
   <actors>
     <actor>
-      <id>2</id>
-      <type>Level</type>
-      <label>Level</label>
-      <prefab>MountainLevel</prefab>
-    </actor>
-    <actor>
-      <id>4</id>
-      <type>Counter</type>
-      <label>Health</label>
-      <prefab></prefab>
-      <param name="StartValue">
-        <type>Int32</type>
-        <value>50</value>
-      </param>
-      <param name="MinValue">
-        <type>Int32</type>
-        <value>0</value>
-      </param>
-      <param name="MaxValue">
-        <type>Int32</type>
-        <value>100</value>
-      </param>
-      <param name="ShowInGame">
-        <type>Boolean</type>
-        <value>True</value>
-      </param>
-    </actor>
-    <actor>
-      <id>3</id>
-      <type>NPC</type>
-      <label>NPC</label>
-      <prefab>Dinosaur</prefab>
-      <param name="Tag">
-        <type>String</type>
-        <value>NPC</value>
-      </param>
-      <param name="UseGravity">
-        <type>Boolean</type>
-        <value>True</value>
-      </param>
-    </actor>
-    <actor>
       <id>0</id>
       <type>Player</type>
       <label>Player1</label>
-      <prefab>Duck</prefab>
+      <prefab>Bear Brown</prefab>
       <param name="HorizontalMaxSpeed">
         <type>Single</type>
         <value>10</value>
@@ -74,6 +32,48 @@
         <type>Single</type>
         <value>0</value>
       </param>
+    </actor>
+    <actor>
+      <id>3</id>
+      <type>NPC</type>
+      <label>NPC</label>
+      <prefab>Dinosaur</prefab>
+      <param name="Tag">
+        <type>String</type>
+        <value>NPC</value>
+      </param>
+      <param name="UseGravity">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </actor>
+    <actor>
+      <id>4</id>
+      <type>Counter</type>
+      <label>Health</label>
+      <prefab></prefab>
+      <param name="StartValue">
+        <type>Int32</type>
+        <value>50</value>
+      </param>
+      <param name="MinValue">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+      <param name="MaxValue">
+        <type>Int32</type>
+        <value>100</value>
+      </param>
+      <param name="ShowInGame">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </actor>
+    <actor>
+      <id>2</id>
+      <type>Level</type>
+      <label>Level</label>
+      <prefab>MountainLevel</prefab>
     </actor>
   </actors>
   <events>
@@ -128,16 +128,6 @@
       </param>
     </event>
     <event>
-      <id>3</id>
-      <type>KeyboardInput</type>
-      <label>KeyboardInput</label>
-      <actorId>0</actorId>
-      <param name="InputKey">
-        <type>KeyCode</type>
-        <value>100</value>
-      </param>
-    </event>
-    <event>
       <id>2</id>
       <type>KeyboardInput</type>
       <label>KeyboardInput</label>
@@ -155,6 +145,16 @@
       <param name="InputKey">
         <type>KeyCode</type>
         <value>119</value>
+      </param>
+    </event>
+    <event>
+      <id>3</id>
+      <type>KeyboardInput</type>
+      <label>KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>100</value>
       </param>
     </event>
   </events>
@@ -384,6 +384,36 @@
       <param name="StartVelocity">
         <type>Vector3</type>
         <value>0 0 0</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>19</id>
+      <type>WinLoseGame</type>
+      <label>WinLoseGame</label>
+      <actorId>0</actorId>
+      <listenedEventId>8</listenedEventId>
+      <param name="WinningActor">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>21</id>
+      <type>FollowObject</type>
+      <label>FollowObject</label>
+      <actorId>3</actorId>
+      <listenedEventId>5</listenedEventId>
+      <param name="Offset">
+        <type>Vector3</type>
+        <value>0 0 -2</value>
+      </param>
+      <param name="FollowSpeed">
+        <type>Single</type>
+        <value>10</value>
+      </param>
+      <param name="StayBehindObject">
+        <type>Boolean</type>
+        <value>True</value>
       </param>
     </reaction>
   </reactions>

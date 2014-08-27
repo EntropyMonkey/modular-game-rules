@@ -43,8 +43,11 @@ public class ActorDropDown : DropDown
 
 	void OnDeletedActor(string[] newContent, BaseRuleElement.ActorData oldActor)
 	{
-		string[] newNames = new string[Content.Length - 1]; // there should be only one actor with the old label in the list
+		string[] newNames = new string[newContent.Length]; // there should be only one actor with the old label in the list
 		int oldSelected = System.Array.FindIndex(Content, item => item.text == oldActor.label);
+		if (oldSelected == -1)
+			extended = true;
+
 		int j = 0;
 		for (int i = 0; i < Content.Length; i++)
 		{
@@ -55,11 +58,7 @@ public class ActorDropDown : DropDown
 			}
 		}
 
-		if (Selected == oldSelected)
-		{
-			Selected = 0;
-		}
-		else if (Selected > oldSelected)
+		if (oldSelected >= 0 && oldSelected < Content.Length && Selected > oldSelected)
 		{
 			string oldName = Content[oldSelected].text;
 			Selected = System.Array.FindIndex(newNames, item => item == oldName);

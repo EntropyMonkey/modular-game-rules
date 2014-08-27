@@ -90,7 +90,8 @@ public class FollowObject : Reaction
 		{
 			int resultId = generator.Gui.GetActorDataByLabel(actorDropDown.Content[resultIndex].text).id;
 			(ruleData as ReactionData).actorId = resultId;
-			generator.ChangeActor(this, resultId);
+			if (resultId != Reactor.Id)
+				generator.ChangeActor(this, resultId);
 		}
 
 		GUILayout.Label("follows with an offset of", RuleGUI.ruleLabelStyle);
@@ -163,11 +164,6 @@ public class FollowObject : Reaction
 						Time.deltaTime * FollowSpeed);
 				}
 			}
-
-			//Reactor.transform.rotation = Quaternion.Lerp(
-			//	Reactor.transform.rotation, 
-			//	Quaternion.LookRotation(targetTransform.position - Reactor.transform.position), 
-			//	Time.deltaTime * FollowSpeed);
 
 			Reactor.transform.LookAt(targetTransform.position);
 		}

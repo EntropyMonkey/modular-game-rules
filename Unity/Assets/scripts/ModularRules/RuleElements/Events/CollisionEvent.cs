@@ -58,6 +58,12 @@ public class CollisionEvent : GameEvent
 
 		this.generator = generator;
 
+		generator.OnActorGOChanged += delegate(ActorData data, Actor newActor, RuleGenerator _generator)
+		{
+			if (CollideWithActor != null && CollideWithActor.Id == data.id)
+				CollideWithActor = newActor;
+		};
+
 		// setting up gui elements - actors
 		string[] actors = generator.Gui.ActorNames;
 		actorDropDown = new ActorDropDown(
@@ -109,7 +115,8 @@ public class CollisionEvent : GameEvent
 			int resultId = generator.Gui.GetActorDataByLabel(actorDropDown.Content[resultIndex].text).id;
 
 			(ruleData as EventData).actorId = resultId;
-			generator.ChangeActor(this, resultId);
+			if (Actor.Id != resultId)
+				generator.ChangeActor(this, resultId);
 		}
 
 		GUILayout.Label("and", RuleGUI.ruleLabelStyle);

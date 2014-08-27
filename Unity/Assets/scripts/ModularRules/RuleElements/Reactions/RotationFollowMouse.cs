@@ -47,7 +47,8 @@ public class RotationFollowMouse : Reaction
 		if (resultIndex > -1)
 		{
 			int resultId = generator.ActorData.Find(item => item.label == actorDropDown.Content[resultIndex].text).id;
-			generator.ChangeActor(this, resultId);
+			if (resultId != Reactor.Id)
+				generator.ChangeActor(this, resultId);
 			(ruleData as ReactionData).actorId = resultId;
 		}
 

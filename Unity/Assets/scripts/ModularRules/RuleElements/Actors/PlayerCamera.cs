@@ -67,7 +67,7 @@ public class PlayerCamera : Actor
 
 		ResetViewport(viewport);
 
-		ShowPrefabsInGUI = false;
+		ShowPrefabInGUI = false;
 	}
 
 	void ResetViewport(Viewport viewport)

@@ -157,7 +157,7 @@ public class Counter : Actor
 		else
 			Debug.LogError("Two counters have the same name. Cannot add more than one counter with the name " + Label);
 
-		ShowPrefabsInGUI = false;
+		ShowPrefabInGUI = false;
 	}
 
 	private void OnDeletedActor(string[] newContent, ActorData actor)

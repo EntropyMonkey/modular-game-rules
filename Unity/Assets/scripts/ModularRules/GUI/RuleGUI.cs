@@ -1123,8 +1123,11 @@ public class RuleGUI : MonoBehaviour
 
 	void DeleteReaction(BaseRuleElement.ReactionData reaction)
 	{
-		eventReactionDict[reaction.eventId].Remove(reaction.id);
-		actorReactionDict[reaction.actorId].Remove(reaction.id);
+		if (eventReactionDict.ContainsKey(reaction.eventId))
+			eventReactionDict[reaction.eventId].Remove(reaction.id);
+		if (actorReactionDict.ContainsKey(reaction.actorId))
+			actorReactionDict[reaction.actorId].Remove(reaction.id);
+
 		reactionData.Remove(reaction);
 
 		Analytics.LogEvent(Analytics.ruleEvent, Analytics.delete_reaction, reaction.label);
@@ -1150,7 +1153,8 @@ public class RuleGUI : MonoBehaviour
 			foreach (int id in actorReactionDict[actorToDelete.id])
 			{
 				BaseRuleElement.ReactionData r = reactionData.Find(item => item.id == id);
-				r.actorId = -1;
+				if (r != null)
+					r.actorId = -1;					
 			}
 			actorReactionDict[actorToDelete.id].Clear();
 			actorReactionDict.Remove(actorToDelete.id);
@@ -1254,7 +1258,7 @@ public class RuleGUI : MonoBehaviour
 		GUILayout.EndVertical();
 	}
 
-	void SaveRulesCallback()
+	public void SaveRulesCallback()
 	{
 		isTesting = false;
 

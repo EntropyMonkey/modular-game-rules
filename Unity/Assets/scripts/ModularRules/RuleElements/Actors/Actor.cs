@@ -95,7 +95,7 @@ public abstract class Actor : BaseRuleElement
 
 	protected DropDown prefabDropDown;
 
-	protected bool ShowPrefabsInGUI = true;
+	protected bool ShowPrefabInGUI = true;
 	#endregion
 
 	[HideInInspector]
@@ -139,6 +139,8 @@ public abstract class Actor : BaseRuleElement
 
 	public void ScanEvents()
 	{
+		if (this == null) return;
+
 		Component[] c = GetComponentsInChildren(typeof(GameEvent));
 
 		if (events != null)
@@ -174,6 +176,16 @@ public abstract class Actor : BaseRuleElement
 		}
 	}
 
+	public void MoveEventsTo(Actor newActor)
+	{
+		foreach(GameEvent gameEvent in events)
+		{
+			newActor.AddEvent(gameEvent);
+		}
+
+		events.Clear();
+	}
+
 	public void RemoveEvent(GameEvent gameEvent)
 	{
 		events.Remove(gameEvent);
@@ -191,6 +203,8 @@ public abstract class Actor : BaseRuleElement
 
 	public void ScanReactions()
 	{
+		if (this == null) return;
+
 		Component[] c = GetComponentsInChildren(typeof(Reaction));
 
 		if (reactions != null)
@@ -225,6 +239,16 @@ public abstract class Actor : BaseRuleElement
 			Debug.Log(name + " added " + reaction.name + ".");
 #endif
 		}
+	}
+
+	public void MoveReactionsTo(Actor newActor)
+	{
+		foreach (Reaction reaction in reactions)
+		{
+			//newActor.AddReaction(reaction); // crashes unity
+		}
+
+		reactions.Clear();
 	}
 
 	public void RemoveReaction(Reaction reaction)
@@ -321,7 +345,7 @@ public abstract class Actor : BaseRuleElement
 		GUILayout.EndVertical();
 
 		// column 2
-		if (ShowPrefabsInGUI)
+		if (ShowPrefabInGUI)
 		{
 			RuleGUI.VerticalLine();
 

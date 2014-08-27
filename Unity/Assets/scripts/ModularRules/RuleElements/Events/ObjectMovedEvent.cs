@@ -37,7 +37,8 @@ public class ObjectMovedEvent : GameEvent
 		{
 			int resultId = generator.Gui.GetActorDataByLabel(actorDropDown.Content[resultIndex].text).id;
 			(ruleData as EventData).actorId = resultId;
-			generator.ChangeActor(this, resultId);
+			if (Actor.Id != resultId)
+				generator.ChangeActor(this, resultId);
 		}
 
 		GUILayout.Label("moves,", RuleGUI.ruleLabelStyle);
@@ -50,7 +51,7 @@ public class ObjectMovedEvent : GameEvent
 		if (Vector3.Distance(position, Actor.transform.position) > minDistance)
 		{
 			Trigger(new GameEventData()
-				.Add(new DataPiece(EventDataKeys.TargetObject) { data = gameObject }));
+				.Add(new DataPiece(EventDataKeys.TargetObject) { data = Actor.gameObject }));
 
 			position = Actor.transform.position;
 		}

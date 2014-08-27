@@ -122,7 +122,7 @@ public class GoogleAnalyticsHelper
             string url =   "http://www.google-analytics.com/__utm.gif?" + string.Join("", (string [])pageURI.ToArray(typeof(string)));
            
             /// Log url:
-            Debug.Log("[Google URL]" + url);       
+            //Debug.Log("[Google URL]" + url);       
            
             /// Execute query:
             WWW w = new WWW(url);

@@ -34,6 +34,9 @@ public class RuleGenerator : MonoBehaviour
 		string filename); // fired when the parser is done with parsing
 	public GeneratedLevel OnGeneratedLevel;
 
+	public delegate void ActorGOChanged(BaseRuleElement.ActorData data, Actor newActor, RuleGenerator generator);
+	public ActorGOChanged OnActorGOChanged; // fired when an actor's game object changes (e.g. reloaded prefab)
+
 	// rule data collection
 	public List<BaseRuleElement.ActorData> ActorData = new List<BaseRuleElement.ActorData>();
 	public List<BaseRuleElement.EventData> EventData = new List<BaseRuleElement.EventData>();
@@ -410,6 +413,8 @@ public class RuleGenerator : MonoBehaviour
 
 			// remove from lists
 			genActors.Remove(actor);
+
+			// remove from unused list (would be deleted after generation otherwise)
 			unusedElements.Remove(actor);
 #if DEBUG
 			Debug.LogWarning("Updating actor (" + actor.Id + "), new type: " + actorData.type);
@@ -426,16 +431,22 @@ public class RuleGenerator : MonoBehaviour
 
 			if (actor.OldPrefab != actorData.prefab)
 			{
-				GameObject oldGo = actor.gameObject;
-				GameObject newGO = LoadPrefab(actorData.prefab);
+				Actor newActor = LoadPrefab(actorData.prefab).AddComponent(actor.GetType()) as Actor;
+
+				actor.MoveEventsTo(newActor);
+				actor.MoveReactionsTo(newActor);
 
 				genActors.Remove(actor);
-				actor = newGO.AddComponent(actor.GetType()) as Actor;
+
+				actor = newActor;
 				actor.Id = actorData.id;
 				actor.CurrentPrefab = actorData.prefab;
 				genActors.Add(actor);
 
-				DestroyImmediate(oldGo);
+				DestroyImmediate(actor.gameObject);
+
+				//if (OnActorGOChanged != null)
+				//	OnActorGOChanged(actorData, actor, this);
 			}
 
 			actor.Label = actorData.label;
@@ -546,31 +557,27 @@ public class RuleGenerator : MonoBehaviour
 	#region Moving Events and Reactions between Actors
 	public void ChangeActor(GameEvent gameEvent, int newActorId)
 	{
-		if (gameEvent.Actor.Id != newActorId)
-		{
-			gameEvent.ResetGenerationData();
+		gameEvent.ResetGenerationData();
+		if (gameEvent.Actor != null) // can be null after deleting actors
 			gameEvent.Actor.RemoveEvent(gameEvent);
-			Actor newActor = GetActor(newActorId);
-			if (newActor)
-			{
-				newActor.AddEvent(gameEvent);
-				gameEvent.Initialize(this);
-			}
+		Actor newActor = GetActor(newActorId);
+		if (newActor)
+		{
+			newActor.AddEvent(gameEvent); // crashes unity when called in a delegate
+			gameEvent.Initialize(this);
 		}
 	}
 
 	public void ChangeActor(Reaction reaction, int newActorId)
 	{
-		if (reaction.Reactor.Id != newActorId)
-		{
-			reaction.ResetGenerationData();
+		reaction.ResetGenerationData();
+		if (reaction.Reactor != null)
 			reaction.Reactor.RemoveReaction(reaction);
-			Actor newActor = GetActor(newActorId);
-			if (newActor)
-			{
-				newActor.AddReaction(reaction);
-				reaction.Initialize(this);
-			}
+		Actor newActor = GetActor(newActorId);
+		if (newActor)
+		{
+			newActor.AddReaction(reaction);
+			reaction.Initialize(this);
 		}
 	}
 

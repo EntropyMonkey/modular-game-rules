@@ -19,7 +19,18 @@ public class WinLoseGame : Reaction
 	{
 		base.Initialize(generator);
 
+		generator.OnActorGOChanged += delegate(ActorData data, Actor newActor, RuleGenerator ruleGenerator)
+		{
+			if (WinningActor != null && WinningActor.Id == data.id)
+			{
+				WinningActor = newActor;
+			}
 
+			if (LosingActor != null && LosingActor.Id == data.id)
+			{
+				LosingActor = newActor;
+			}
+		};
 
 		int selected = 0;
 
@@ -109,7 +120,7 @@ public class WinLoseGame : Reaction
 					int resultId = Reactor.RuleGenerator.Gui.GetActorDataByLabel(winningDropDown.Content[resultIndex].text).id;
 
 					WinningActor = Reactor.RuleGenerator.GetActor(resultId);
-					ChangeParameter("WinningActor", ruleData.parameters, WinningActor);
+					ChangeParameter("WinningActor", ruleData.parameters, resultId);
 				}
 
 				break;
@@ -124,7 +135,7 @@ public class WinLoseGame : Reaction
 					int resultId = Reactor.RuleGenerator.Gui.GetActorDataByLabel(losingDropDown.Content[resultIndex].text).id;
 
 					LosingActor = Reactor.RuleGenerator.GetActor(resultId);
-					ChangeParameter("LosingActor", ruleData.parameters, LosingActor);
+					ChangeParameter("LosingActor", ruleData.parameters, resultId);
 				}
 				break;
 		}

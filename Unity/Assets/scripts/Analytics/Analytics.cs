@@ -94,6 +94,7 @@ public class Analytics : MonoBehaviour
 		{
 			case LogType.Exception:
 				LogEvent(errorEvent, exception_thrown, logEntry);
+				FindObjectOfType<RuleGUI>().SaveRulesCallback();
 				break;
 		}
 	}
@@ -138,6 +139,9 @@ public class Analytics : MonoBehaviour
 	public static void EndSession()
 	{
 		if (!Running) return;
+	
+		if (FindObjectOfType<RuleGUI>() != null)
+			FindObjectOfType<RuleGUI>().SaveRulesCallback();
 
 		LogEvent(testEvent, end_test, "");
 

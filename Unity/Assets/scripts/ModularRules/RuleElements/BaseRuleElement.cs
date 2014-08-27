@@ -156,8 +156,6 @@ public abstract class BaseRuleElement : MonoBehaviour
 		{
 			this.func = (e1, e2) =>
 				{
-					int result = 0;
-
 					int e1o = e1.MapTypeToOrder(e1);
 					int e2o = e2.MapTypeToOrder(e2);
 
@@ -165,8 +163,8 @@ public abstract class BaseRuleElement : MonoBehaviour
 						return 1;
 					else if (e1o < e2o)
 						return -1;
-
-					return result;
+					else
+						return 0;
 				};
 		}
 
@@ -186,7 +184,8 @@ public abstract class BaseRuleElement : MonoBehaviour
 		set
 		{
 			label = value;
-			name = value;
+			if (this != null)
+				name = value;
 		}
 		get
 		{

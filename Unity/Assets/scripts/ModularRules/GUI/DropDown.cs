@@ -15,7 +15,7 @@ public class DropDown
 	float minWidth;
 	float minHeight;
 
-	bool extended = false;
+	protected bool extended = false;
 
 	Vector2 keyScrollPos = Vector2.zero;
 

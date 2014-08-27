@@ -58,6 +58,12 @@ public class DistanceEvent : GameEvent
 
 		this.generator = generator;
 
+		generator.OnActorGOChanged += delegate(ActorData data, Actor newActor, RuleGenerator ruleGenerator)
+		{
+			if (WatchedObject == null || WatchedObject.Id == data.id)
+				WatchedObject = newActor;
+		};
+
 		string[] actors = generator.Gui.ActorNames;
 		actorDropDown = new ActorDropDown(
 			System.Array.FindIndex(actors, item => item == Actor.Label), actors,
@@ -65,7 +71,7 @@ public class DistanceEvent : GameEvent
 
 		if (WatchedObject == null)
 		{
-			WatchedObject = generator.GetActor(0);
+			WatchedObject = generator.GetActor(0); // dont get global actor bec it could be anywhere
 		}
 
 		watchedActorDropDown = new ActorDropDown(
@@ -87,7 +93,8 @@ public class DistanceEvent : GameEvent
 			int resultId = generator.Gui.GetActorDataByLabel(actorDropDown.Content[resultIndex].text).id;
 
 			(ruleData as EventData).actorId = resultId;
-			generator.ChangeActor(this, resultId);
+			if (resultId != Actor.Id)
+				generator.ChangeActor(this, resultId);
 		}
 
 		GUILayout.Label("and", RuleGUI.ruleLabelStyle);

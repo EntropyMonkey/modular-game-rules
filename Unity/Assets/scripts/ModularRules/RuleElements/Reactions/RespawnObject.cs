@@ -11,6 +11,14 @@ public class RespawnObject : Reaction
 	{
 		base.Initialize(generator);
 
+		generator.OnActorGOChanged += delegate(ActorData data, Actor newActor, RuleGenerator ruleGenerator)
+		{
+			if (TargetObject == null || TargetObject.Id != data.id)
+			{
+				TargetObject = newActor;
+			}
+		};
+
 		string selectedName = "";
 		if (TargetObject != null)
 			selectedName = TargetObject.Label;
@@ -55,7 +63,8 @@ public class RespawnObject : Reaction
 			RuleGenerator generator = FindObjectOfType<RuleGenerator>();
 			int resultId = generator.Gui.GetActorDataByLabel(actorDropdown.Content[index].text).id;
 			TargetObject = generator.GetActor(resultId);
-			generator.ChangeActor(this, resultId);
+			if (resultId != Reactor.Id)
+				generator.ChangeActor(this, resultId);
 			ChangeParameter("TargetObject", ruleData.parameters, TargetObject);
 		}
 	}

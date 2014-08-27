@@ -59,6 +59,14 @@ public class DeactivateObject : Reaction
 
 		this.generator = generator;
 
+		generator.OnActorGOChanged += delegate(ActorData data, Actor newActor, RuleGenerator ruleGenerator)
+		{
+			if (ObjectToDeactivate != null && ObjectToDeactivate.Id == data.id)
+			{
+				ObjectToDeactivate = newActor;
+			}
+		};
+
 		if (ObjectToDeactivate == null)
 		{
 			ObjectToDeactivate = Reactor;
@@ -104,7 +112,8 @@ public class DeactivateObject : Reaction
 				int resultId = generator.Gui.GetActorDataByLabel(actorDropDown.Content[resultIndex].text).id;
 				(ruleData as ReactionData).actorId = resultId;
 				ChangeParameter("ObjectToDeactivate", (ruleData as ReactionData).parameters, resultId);
-				generator.ChangeActor(this, resultId);
+				if (resultId != Reactor.Id)
+					generator.ChangeActor(this, resultId);
 				ObjectToDeactivate = Reactor;
 			}
 		}

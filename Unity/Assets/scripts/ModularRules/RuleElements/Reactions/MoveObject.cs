@@ -28,6 +28,14 @@ public class MoveObject : Reaction
 
 		this.generator = generator;
 
+		generator.OnActorGOChanged += delegate(ActorData data, Actor newActor, RuleGenerator ruleGenerator)
+		{
+			if (ActorDirectionIsRelativeTo != null && ActorDirectionIsRelativeTo.Id == data.id)
+			{
+				ActorDirectionIsRelativeTo = newActor;
+			}
+		};
+
 		if (Reactor.rigidbody == null)
 			Reactor.gameObject.AddComponent<Rigidbody>();
 
@@ -121,7 +129,8 @@ public class MoveObject : Reaction
 		if (resultIndex > -1)
 		{
 			int resultId = generator.Gui.GetActorDataByLabel(actorDropDown.Content[resultIndex].text).id;
-			generator.ChangeActor(this, resultId);
+			if (resultId != Reactor.Id)
+				generator.ChangeActor(this, resultId);
 			(ruleData as ReactionData).actorId = resultId;
 		}
 
