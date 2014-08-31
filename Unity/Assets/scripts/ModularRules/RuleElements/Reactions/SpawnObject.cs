@@ -110,7 +110,7 @@ public class SpawnObject : Reaction
 	{
 		GUILayout.Label("randomly spawn", RuleGUI.ruleLabelStyle);
 
-		SpawnedPrefabs = RuleGUI.ShowParameter(SpawnedPrefabs);
+		SpawnedPrefabs = RuleGUI.ShowParameter(SpawnedPrefabs, "or");
 		ChangeParameter("SpawnedPrefabs", ruleData.parameters, SpawnedPrefabs);
 
 		GUILayout.Label("in direction", RuleGUI.ruleLabelStyle);
@@ -118,14 +118,14 @@ public class SpawnObject : Reaction
 		Direction = RuleGUI.ShowParameter(Direction, "spawnDirection" + Id);
 		ChangeParameter("Direction", ruleData.parameters, Direction);
 
-		GUILayout.Label("at distance", RuleGUI.ruleLabelStyle);
+		GUILayout.Label("at a distance of", RuleGUI.ruleLabelStyle);
 
 		Distance = RuleGUI.ShowParameter(Distance);
 		ChangeParameter("Distance", ruleData.parameters, Distance);
 
 		GUILayout.Label("with a start speed of", RuleGUI.ruleLabelStyle);
 
-		StartVelocity = RuleGUI.ShowParameter(StartVelocity, "startVelocity");
+		StartVelocity = RuleGUI.ShowParameter(StartVelocity, "startVelocity" + Id);
 		ChangeParameter("StartVelocity", ruleData.parameters, StartVelocity);
 
 		GUILayout.Label("and tag it as a", RuleGUI.ruleLabelStyle);

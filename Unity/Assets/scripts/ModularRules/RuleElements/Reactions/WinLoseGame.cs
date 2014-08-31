@@ -157,6 +157,8 @@ public class WinLoseGame : Reaction
 
 	void Overlay(int windowId)
 	{
+		Reactor.RuleGenerator.PauseEventExecution();
+
 		GUILayout.BeginVertical();
 
 		if (Ending == GameEnd.WIN)
@@ -167,6 +169,8 @@ public class WinLoseGame : Reaction
 
 		else if (Ending == GameEnd.DRAW)
 			GUILayout.Label("The game was a draw!");
+
+		GUILayout.Label("Restarting..");
 
 		GUILayout.FlexibleSpace();
 

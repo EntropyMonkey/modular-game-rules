@@ -179,7 +179,7 @@ public class MoveObject : Reaction
 		if (DirectionRelativeTo == RelativeTo.ACTOR)
 			relevantTransform = ActorDirectionIsRelativeTo.transform;
 		else if (DirectionRelativeTo == RelativeTo.SELF)
-			relevantTransform = transform;
+			relevantTransform = Reactor.transform;
 		else // world
 			relevantTransform = new GameObject("origin").transform;
 
@@ -214,7 +214,7 @@ public class MoveObject : Reaction
 		}
 		else
 		{
-			dir = (relevantTransform.position - transform.position).normalized;
+			dir = (relevantTransform.position - Reactor.transform.position).normalized;
 			switch (MoveDirection)
 			{
 				case Direction.FORWARD:

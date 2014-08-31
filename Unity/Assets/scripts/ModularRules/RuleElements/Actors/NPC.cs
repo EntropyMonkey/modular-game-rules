@@ -13,6 +13,8 @@ public class NPC : Actor
 	private Checkpoint[] checkpoints;
 	private int currentCheckpoint = -1;
 
+	private DropDown checkpointDropDown;
+
 	public override BaseRuleElement.RuleData GetRuleInformation()
 	{
 		BaseRuleElement.ActorData rule = base.GetRuleInformation() as BaseRuleElement.ActorData;
@@ -50,6 +52,13 @@ public class NPC : Actor
 		};
 
 		tag = Tag;
+
+		int selected = 0;
+		if (Tag != "")
+		{
+			selected = System.Array.FindIndex(Checkpoint.PossibleCheckpointTargetTags, item => item == Tag);
+		}
+		checkpointDropDown = new DropDown(selected, Checkpoint.PossibleCheckpointTargetTags);
 	}
 
 	void Start()
@@ -142,9 +151,15 @@ public class NPC : Actor
 
 		GUILayout.BeginHorizontal();
 		GUILayout.Label("Checkpoint Tag", RuleGUI.smallLabelStyle);
-		Tag = RuleGUI.ShowParameter(Tag);
-		ChangeParameter("Tag", ruleData.parameters, Tag);
+		int resultIndex = checkpointDropDown.Draw();
+		if (resultIndex > -1)
+		{
+			Tag = checkpointDropDown.Content[resultIndex].text;
+			ChangeParameter("Tag", ruleData.parameters, Tag);
+		}
 		GUILayout.EndHorizontal();
+
+		GUILayout.Space(5);
 
 		GUILayout.BeginHorizontal();
 		GUILayout.Label("Use Gravity", RuleGUI.smallLabelStyle);

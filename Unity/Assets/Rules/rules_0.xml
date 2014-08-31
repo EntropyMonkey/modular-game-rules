@@ -54,7 +54,7 @@
       <prefab></prefab>
       <param name="StartValue">
         <type>Int32</type>
-        <value>50</value>
+        <value>5</value>
       </param>
       <param name="MinValue">
         <type>Int32</type>
@@ -62,7 +62,7 @@
       </param>
       <param name="MaxValue">
         <type>Int32</type>
-        <value>100</value>
+        <value>10</value>
       </param>
       <param name="ShowInGame">
         <type>Boolean</type>
@@ -77,6 +77,38 @@
     </actor>
   </actors>
   <events>
+    <event>
+      <id>11</id>
+      <type>CounterEvent</type>
+      <label>CounterEvent</label>
+      <actorId>-1</actorId>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health</value>
+      </param>
+      <param name="Compare">
+        <type>Comparison</type>
+        <value>1</value>
+      </param>
+      <param name="CounterLimit">
+        <type>Single</type>
+        <value>0</value>
+      </param>
+    </event>
+    <event>
+      <id>10</id>
+      <type>CollisionEvent</type>
+      <label>CollisionEvent</label>
+      <actorId>0</actorId>
+      <param name="CollideWithTag">
+        <type>String</type>
+        <value>Fruit</value>
+      </param>
+      <param name="TriggerOn">
+        <type>CollisionPhase</type>
+        <value>0</value>
+      </param>
+    </event>
     <event>
       <id>9</id>
       <type>CollisionEvent</type>
@@ -98,16 +130,6 @@
       <actorId>0</actorId>
     </event>
     <event>
-      <id>0</id>
-      <type>KeyboardInput</type>
-      <label>KeyboardInput</label>
-      <actorId>0</actorId>
-      <param name="InputKey">
-        <type>KeyCode</type>
-        <value>97</value>
-      </param>
-    </event>
-    <event>
       <id>7</id>
       <type>KeyboardInput</type>
       <label>KeyboardInput</label>
@@ -118,16 +140,6 @@
       </param>
     </event>
     <event>
-      <id>8</id>
-      <type>KeyboardInput</type>
-      <label>KeyboardInput</label>
-      <actorId>0</actorId>
-      <param name="InputKey">
-        <type>KeyCode</type>
-        <value>274</value>
-      </param>
-    </event>
-    <event>
       <id>2</id>
       <type>KeyboardInput</type>
       <label>KeyboardInput</label>
@@ -135,6 +147,16 @@
       <param name="InputKey">
         <type>KeyCode</type>
         <value>115</value>
+      </param>
+    </event>
+    <event>
+      <id>0</id>
+      <type>KeyboardInput</type>
+      <label>KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>97</value>
       </param>
     </event>
     <event>
@@ -314,56 +336,6 @@
       </param>
     </reaction>
     <reaction>
-      <id>6</id>
-      <type>MoveObject</type>
-      <label>MoveObject</label>
-      <actorId>0</actorId>
-      <listenedEventId>8</listenedEventId>
-      <param name="RotateWithMovement">
-        <type>Boolean</type>
-        <value>False</value>
-      </param>
-      <param name="RotationSpeed">
-        <type>Single</type>
-        <value>5</value>
-      </param>
-      <param name="DirectionRelativeTo">
-        <type>RelativeTo</type>
-        <value>0</value>
-      </param>
-      <param name="MoveDirection">
-        <type>Direction</type>
-        <value>5</value>
-      </param>
-      <param name="MoveSpeed">
-        <type>Single</type>
-        <value>25</value>
-      </param>
-    </reaction>
-    <reaction>
-      <id>18</id>
-      <type>ChangeCounter</type>
-      <label>ChangeCounter</label>
-      <actorId>0</actorId>
-      <listenedEventId>8</listenedEventId>
-      <param name="CounterName">
-        <type>String</type>
-        <value>Health</value>
-      </param>
-      <param name="ChangeBy">
-        <type>Int32</type>
-        <value>1</value>
-      </param>
-      <param name="KindOfChange">
-        <type>ChangeCounter+Change</type>
-        <value>0</value>
-      </param>
-      <param name="PerSeconds">
-        <type>Int32</type>
-        <value>1</value>
-      </param>
-    </reaction>
-    <reaction>
       <id>20</id>
       <type>SpawnObject</type>
       <label>SpawnObject</label>
@@ -383,18 +355,7 @@
       </param>
       <param name="StartVelocity">
         <type>Vector3</type>
-        <value>0 0 0</value>
-      </param>
-    </reaction>
-    <reaction>
-      <id>19</id>
-      <type>WinLoseGame</type>
-      <label>WinLoseGame</label>
-      <actorId>0</actorId>
-      <listenedEventId>8</listenedEventId>
-      <param name="WinningActor">
-        <type>Int32</type>
-        <value>0</value>
+        <value>0 0 10</value>
       </param>
     </reaction>
     <reaction>
@@ -414,6 +375,124 @@
       <param name="StayBehindObject">
         <type>Boolean</type>
         <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>22</id>
+      <type>ChangeCounter</type>
+      <label>ChangeCounter</label>
+      <actorId>0</actorId>
+      <listenedEventId>10</listenedEventId>
+      <param name="PerSeconds">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health</value>
+      </param>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>23</id>
+      <type>DeactivateObject</type>
+      <label>DeactivateObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>10</listenedEventId>
+      <param name="TargetObj">
+        <type>DeactivateObject+TargetObject</type>
+        <value>0</value>
+      </param>
+      <param name="Timeout">
+        <type>Single</type>
+        <value>0</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>24</id>
+      <type>ChangeCounter</type>
+      <label>ChangeCounter</label>
+      <actorId>0</actorId>
+      <listenedEventId>9</listenedEventId>
+      <param name="PerSeconds">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health</value>
+      </param>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>-1</value>
+      </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>26</id>
+      <type>ChangeCounter</type>
+      <label>ChangeCounter</label>
+      <actorId>0</actorId>
+      <listenedEventId>11</listenedEventId>
+      <param name="PerSeconds">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health</value>
+      </param>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>5</value>
+      </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>29</id>
+      <type>RespawnObject</type>
+      <label>RespawnObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>11</listenedEventId>
+      <param name="TargetObject">
+        <type>Actor</type>
+        <value>0</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>30</id>
+      <type>SpawnObject</type>
+      <label>SpawnObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>9</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Banana Cherry</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>0 2 0</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>1</value>
+      </param>
+      <param name="StartVelocity">
+        <type>Vector3</type>
+        <value>0 2.5 2</value>
       </param>
     </reaction>
   </reactions>

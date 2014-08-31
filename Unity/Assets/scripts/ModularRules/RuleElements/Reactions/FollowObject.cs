@@ -136,7 +136,8 @@ public class FollowObject : Reaction
 
 	void FixedUpdate()
 	{
-		if (!FixedToObject && targetTransform != null)
+		if (!FixedToObject && targetTransform != null && 
+			Vector3.Distance(targetTransform.position + Offset, Reactor.transform.position) > 0.5f)
 		{
 			if (!StayBehindObject)
 			{
@@ -164,8 +165,9 @@ public class FollowObject : Reaction
 						Time.deltaTime * FollowSpeed);
 				}
 			}
-
-			Reactor.transform.LookAt(targetTransform.position);
 		}
+
+		if (targetTransform != null)
+			Reactor.transform.LookAt(targetTransform.position);
 	}
 }

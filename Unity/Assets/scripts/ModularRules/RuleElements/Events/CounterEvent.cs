@@ -76,9 +76,13 @@ public class CounterEvent : GameEvent
 	{
 		if (!counter) return null;
 
-		if ((Compare == Comparison.LESS && counter.Value < CounterLimit) ||
-			(Compare == Comparison.EQUAL && counter.Value - CounterLimit < 0.01f) ||
-			(Compare == Comparison.GREATER && counter.Value > CounterLimit))
+		bool conditionsTrue = Compare == Comparison.LESS && counter.Value < CounterLimit;
+
+		conditionsTrue |= Compare == Comparison.EQUAL && Mathf.Abs(counter.Value - CounterLimit) < 0.01f;
+
+		conditionsTrue |= Compare == Comparison.GREATER && counter.Value > CounterLimit;
+
+		if (conditionsTrue)
 		{
 			Trigger(GameEventData.Empty);
 			return this;

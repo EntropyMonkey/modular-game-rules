@@ -18,7 +18,7 @@ public class Level : Actor
 		base.Initialize(generator);
 
 		int selected = System.Array.FindIndex(possibleLevels, item => item == CurrentPrefab);
-		prefabDropDown = new DropDown(selected, possibleLevels, 200);
+		prefabDropDown = new DropDown(selected, possibleLevels);
 	}
 
 	void Update()

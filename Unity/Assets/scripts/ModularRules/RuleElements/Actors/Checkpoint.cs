@@ -10,6 +10,9 @@ public class Checkpoint : MonoBehaviour
 	}
 
 	public static string Tag = "Checkpoint";
+
+	public static string[] PossibleCheckpointTargetTags = { "Player", "NPC" };
+
 	private static int nextFreeId = 0;
 
 	public string TargetTag = Player.Tag;

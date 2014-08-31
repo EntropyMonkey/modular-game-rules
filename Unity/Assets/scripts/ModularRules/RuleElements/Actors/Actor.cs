@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿//#define DEBUG
+
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -89,7 +91,7 @@ public abstract class Actor : BaseRuleElement
 	}
 	public string OldPrefab = "";
 
-	protected string[] possiblePrefabs = new string[] { "None", "Albatros", "Ananas", "Banana", 
+	protected string[] possiblePrefabs = { "None", "Albatros", "Ananas", "Banana", 
 		"Bear Brown", "Bear Gray", "Bomb", "Cherry", "DarkFighter", "Dinosaur", "Duck", 
 		"FeisarShip", "Gunman", "Monster", "Orange" };
 
@@ -105,6 +107,11 @@ public abstract class Actor : BaseRuleElement
 	{
 		get;
 		protected set;
+	}
+
+	void Awake()
+	{
+		pausedEvents = true;
 	}
 
 	/// <summary>
@@ -134,7 +141,9 @@ public abstract class Actor : BaseRuleElement
 			selected = System.Array.FindIndex(possiblePrefabs, item => item == CurrentPrefab);
 		}
 
-		prefabDropDown = new DropDown(selected, possiblePrefabs, 200);
+		prefabDropDown = new DropDown(selected, possiblePrefabs);
+
+		pausedEvents = false;
 	}
 
 	public void ScanEvents()
@@ -178,12 +187,11 @@ public abstract class Actor : BaseRuleElement
 
 	public void MoveEventsTo(Actor newActor)
 	{
-		foreach(GameEvent gameEvent in events)
-		{
-			newActor.AddEvent(gameEvent);
-		}
-
-		events.Clear();
+		if (events != null) 
+			foreach(GameEvent gameEvent in events)
+			{
+				newActor.AddEvent(gameEvent);
+			}
 	}
 
 	public void RemoveEvent(GameEvent gameEvent)
@@ -194,6 +202,10 @@ public abstract class Actor : BaseRuleElement
 	public void InitializeEvents()
 	{
 		if (events == null) return;
+
+#if DEBUG
+		Debug.Log(Label + ": Initializing " + events.Count + " events.");
+#endif
 
 		foreach (GameEvent e in events)
 		{
@@ -243,12 +255,13 @@ public abstract class Actor : BaseRuleElement
 
 	public void MoveReactionsTo(Actor newActor)
 	{
-		foreach (Reaction reaction in reactions)
-		{
-			//newActor.AddReaction(reaction); // crashes unity
-		}
-
-		reactions.Clear();
+		if (reactions != null)
+			foreach (Reaction reaction in reactions)
+			{
+				reaction.Unregister();
+				newActor.AddReaction(reaction);
+				reaction.Register();
+			}
 	}
 
 	public void RemoveReaction(Reaction reaction)
@@ -259,6 +272,10 @@ public abstract class Actor : BaseRuleElement
 	public void InitializeReactions()
 	{
 		if (reactions == null) return;
+
+#if DEBUG
+		Debug.Log(name + ": Initializing " + reactions.Count + " reactions.");
+#endif
 
 		foreach (Reaction r in reactions)
 		{

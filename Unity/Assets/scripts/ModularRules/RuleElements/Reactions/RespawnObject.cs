@@ -65,7 +65,7 @@ public class RespawnObject : Reaction
 			TargetObject = generator.GetActor(resultId);
 			if (resultId != Reactor.Id)
 				generator.ChangeActor(this, resultId);
-			ChangeParameter("TargetObject", ruleData.parameters, TargetObject);
+			ChangeParameter("TargetObject", ruleData.parameters, TargetObject.Id);
 		}
 	}
 }

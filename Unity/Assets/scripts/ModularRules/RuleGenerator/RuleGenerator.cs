@@ -438,15 +438,18 @@ public class RuleGenerator : MonoBehaviour
 
 				genActors.Remove(actor);
 
+				newActor.Id = actorData.id;
+				newActor.CurrentPrefab = actorData.prefab;
+				genActors.Add(newActor);
+
+				newActor.Initialize(this);
+
+				Destroy(actor.gameObject);
+
 				actor = newActor;
-				actor.Id = actorData.id;
-				actor.CurrentPrefab = actorData.prefab;
-				genActors.Add(actor);
 
-				DestroyImmediate(actor.gameObject);
-
-				//if (OnActorGOChanged != null)
-				//	OnActorGOChanged(actorData, actor, this);
+				if (OnActorGOChanged != null)
+					OnActorGOChanged(actorData, actor, this);
 			}
 
 			actor.Label = actorData.label;
@@ -454,8 +457,6 @@ public class RuleGenerator : MonoBehaviour
 
 			// update parameters
 			SetParameters(actor, actorData);
-
-			//SetComponentParameters(oldActor, actorData);
 		}
 	}
 
@@ -726,6 +727,7 @@ public class RuleGenerator : MonoBehaviour
 	public void Reload()
 	{
 		LoadRules(ActorData, EventData, ReactionData);
+		StartEventExecution();
 	}
 
 	public void LoadRules(string filename)

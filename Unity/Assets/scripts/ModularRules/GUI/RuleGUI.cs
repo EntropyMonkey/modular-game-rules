@@ -1522,7 +1522,7 @@ public class RuleGUI : MonoBehaviour
 		return GUILayout.TextField(value, ruleEditableStyle);
 	}
 
-	public static List<string> ShowParameter(List<string> value)
+	public static List<string> ShowParameter(List<string> value, string connector = ",")
 	{
 		List<int> delete = new List<int>();
 		GUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
@@ -1536,7 +1536,7 @@ public class RuleGUI : MonoBehaviour
 			}
 
 			if (i < value.Count - 1)
-				GUILayout.Label(",", ruleLabelStyle);
+				GUILayout.Label(connector, ruleLabelStyle);
 		}
 
 		GUILayout.Space(10);

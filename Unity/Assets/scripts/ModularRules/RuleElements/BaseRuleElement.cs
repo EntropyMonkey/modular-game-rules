@@ -200,7 +200,6 @@ public abstract class BaseRuleElement : MonoBehaviour
 	public virtual void Initialize(RuleGenerator generator)
 	{
 		generator.RegisterRuleElement(this);
-		//generator.OnActorNameChanged += OnActorNameChanged;
 	}
 
 	public abstract void ShowGui(RuleData ruleData);
@@ -236,7 +235,7 @@ public abstract class BaseRuleElement : MonoBehaviour
 			}
 			else if (newValue.GetType().IsSubclassOf(typeof(Actor)))
 			{
-				param.value = newValue as Actor;
+				param.value = ((Actor)Convert.ChangeType((object)newValue, typeof(Actor))).Id;
 			}
 			else
 			{

@@ -16,6 +16,7 @@ public class DropDown
 	float minHeight;
 
 	protected bool extended = false;
+	bool canClose = false;
 
 	Vector2 keyScrollPos = Vector2.zero;
 
@@ -66,16 +67,23 @@ public class DropDown
 			{
 				extended = true;
 			}
-			else if (Selected < 0 || Selected > Content.Length && GUILayout.Button("...", RuleGUI.ruleEditableStyle))
+			else if ((Selected < 0 || Selected > Content.Length) && GUILayout.Button("...", RuleGUI.ruleEditableStyle))
 			{
 				extended = true;
 			}
 		}
 
-		if (extended && Input.GetMouseButton(0) && Event.current.type == EventType.Repaint &&
+		if (extended && Input.GetMouseButton(0) && Event.current.type == EventType.MouseDown &&
 			!GUILayoutUtility.GetLastRect().Contains(Event.current.mousePosition))
 		{
+			canClose = true;
+		}
+
+		//http://forum.unity3d.com/threads/unexplained-guilayout-mismatched-issue-is-it-a-unity-bug-or-a-miss-understanding.158375/
+		if (Event.current.type == EventType.Layout && canClose)
+		{
 			extended = false;
+			canClose = false;
 		}
 
 		return Selected;

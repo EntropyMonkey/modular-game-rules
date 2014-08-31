@@ -58,7 +58,7 @@ public class CollisionEvent : GameEvent
 
 		this.generator = generator;
 
-		generator.OnActorGOChanged += delegate(ActorData data, Actor newActor, RuleGenerator _generator)
+		generator.OnActorGOChanged += delegate(ActorData data, Actor newActor, RuleGenerator ruleGenerator)
 		{
 			if (CollideWithActor != null && CollideWithActor.Id == data.id)
 				CollideWithActor = newActor;
@@ -88,7 +88,7 @@ public class CollisionEvent : GameEvent
 		int init = 0;
 		if (CollideWithActor != null)
 			init = 1;
-		chooseObjectKindDropDown = new DropDown(init, new string[] { "any object which is", "the actor" });
+		chooseObjectKindDropDown = new DropDown(init, new string[] { "any object which is a", "the actor" });
 
 		SubscribeRelay();
 	}
