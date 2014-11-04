@@ -1,0 +1,934 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<rules>
+  <actors>
+    <actor>
+      <id>5</id>
+      <type>Player</type>
+      <label>Player2</label>
+      <prefab>Duck</prefab>
+      <param name="HorizontalMaxSpeed">
+        <type>Single</type>
+        <value>10</value>
+      </param>
+      <param name="VerticalMaxSpeed">
+        <type>Single</type>
+        <value>10</value>
+      </param>
+      <param name="Gravity">
+        <type>Single</type>
+        <value>3</value>
+      </param>
+    </actor>
+    <actor>
+      <id>0</id>
+      <type>Player</type>
+      <label>Player1</label>
+      <prefab>Bear Brown</prefab>
+      <param name="HorizontalMaxSpeed">
+        <type>Single</type>
+        <value>10</value>
+      </param>
+      <param name="VerticalMaxSpeed">
+        <type>Single</type>
+        <value>10</value>
+      </param>
+      <param name="Gravity">
+        <type>Single</type>
+        <value>3</value>
+      </param>
+    </actor>
+    <actor>
+      <id>1</id>
+      <type>PlayerCamera</type>
+      <label>Player1Camera</label>
+      <prefab>PlayerCamera</prefab>
+      <param name="ViewportWidth">
+        <type>Single</type>
+        <value>1</value>
+      </param>
+      <param name="ViewportXPos">
+        <type>Single</type>
+        <value>0</value>
+      </param>
+    </actor>
+    <actor>
+      <id>6</id>
+      <type>PlayerCamera</type>
+      <label>Player2Camera</label>
+      <prefab></prefab>
+    </actor>
+    <actor>
+      <id>3</id>
+      <type>NPC</type>
+      <label>NPC</label>
+      <prefab>Dinosaur</prefab>
+      <param name="Tag">
+        <type>String</type>
+        <value>NPC</value>
+      </param>
+      <param name="UseGravity">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </actor>
+    <actor>
+      <id>7</id>
+      <type>Counter</type>
+      <label>Health2</label>
+      <prefab></prefab>
+      <param name="StartValue">
+        <type>Int32</type>
+        <value>5</value>
+      </param>
+      <param name="MinValue">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+      <param name="MaxValue">
+        <type>Int32</type>
+        <value>10</value>
+      </param>
+      <param name="ShowInGame">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </actor>
+    <actor>
+      <id>9</id>
+      <type>Counter</type>
+      <label>p2fruits</label>
+      <prefab></prefab>
+      <param name="StartValue">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+      <param name="MinValue">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+      <param name="MaxValue">
+        <type>Int32</type>
+        <value>5</value>
+      </param>
+      <param name="ShowInGame">
+        <type>Boolean</type>
+        <value>False</value>
+      </param>
+    </actor>
+    <actor>
+      <id>8</id>
+      <type>Counter</type>
+      <label>p1fruits</label>
+      <prefab></prefab>
+      <param name="StartValue">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+      <param name="MinValue">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+      <param name="MaxValue">
+        <type>Int32</type>
+        <value>5</value>
+      </param>
+      <param name="ShowInGame">
+        <type>Boolean</type>
+        <value>False</value>
+      </param>
+    </actor>
+    <actor>
+      <id>4</id>
+      <type>Counter</type>
+      <label>Health1</label>
+      <prefab></prefab>
+      <param name="StartValue">
+        <type>Int32</type>
+        <value>5</value>
+      </param>
+      <param name="MinValue">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+      <param name="MaxValue">
+        <type>Int32</type>
+        <value>10</value>
+      </param>
+      <param name="ShowInGame">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </actor>
+    <actor>
+      <id>2</id>
+      <type>Level</type>
+      <label>Level</label>
+      <prefab>MountainLevel</prefab>
+    </actor>
+  </actors>
+  <events>
+    <event>
+      <id>12</id>
+      <type>CounterEvent</type>
+      <label>CounterEvent</label>
+      <actorId>-1</actorId>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health2</value>
+      </param>
+      <param name="Compare">
+        <type>Comparison</type>
+        <value>1</value>
+      </param>
+      <param name="CounterLimit">
+        <type>Single</type>
+        <value>0</value>
+      </param>
+    </event>
+    <event>
+      <id>16</id>
+      <type>CounterEvent</type>
+      <label>CounterEvent</label>
+      <actorId>-1</actorId>
+      <param name="CounterName">
+        <type>String</type>
+        <value>p2fruits</value>
+      </param>
+      <param name="Compare">
+        <type>Comparison</type>
+        <value>1</value>
+      </param>
+      <param name="CounterLimit">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+    </event>
+    <event>
+      <id>15</id>
+      <type>CounterEvent</type>
+      <label>CounterEvent</label>
+      <actorId>-1</actorId>
+      <param name="CounterName">
+        <type>String</type>
+        <value>p1fruits</value>
+      </param>
+      <param name="Compare">
+        <type>Comparison</type>
+        <value>1</value>
+      </param>
+      <param name="CounterLimit">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+    </event>
+    <event>
+      <id>11</id>
+      <type>CounterEvent</type>
+      <label>CounterEvent</label>
+      <actorId>-1</actorId>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health1</value>
+      </param>
+      <param name="Compare">
+        <type>Comparison</type>
+        <value>1</value>
+      </param>
+      <param name="CounterLimit">
+        <type>Single</type>
+        <value>0</value>
+      </param>
+    </event>
+    <event>
+      <id>14</id>
+      <type>CollisionEvent</type>
+      <label>CollisionEvent</label>
+      <actorId>3</actorId>
+      <param name="CollideWithActor">
+        <type>Int32</type>
+        <value>5</value>
+      </param>
+      <param name="TriggerOn">
+        <type>CollisionPhase</type>
+        <value>0</value>
+      </param>
+    </event>
+    <event>
+      <id>10</id>
+      <type>CollisionEvent</type>
+      <label>CollisionEvent</label>
+      <actorId>0</actorId>
+      <param name="CollideWithTag">
+        <type>String</type>
+        <value>Fruit</value>
+      </param>
+      <param name="TriggerOn">
+        <type>CollisionPhase</type>
+        <value>0</value>
+      </param>
+    </event>
+    <event>
+      <id>9</id>
+      <type>CollisionEvent</type>
+      <label>CollisionEvent</label>
+      <actorId>3</actorId>
+      <param name="CollideWithTag">
+        <type>String</type>
+        <value>Player</value>
+      </param>
+      <param name="CollideWithActor">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+      <param name="TriggerOn">
+        <type>CollisionPhase</type>
+        <value>0</value>
+      </param>
+    </event>
+    <event>
+      <id>13</id>
+      <type>CollisionEvent</type>
+      <label>CollisionEvent</label>
+      <actorId>5</actorId>
+      <param name="CollideWithTag">
+        <type>String</type>
+        <value>Fruit</value>
+      </param>
+      <param name="TriggerOn">
+        <type>CollisionPhase</type>
+        <value>0</value>
+      </param>
+    </event>
+    <event>
+      <id>17</id>
+      <type>ObjectMovedEvent</type>
+      <label>ObjectMovedEvent</label>
+      <actorId>5</actorId>
+    </event>
+    <event>
+      <id>5</id>
+      <type>ObjectMovedEvent</type>
+      <label>ObjectMovedEvent</label>
+      <actorId>0</actorId>
+    </event>
+    <event>
+      <id>1</id>
+      <type>KeyboardInput</type>
+      <label>KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>119</value>
+      </param>
+    </event>
+    <event>
+      <id>3</id>
+      <type>KeyboardInput</type>
+      <label>KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>100</value>
+      </param>
+    </event>
+    <event>
+      <id>18</id>
+      <type>KeyboardInput</type>
+      <label>KeyboardInput</label>
+      <actorId>-1</actorId>
+      <param name="InputKey">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+    </event>
+    <event>
+      <id>2</id>
+      <type>KeyboardInput</type>
+      <label>KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>115</value>
+      </param>
+    </event>
+    <event>
+      <id>0</id>
+      <type>KeyboardInput</type>
+      <label>KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>97</value>
+      </param>
+    </event>
+    <event>
+      <id>7</id>
+      <type>KeyboardInput</type>
+      <label>KeyboardInput</label>
+      <actorId>0</actorId>
+      <param name="InputKey">
+        <type>KeyCode</type>
+        <value>273</value>
+      </param>
+    </event>
+  </events>
+  <reactions>
+    <reaction>
+      <id>8</id>
+      <type>MoveObject</type>
+      <label>MoveObject</label>
+      <actorId>3</actorId>
+      <listenedEventId>9</listenedEventId>
+      <param name="RotateWithMovement">
+        <type>Boolean</type>
+        <value>False</value>
+      </param>
+      <param name="RotationSpeed">
+        <type>Single</type>
+        <value>0</value>
+      </param>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>0</value>
+      </param>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>4</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>1000</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>4</id>
+      <type>FollowObject</type>
+      <label>FollowObject</label>
+      <actorId>1</actorId>
+      <listenedEventId>5</listenedEventId>
+      <param name="Offset">
+        <type>Vector3</type>
+        <value>0 2 -5</value>
+      </param>
+      <param name="FollowSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+      <param name="StayBehindObject">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>3</id>
+      <type>MoveObject</type>
+      <label>MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>3</listenedEventId>
+      <param name="RotateWithMovement">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+      <param name="RotationSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>2</value>
+      </param>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>3</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>20</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>2</id>
+      <type>MoveObject</type>
+      <label>MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>2</listenedEventId>
+      <param name="RotateWithMovement">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+      <param name="RotationSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>2</value>
+      </param>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>1</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>20</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>1</id>
+      <type>MoveObject</type>
+      <label>MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>1</listenedEventId>
+      <param name="RotateWithMovement">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+      <param name="RotationSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>2</value>
+      </param>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>0</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>20</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>0</id>
+      <type>MoveObject</type>
+      <label>MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>0</listenedEventId>
+      <param name="RotateWithMovement">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+      <param name="RotationSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>2</value>
+      </param>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>2</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>20</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>20</id>
+      <type>SpawnObject</type>
+      <label>SpawnObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>7</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Banana Cherry</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>0 0.5 1</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>3</value>
+      </param>
+      <param name="StartVelocity">
+        <type>Vector3</type>
+        <value>0 0 10</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>21</id>
+      <type>FollowObject</type>
+      <label>FollowObject</label>
+      <actorId>3</actorId>
+      <listenedEventId>5</listenedEventId>
+      <param name="Offset">
+        <type>Vector3</type>
+        <value>0 0 -2</value>
+      </param>
+      <param name="FollowSpeed">
+        <type>Single</type>
+        <value>10</value>
+      </param>
+      <param name="StayBehindObject">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>22</id>
+      <type>ChangeCounter</type>
+      <label>ChangeCounter</label>
+      <actorId>0</actorId>
+      <listenedEventId>10</listenedEventId>
+      <param name="PerSeconds">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health</value>
+      </param>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>23</id>
+      <type>DeactivateObject</type>
+      <label>DeactivateObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>10</listenedEventId>
+      <param name="TargetObj">
+        <type>DeactivateObject+TargetObject</type>
+        <value>0</value>
+      </param>
+      <param name="Timeout">
+        <type>Single</type>
+        <value>0</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>24</id>
+      <type>ChangeCounter</type>
+      <label>ChangeCounter</label>
+      <actorId>0</actorId>
+      <listenedEventId>9</listenedEventId>
+      <param name="PerSeconds">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health</value>
+      </param>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>-1</value>
+      </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>26</id>
+      <type>ChangeCounter</type>
+      <label>ChangeCounter</label>
+      <actorId>0</actorId>
+      <listenedEventId>11</listenedEventId>
+      <param name="PerSeconds">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health1</value>
+      </param>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>5</value>
+      </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>29</id>
+      <type>RespawnObject</type>
+      <label>RespawnObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>11</listenedEventId>
+      <param name="TargetObject">
+        <type>Actor</type>
+        <value>0</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>30</id>
+      <type>SpawnObject</type>
+      <label>SpawnObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>9</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Banana Cherry</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>0 2 0</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>1</value>
+      </param>
+      <param name="StartVelocity">
+        <type>Vector3</type>
+        <value>0 2.5 2</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>32</id>
+      <type>ChangeCounter</type>
+      <label>ChangeCounter</label>
+      <actorId>0</actorId>
+      <listenedEventId>12</listenedEventId>
+      <param name="PerSeconds">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health2</value>
+      </param>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>5</value>
+      </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>33</id>
+      <type>RespawnObject</type>
+      <label>RespawnObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>12</listenedEventId>
+      <param name="TargetObject">
+        <type>Int32</type>
+        <value>5</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>34</id>
+      <type>ChangeCounter</type>
+      <label>ChangeCounter</label>
+      <actorId>0</actorId>
+      <listenedEventId>10</listenedEventId>
+      <param name="PerSeconds">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>p1fruits</value>
+      </param>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>35</id>
+      <type>ChangeCounter</type>
+      <label>ChangeCounter</label>
+      <actorId>0</actorId>
+      <listenedEventId>13</listenedEventId>
+      <param name="PerSeconds">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health</value>
+      </param>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>36</id>
+      <type>ChangeCounter</type>
+      <label>ChangeCounter</label>
+      <actorId>0</actorId>
+      <listenedEventId>13</listenedEventId>
+      <param name="PerSeconds">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>p2fruits</value>
+      </param>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>37</id>
+      <type>DeactivateObject</type>
+      <label>DeactivateObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>13</listenedEventId>
+      <param name="TargetObj">
+        <type>DeactivateObject+TargetObject</type>
+        <value>0</value>
+      </param>
+      <param name="Timeout">
+        <type>Single</type>
+        <value>0</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>38</id>
+      <type>ChangeCounter</type>
+      <label>ChangeCounter</label>
+      <actorId>0</actorId>
+      <listenedEventId>14</listenedEventId>
+      <param name="PerSeconds">
+        <type>Int32</type>
+        <value>1</value>
+      </param>
+      <param name="CounterName">
+        <type>String</type>
+        <value>Health2</value>
+      </param>
+      <param name="ChangeBy">
+        <type>Int32</type>
+        <value>-1</value>
+      </param>
+      <param name="KindOfChange">
+        <type>ChangeCounter+Change</type>
+        <value>1</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>39</id>
+      <type>MoveObject</type>
+      <label>MoveObject</label>
+      <actorId>3</actorId>
+      <listenedEventId>14</listenedEventId>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>0</value>
+      </param>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>4</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>1000</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>40</id>
+      <type>SpawnObject</type>
+      <label>SpawnObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>13</listenedEventId>
+      <param name="SpawnedPrefabs">
+        <type>System.Collections.Generic.List`1[System.String]</type>
+        <value>Banana Cherry</value>
+      </param>
+      <param name="Direction">
+        <type>Vector3</type>
+        <value>0 0 0</value>
+      </param>
+      <param name="Distance">
+        <type>Single</type>
+        <value>1</value>
+      </param>
+      <param name="StartVelocity">
+        <type>Vector3</type>
+        <value>0 0 0</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>41</id>
+      <type>WinLoseGame</type>
+      <label>WinLoseGame</label>
+      <actorId>0</actorId>
+      <listenedEventId>15</listenedEventId>
+      <param name="WinningActor">
+        <type>Int32</type>
+        <value>0</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>42</id>
+      <type>WinLoseGame</type>
+      <label>WinLoseGame</label>
+      <actorId>0</actorId>
+      <listenedEventId>16</listenedEventId>
+      <param name="WinningActor">
+        <type>Int32</type>
+        <value>5</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>44</id>
+      <type>FollowObject</type>
+      <label>FollowObject</label>
+      <actorId>6</actorId>
+      <listenedEventId>17</listenedEventId>
+      <param name="Offset">
+        <type>Vector3</type>
+        <value>0 0 0</value>
+      </param>
+      <param name="FollowSpeed">
+        <type>Single</type>
+        <value>5</value>
+      </param>
+      <param name="StayBehindObject">
+        <type>Boolean</type>
+        <value>True</value>
+      </param>
+    </reaction>
+    <reaction>
+      <id>45</id>
+      <type>MoveObject</type>
+      <label>MoveObject</label>
+      <actorId>0</actorId>
+      <listenedEventId>18</listenedEventId>
+      <param name="DirectionRelativeTo">
+        <type>RelativeTo</type>
+        <value>2</value>
+      </param>
+      <param name="MoveDirection">
+        <type>Direction</type>
+        <value>0</value>
+      </param>
+      <param name="MoveSpeed">
+        <type>Single</type>
+        <value>10</value>
+      </param>
+    </reaction>
+  </reactions>
+</rules>

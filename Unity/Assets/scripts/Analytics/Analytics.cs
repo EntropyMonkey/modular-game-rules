@@ -128,7 +128,7 @@ public class Analytics : MonoBehaviour
 		{
 			GoogleAnalyticsHelper.LogEvent(CurrentUserId, category, action, label, (int)time);
 		}
-		localLog.Add("" + CurrentUserId + " " + (int)time + " " + category + " " + action + " " + label);
+		if (localLog != null) localLog.Add("" + CurrentUserId + " " + (int)time + " " + category + " " + action + " " + label);
 	}
 
 	void OnDestroy()

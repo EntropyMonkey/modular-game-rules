@@ -145,7 +145,7 @@ public class MoveObject : Reaction
 			{
 				int resultId = generator.Gui.GetActorDataByLabel(relativeActorDropDown.Content[resultIndex].text).id;
 				ActorDirectionIsRelativeTo = generator.GetActor(resultId);
-				ChangeParameter("ActorDirectionIsRelativeTo", (ruleData as ReactionData).parameters, ActorDirectionIsRelativeTo);
+				ChangeParameter("ActorDirectionIsRelativeTo", (ruleData as ReactionData).parameters, ActorDirectionIsRelativeTo.Id);
 			}
 		}
 

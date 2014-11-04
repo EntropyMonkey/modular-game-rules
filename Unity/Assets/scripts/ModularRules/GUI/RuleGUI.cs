@@ -52,7 +52,7 @@ public class RuleGUI : MonoBehaviour
 	private bool isTesting = false;
 
 	private RuleGUIState LastGuiState { get; set; }
-	private RuleGUIState guiState = RuleGUIState.BEGIN;
+	private RuleGUIState guiState = RuleGUIState.LOAD;//RuleGUIState.BEGIN;
 	private RuleGUIState GuiState
 	{
 		set
@@ -440,6 +440,7 @@ public class RuleGUI : MonoBehaviour
 	#endregion
 
 	#region Load Rules
+	Vector2 loadingScrollbar = Vector2.zero;
 	void LoadRules()
 	{
 		if (GuiState == RuleGUIState.INGAME && GUI.Button(new Rect(0, Screen.height - 105, 100, 50), "Re/Load Rules"))
@@ -451,7 +452,7 @@ public class RuleGUI : MonoBehaviour
 
 		GUILayout.BeginVertical(GUILayout.Width(Screen.width * 0.3f));
 
-		GUILayout.BeginScrollView(Vector2.zero);
+		loadingScrollbar =GUILayout.BeginScrollView(loadingScrollbar);
 
 		for (int i = 0; i < Files.Length; i++)
 		{

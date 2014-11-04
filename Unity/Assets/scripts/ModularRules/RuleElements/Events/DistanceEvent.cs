@@ -104,7 +104,7 @@ public class DistanceEvent : GameEvent
 		{
 			int resultId = generator.Gui.GetActorDataByLabel(watchedActorDropDown.Content[resultIndex].text).id;
 
-			ChangeParameter("WatchedObject", ruleData.parameters, WatchedObject);
+			ChangeParameter("WatchedObject", ruleData.parameters, WatchedObject.Id);
 			WatchedObject = generator.GetActor(resultId);
 		}
 

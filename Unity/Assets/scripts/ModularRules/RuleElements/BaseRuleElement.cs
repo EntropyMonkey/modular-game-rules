@@ -225,15 +225,11 @@ public abstract class BaseRuleElement : MonoBehaviour
 				name = name,
 			};
 
-			if (newValue.GetType().IsEnum)
+			if (newValue.GetType().IsEnum) // enum handling
 			{
 				param.value = (int)Convert.ChangeType((object)newValue, typeof(int));
 			}
-			else if (newValue.GetType().IsAssignableFrom(typeof(Actor)))
-			{
-				param.value = ((Actor)Convert.ChangeType((object)newValue, typeof(Actor))).Id;
-			}
-			else if (newValue.GetType().IsSubclassOf(typeof(Actor)))
+			else if (newValue.GetType().IsAssignableFrom(typeof(Actor)) || newValue.GetType().IsSubclassOf(typeof(Actor))) // actor handling
 			{
 				param.value = ((Actor)Convert.ChangeType((object)newValue, typeof(Actor))).Id;
 			}
@@ -251,7 +247,7 @@ public abstract class BaseRuleElement : MonoBehaviour
 
 			if (param.type != newValue.GetType() && !param.type.IsEnum && !newValue.GetType().IsAssignableFrom(typeof(Actor)))
 			{
-				return;
+				return; // type doesn't fit expected type
 			}
 			else if ((param.type == typeof(Actor) && !(newValue is int) && newValue.GetType().IsAssignableFrom(typeof(Actor))))
 			{

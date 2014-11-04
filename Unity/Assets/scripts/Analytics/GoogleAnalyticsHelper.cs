@@ -51,7 +51,7 @@ public class GoogleAnalyticsHelper
 	private static Hashtable requestParams = new Hashtable();
 	public static void LogEvent(string page, string category, string action, string opt_label, int opt_value)
         {
-            if (domain == "" || domain.Length == 0)
+            if (domain == null || domain == "" || domain.Length == 0)
             {
                 Debug.Log("GoogleAnalytics settings not set!");
                 return;
